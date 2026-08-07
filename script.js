@@ -22,6 +22,9 @@ function switchTab(tabId) {
     if (tabId === 'reserva') calculateReserva();
     if (tabId === 'milhao') calculateMilhao();
     if (tabId === 'financiamento') calculateFinanciamento();
+    if (tabId === 'veiculos') calculateVeiculo();
+    if (tabId === 'amortizacao') calculateAmortizacao();
+    if (tabId === 'alugar-comprar') calculateAlugarComprar();
     if (tabId === 'inflacao') calculateInflacao();
     if (tabId === 'comparador') calculateComparador();
     if (tabId === 'fgts') calculateFGTS();
@@ -42,10 +45,9 @@ async function fetchMarketIndicators() {
     cdiEl.innerText = "14.71% a.a.";
     ipcaEl.innerText = "4.55% a.a.";
     poupancaEl.innerText = "6.17% a.a.";
-    dolarEl.innerText = "R$ 5,50"; // Valor base caso a API externa oscile
+    dolarEl.innerText = "R$ 5,50";
 
     try {
-        // Busca a cotação do Dólar Comercial em tempo real via AwesomeAPI
         let resDolar = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL');
         let dataDolar = await resDolar.json();
         if (dataDolar && dataDolar.USDBRL) {
@@ -56,12 +58,11 @@ async function fetchMarketIndicators() {
         console.warn("Aviso: Não foi possível atualizar o dólar em tempo real, mantendo padrão.", error);
     }
 
-    // Exibe data e hora atual da verificação
     let hoje = new Date();
     dateSpan.innerText = `Atualizado em: ${hoje.toLocaleDateString('pt-BR')} às ${hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-// 1. Juros Compostos
+// 1. Juros Compostos (Com Total Investido, Juros e Total Final)
 function calculateJC() {
     let p = parseFloat(document.getElementById('jc-initial').value) || 0;
     let pmt = parseFloat(document.getElementById('jc-monthly').value) || 0;
@@ -91,6 +92,14 @@ function calculateJC() {
         }
     }
 
+    let totalJuros = currentTotal - totalInvested;
+
+    // Atualiza os cards de resultados numéricos na tela
+    document.getElementById('jc-res-investido').innerText = totalInvested.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('jc-res-juros').innerText = totalJuros.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('jc-res-total').innerText = currentTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    // Atualiza o Gráfico
     const ctx = document.getElementById('growthChart').getContext('2d');
     if (myChart) myChart.destroy();
 
@@ -171,7 +180,150 @@ function calculateFinanciamento() {
     document.getElementById('price-total').innerText = totalprice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-// 5. Calculadora de Inflação
+// 5. Financiamento de Veículos
+function calculateVeiculo() {
+    let valor = parseFloat(document.getElementById('vei-valor').value) || 0;
+    let entrada = parseFloat(document.getElementById('vei-entrada').value) || 0;
+    let taxaMensal = parseFloat(document.getElementById('vei-taxa').value) / 100 || 0;
+    let meses = parseInt(document.getElementById('vei-meses').value) || 0;
+
+    let pv = valor - entrada;
+    let i = taxaMensal;
+    let n = meses;
+
+    let parcela = 0;
+    if (i === 0) {
+        parcela = pv / (n || 1);
+    } else {
+        parcela = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+    }
+    let totalPago = parcela * n;
+
+    document.getElementById('vei-res-financiado').innerText = pv.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('vei-res-parcela').innerText = parcela.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('vei-res-total').innerText = totalPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// 6. Amortização Extra
+function calculateAmortizacao() {
+    let saldoDevedor = parseFloat(document.getElementById('amo-saldo').value) || 0;
+    let taxa = parseFloat(document.getElementById('amo-taxa').value) / 100 || 0;
+    let mesesRestantes = parseInt(document.getElementById('amo-meses').value) || 0;
+    let extra = parseFloat(document.getElementById('amo-extra').value) || 0;
+    let tipo = document.getElementById('amo-tipo').value;
+
+    let i = taxa;
+    let n = mesesRestantes;
+
+    let pmtAntigo = 0;
+    if (i === 0) {
+        pmtAntigo = saldoDevedor / (n || 1);
+    } else {
+        pmtAntigo = saldoDevedor * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+    }
+
+    let novoSaldo = saldoDevedor - extra;
+    if (novoSaldo < 0) novoSaldo = 0;
+
+    let pmtNovo = 0;
+    let novoPrazo = n;
+    let economiaJurosTexto = "";
+
+    if (tipo === 'prestacao') {
+        if (i === 0) {
+            pmtNovo = novoSaldo / (n || 1);
+        } else {
+            pmtNovo = novoSaldo * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+        }
+        novoPrazo = n;
+        let totalAntigo = pmtAntigo * n;
+        let totalNovo = pmtNovo * n + extra;
+        let economia = totalAntigo - totalNovo;
+        economiaJurosTexto = `Economia aprox. de juros: ${economia > 0 ? economia.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}`;
+    } else {
+        pmtNovo = pmtAntigo;
+        if (novoSaldo <= 0) {
+            novoPrazo = 0;
+        } else if (i === 0) {
+            novoPrazo = Math.ceil(novoSaldo / pmtAntigo);
+        } else {
+            let numerador = -Math.log(1 - (novoSaldo * i) / pmtAntigo);
+            let denominador = Math.log(1 + i);
+            novoPrazo = Math.ceil(numerador / denominador);
+        }
+        let totalAntigo = pmtAntigo * n;
+        let totalNovo = (pmtNovo * novoPrazo) + extra;
+        let economia = totalAntigo - totalNovo;
+        economiaJurosTexto = `Economia de juros: ${economia > 0 ? economia.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}`;
+    }
+
+    document.getElementById('amo-antiga-parc').innerText = pmtAntigo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('amo-antigo-prazo').innerText = `${n} meses (${(n/12).toFixed(1)} anos)`;
+
+    document.getElementById('amo-nova-parc').innerText = pmtNovo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('amo-novo-prazo').innerText = `${novoPrazo} meses (${(novoPrazo/12).toFixed(1)} anos)`;
+    document.getElementById('amo-economia').innerText = economiaJurosTexto;
+}
+
+// 7. Alugar vs. Comprar Imóvel
+function calculateAlugarComprar() {
+    let valorImovel = parseFloat(document.getElementById('ac-imovel').value) || 0;
+    let entrada = parseFloat(document.getElementById('ac-entrada').value) || 0;
+    let taxaAnual = parseFloat(document.getElementById('ac-juros').value) / 100 || 0;
+    let anos = parseInt(document.getElementById('ac-anos').value) || 30;
+    let aluguelInicial = parseFloat(document.getElementById('ac-aluguel').value) || 0;
+    let rendimentoMes = parseFloat(document.getElementById('ac-rendimento').value) / 100 || 0;
+    let valorizacaoAnual = parseFloat(document.getElementById('ac-valorizacao').value) / 100 || 0;
+
+    let n = anos * 12;
+    let i = taxaAnual / 12;
+    let pv = valorImovel - entrada;
+
+    let pmt = 0;
+    if (i === 0) {
+        pmt = pv / (n || 1);
+    } else {
+        pmt = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+    }
+
+    let totalGastoImovel = entrada;
+    let patrimonioImovel = valorImovel;
+
+    let saldoInvestimento = entrada;
+    let totalGastoAluguel = 0;
+    let currentAluguel = aluguelInicial;
+
+    for (let m = 1; m <= n; m++) {
+        patrimonioImovel *= Math.pow(1 + valorizacaoAnual, 1 / 12);
+        totalGastoImovel += pmt;
+
+        if (m > 1 && m % 12 === 1) {
+            currentAluguel *= (1 + valorizacaoAnual);
+        }
+
+        totalGastoAluguel += currentAluguel;
+        saldoInvestimento *= (1 + rendimentoMes);
+
+        let diferenca = pmt - currentAluguel;
+        saldoInvestimento += diferenca;
+    }
+
+    let conclusaoEl = document.getElementById('ac-conclusao');
+    if (patrimonioImovel > saldoInvestimento) {
+        conclusaoEl.innerText = "🏡 Vale mais a pena COMPRAR o imóvel!";
+        conclusaoEl.className = "text-lg md:text-xl font-extrabold text-emerald-400";
+    } else {
+        conclusaoEl.innerText = "📈 Vale mais a pena ALUGAR e INVESTIR!";
+        conclusaoEl.className = "text-lg md:text-xl font-extrabold text-blue-400";
+    }
+
+    document.getElementById('ac-patrimonio-imovel').innerText = patrimonioImovel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('ac-gasto-imovel').innerText = totalGastoImovel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('ac-patrimonio-invest').innerText = saldoInvestimento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('ac-gasto-invest').innerText = totalGastoAluguel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// 8. Calculadora de Inflação
 function calculateInflacao() {
     let valor = parseFloat(document.getElementById('inf-valor').value) || 0;
     let taxa = parseFloat(document.getElementById('inf-taxa').value) / 100 || 0;
@@ -181,7 +333,7 @@ function calculateInflacao() {
     document.getElementById('inf-resultado').innerText = valorFuturo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-// 6. À Vista vs Parcelado
+// 9. À Vista vs Parcelado
 function calculateComparador() {
     let valor = parseFloat(document.getElementById('comp-valor').value) || 0;
     let descontoPct = parseFloat(document.getElementById('comp-desconto').value) / 100 || 0;
@@ -210,7 +362,7 @@ function calculateComparador() {
     }
 }
 
-// 7. Cálculo Rescisão e FGTS
+// 10. Cálculo Rescisão e FGTS
 function calculateFGTS() {
     let salario = parseFloat(document.getElementById('fgts-salario').value) || 0;
     let saldoFgts = parseFloat(document.getElementById('fgts-saldo').value) || 0;
@@ -225,7 +377,7 @@ function calculateFGTS() {
     document.getElementById('fgts-res-total').innerText = totalRescisao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-// 8. Calculadora de Rescisão CLT
+// 11. Calculadora de Rescisão CLT
 function calculateRescisaoCLT() {
     let salario = parseFloat(document.getElementById('clt-salario').value) || 0;
     let motivo = document.getElementById('clt-motivo').value;
@@ -235,43 +387,32 @@ function calculateRescisaoCLT() {
     let mesesFerias = parseInt(document.getElementById('clt-meses-ferias').value) || 0;
     let tipoAviso = document.getElementById('clt-aviso').value;
 
-    // Cálculos de Verbas Base
     let saldoSalario = (salario / 30) * diasMes;
     let decimoTerceiro = (salario / 12) * meses13;
 
-    // Férias Vencidas + Terço Constitucional
     let feriasVencidas = 0;
     if (temFeriasVencidas) {
         feriasVencidas = salario + (salario / 3);
     }
 
-    // Férias Proporcionais + Terço Constitucional
     let feriasProporcionais = ((salario / 12) * mesesFerias);
     feriasProporcionais += (feriasProporcionais / 3);
 
     let valorAviso = 0;
 
-    // Lógica do Aviso Prévio baseada no Motivo
     if (motivo === 'pedido') {
-        // Pedido de demissão: não recebe aviso do empregador.
-        // Se não cumprir (descontado), a empresa desconta um salário do acerto.
         if (tipoAviso === 'descontado') {
             valorAviso = -salario;
         }
     } else if (motivo === 'sem-justa-causa') {
-        // Demissão sem justa causa
         if (tipoAviso === 'indenizado') {
-            valorAviso = salario; // Aqui simplificamos para 30 dias base.
+            valorAviso = salario;
         }
-        // Se for "trabalhado", o valor já está no "Saldo de Salário", então o aviso extra é 0.
     }
 
-    // Total Bruto
     let totalBruto = saldoSalario + decimoTerceiro + feriasVencidas + feriasProporcionais + valorAviso;
-    // Se o desconto do aviso for maior que as verbas, o trabalhador não recebe nada (mas não fica devendo)
     if (totalBruto < 0) totalBruto = 0;
 
-    // Atualização do HTML (UI)
     const formatBRL = (valor) => valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     document.getElementById('clt-res-saldo').innerText = formatBRL(saldoSalario);
@@ -282,7 +423,6 @@ function calculateRescisaoCLT() {
     let avisoEl = document.getElementById('clt-res-aviso');
     avisoEl.innerText = formatBRL(valorAviso);
 
-    // Estilização dinâmica caso o aviso seja um desconto (vermelho)
     avisoEl.classList.remove('text-red-400', 'text-white');
     if (valorAviso < 0) {
         avisoEl.classList.add('text-red-400');
