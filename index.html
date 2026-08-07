@@ -12,8 +12,8 @@
 
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
 
-    <!-- 📱 MENU SUPERIOR RESPONSIVO EM GRADE (ACESSÍVEL EM TELAS 4:3 E DISPOSITIVOS MÓVEIS) -->
-    <header class="w-full bg-gray-800 border-b border-gray-700 sticky top-0 z-50 shadow-md">
+    <!-- 📱 MENU SUPERIOR RESPONSIVO (Relativo em telas menores para rolar/esconder, sticky em telas maiores) -->
+    <header class="w-full bg-gray-800 border-b border-gray-700 relative md:sticky md:top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-3">
             <nav class="grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-center lg:justify-center gap-2 w-full">
                 <button onclick="switchTab('home')" id="btn-home" class="tab-btn active p-2 rounded-lg bg-emerald-500 text-gray-950 transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Início">
