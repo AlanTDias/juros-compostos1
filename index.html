@@ -12,38 +12,50 @@
 
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
 
-    <!-- 📱 MENU SUPERIOR HORIZONTAL (HEADER) -->
-    <header class="w-full bg-gray-800 border-b border-gray-700 p-4 md:px-8">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-
-            <!-- Navegação Horizontal com Rolagem em Telas Pequenas -->
-            <nav class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-thin">
-                <button onclick="switchTab('juros-compostos')" id="btn-juros-compostos" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg bg-emerald-500 text-gray-950 font-bold transition text-sm">
-                    📈 Juros Compostos
+    <!-- 📱 MENU SUPERIOR RESPONSIVO EM GRADE (ACESSÍVEL EM TELAS 4:3 E DISPOSITIVOS MÓVEIS) -->
+    <header class="w-full bg-gray-800 border-b border-gray-700 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <nav class="grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-center lg:justify-center gap-2 w-full">
+                <button onclick="switchTab('home')" id="btn-home" class="tab-btn active p-2 rounded-lg bg-emerald-500 text-gray-950 transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Início">
+                    <span class="text-base">🏠</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Início</span>
                 </button>
-                <button onclick="switchTab('reserva')" id="btn-reserva" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
-                    🛡️ Reserva de Emergência
+                <button onclick="switchTab('juros-compostos')" id="btn-juros-compostos" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
+                    title="Juros Compostos">
+                    <span class="text-base">📈</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Juros Compostos</span>
                 </button>
-                <button onclick="switchTab('milhao')" id="btn-milhao" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
-                    🎯 Rumo ao Milhão
+                <button onclick="switchTab('reserva')" id="btn-reserva" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Reserva de Emergência">
+                    <span class="text-base">🛡️</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Reserva</span>
                 </button>
-                <button onclick="switchTab('financiamento')" id="btn-financiamento" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
-                    🏡 Financiamento (SAC/Price)
+                <button onclick="switchTab('milhao')" id="btn-milhao" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Rumo ao Milhão">
+                    <span class="text-base">🎯</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Rumo ao Milhão</span>
                 </button>
-                <button onclick="switchTab('inflacao')" id="btn-inflacao" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
-                    📉 Calculadora de Inflação
+                <button onclick="switchTab('financiamento')" id="btn-financiamento" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
+                    title="Financiamento (SAC/Price)">
+                    <span class="text-base">🏡</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Financiamento</span>
                 </button>
-                <button onclick="switchTab('comparador')" id="btn-comparador" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
-                    💸 À Vista vs. Parcelado
+                <button onclick="switchTab('inflacao')" id="btn-inflacao" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Calculadora de Inflação">
+                    <span class="text-base">📉</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Inflação</span>
                 </button>
-                <button onclick="switchTab('fgts')" id="btn-fgts" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
-                    💼 Rescisão FGTS
+                <button onclick="switchTab('comparador')" id="btn-comparador" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="À Vista vs. Parcelado">
+                    <span class="text-base">💸</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">À Vista vs Parc.</span>
                 </button>
-                <button onclick="switchTab('rescisao-clt')" id="btn-rescisao-clt" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
-                    📄 Rescisão CLT Completa
+                <button onclick="switchTab('fgts')" id="btn-fgts" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Rescisão FGTS">
+                    <span class="text-base">💼</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">FGTS</span>
+                </button>
+                <button onclick="switchTab('rescisao-clt')" id="btn-rescisao-clt" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
+                    title="Rescisão CLT Completa">
+                    <span class="text-base">📄</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Rescisão CLT</span>
                 </button>
             </nav>
-
         </div>
     </header>
 
@@ -56,44 +68,52 @@
             <span class="text-[10px] text-gray-600 mt-1">Recomendado: 728x90 ou Responsivo</span>
         </div>
 
-        <!-- 📊 PAINEL DE INDICADORES EM TEMPO REAL -->
-        <section class="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg">
-            <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 mb-3 border-b border-gray-700">
-                <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Indicadores Econômicos em Tempo Real
-                </h3>
-                <span id="indicadores-data" class="text-xs text-gray-400 mt-1 md:mt-0">Carregando data...</span>
+        <!-- ---------------- TAB 0: HOME / INÍCIO ---------------- -->
+        <section id="tab-home" class="tab-content space-y-6">
+            <div class="space-y-2">
+                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Bem-vindo ao Portal Financeiro</h2>
+                <p class="text-sm text-gray-400">Monitore os indicadores econômicos atuais e selecione uma das ferramentas de simulação no menu superior.</p>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
-                    <span class="block text-xs text-gray-400">Taxa Selic (a.a.)</span>
-                    <span id="ind-selic" class="text-lg font-bold text-white">Carregando...</span>
+            <!-- 📊 PAINEL DE INDICADORES EM TEMPO REAL -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg">
+                <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 mb-3 border-b border-gray-700">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Indicadores Econômicos em Tempo Real
+                    </h3>
+                    <span id="indicadores-data" class="text-xs text-gray-400 mt-1 md:mt-0">Carregando data...</span>
                 </div>
-                <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
-                    <span class="block text-xs text-gray-400">CDI (a.a.)</span>
-                    <span id="ind-cdi" class="text-lg font-bold text-white">Carregando...</span>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <span class="block text-xs text-gray-400">Taxa Selic (a.a.)</span>
+                        <span id="ind-selic" class="text-base md:text-lg font-bold text-white">Carregando...</span>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <span class="block text-xs text-gray-400">CDI (a.a.)</span>
+                        <span id="ind-cdi" class="text-base md:text-lg font-bold text-white">Carregando...</span>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <span class="block text-xs text-gray-400">IPCA (Acumul. 12m)</span>
+                        <span id="ind-ipca" class="text-base md:text-lg font-bold text-white">Carregando...</span>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <span class="block text-xs text-gray-400">Dólar Comercial</span>
+                        <span id="ind-dolar" class="text-base md:text-lg font-bold text-white">Carregando...</span>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700 col-span-2 sm:col-span-1">
+                        <span class="block text-xs text-gray-400">Poupança (Nova)</span>
+                        <span id="ind-poupanca" class="text-base md:text-lg font-bold text-white">Carregando...</span>
+                    </div>
                 </div>
-                <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
-                    <span class="block text-xs text-gray-400">IPCA (Acumul. 12m)</span>
-                    <span id="ind-ipca" class="text-lg font-bold text-white">Carregando...</span>
-                </div>
-                <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
-                    <span class="block text-xs text-gray-400">Dólar Comercial</span>
-                    <span id="ind-dolar" class="text-lg font-bold text-white">Carregando...</span>
-                </div>
-                <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700 col-span-2 sm:col-span-1">
-                    <span class="block text-xs text-gray-400">Poupança (Nova)</span>
-                    <span id="ind-poupanca" class="text-lg font-bold text-white">Carregando...</span>
-                </div>
-            </div>
+            </section>
         </section>
 
         <!-- ---------------- TAB 1: JUROS COMPOSTOS ---------------- -->
-        <section id="tab-juros-compostos" class="tab-content space-y-6">
-            <h2 class="text-2xl font-bold text-emerald-400">Calculadora de Juros Compostos</h2>
+        <section id="tab-juros-compostos" class="tab-content hidden space-y-6">
+            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Juros Compostos</h2>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
                     <div>
                         <label class="block text-sm font-medium">Valor Inicial (R$)</label>
                         <input type="number" id="jc-initial" value="0" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
@@ -130,17 +150,17 @@
                     </div>
                     <button onclick="calculateJC()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Calcular</button>
                 </div>
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg lg:col-span-2 flex items-center justify-center">
-                    <div class="w-full h-72"><canvas id="growthChart"></canvas></div>
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg lg:col-span-2 flex items-center justify-center">
+                    <div class="w-full h-64 md:h-72"><canvas id="growthChart"></canvas></div>
                 </div>
             </div>
         </section>
 
         <!-- ---------------- TAB 2: RESERVA DE EMERGÊNCIA ---------------- -->
         <section id="tab-reserva" class="tab-content hidden space-y-6">
-            <h2 class="text-2xl font-bold text-emerald-400">Simulador de Reserva de Emergência</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Simulador de Reserva de Emergência</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
                     <div>
                         <label class="block text-sm font-medium">Gastos Mensais Essenciais (R$)</label>
                         <input type="number" id="res-gastos" value="0" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
@@ -156,16 +176,16 @@
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center items-center text-center space-y-3">
                     <span class="text-gray-400">Sua Reserva Ideal deve ser de:</span>
-                    <span id="res-resultado" class="text-4xl font-extrabold text-emerald-400">R$ 0,00</span>
+                    <span id="res-resultado" class="text-3xl md:text-4xl font-extrabold text-emerald-400">R$ 0,00</span>
                 </div>
             </div>
         </section>
 
         <!-- ---------------- TAB 3: RUMO AO MILHÃO ---------------- -->
         <section id="tab-milhao" class="tab-content hidden space-y-6">
-            <h2 class="text-2xl font-bold text-emerald-400">Calculadora: Rumo ao Milhão</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora: Rumo ao Milhão</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
                     <div>
                         <label class="block text-sm font-medium">Valor Atual (R$)</label>
                         <input type="number" id="milhao-inicial" value="0" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
@@ -182,7 +202,7 @@
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center items-center text-center space-y-3">
                     <span class="text-gray-400">Você atingirá R$ 1 Milhão em:</span>
-                    <span id="milhao-resultado" class="text-3xl font-extrabold text-emerald-400">-</span>
+                    <span id="milhao-resultado" class="text-2xl md:text-3xl font-extrabold text-emerald-400">-</span>
                     <span id="milhao-detalhes" class="text-xs text-gray-400"></span>
                 </div>
             </div>
@@ -190,9 +210,9 @@
 
         <!-- ---------------- TAB 4: FINANCIAMENTO IMOBILIÁRIO ---------------- -->
         <section id="tab-financiamento" class="tab-content hidden space-y-6">
-            <h2 class="text-2xl font-bold text-emerald-400">Simulador de Financiamento (SAC vs. Price)</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Simulador de Financiamento (SAC vs. Price)</h2>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
                     <div>
                         <label class="block text-sm font-medium">Valor do Imóvel (R$)</label>
                         <input type="number" id="fin-valor" value="0" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
@@ -211,7 +231,7 @@
                     </div>
                     <button onclick="calculateFinanciamento()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Comparar Sistemas</button>
                 </div>
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg lg:col-span-2 space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg lg:col-span-2 space-y-4">
                     <h3 class="text-lg font-semibold text-emerald-300">Resultados da Comparação</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-gray-700 p-4 rounded-lg space-y-2">
@@ -232,9 +252,9 @@
 
         <!-- ---------------- TAB 5: CALCULADORA DE INFLAÇÃO ---------------- -->
         <section id="tab-inflacao" class="tab-content hidden space-y-6">
-            <h2 class="text-2xl font-bold text-emerald-400">Calculadora de Inflação (Poder de Compra)</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Inflação (Poder de Compra)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
                     <div>
                         <label class="block text-sm font-medium">Valor Atual (R$)</label>
                         <input type="number" id="inf-valor" value="1000" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
@@ -251,16 +271,16 @@
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center items-center text-center space-y-3">
                     <span class="text-gray-400">Poder de compra equivalente no futuro:</span>
-                    <span id="inf-resultado" class="text-3xl font-extrabold text-emerald-400">R$ 0,00</span>
+                    <span id="inf-resultado" class="text-2xl md:text-3xl font-extrabold text-emerald-400">R$ 0,00</span>
                 </div>
             </div>
         </section>
 
         <!-- ---------------- TAB 6: À VISTA VS. PARCELADO ---------------- -->
         <section id="tab-comparador" class="tab-content hidden space-y-6">
-            <h2 class="text-2xl font-bold text-emerald-400">Comparador: À Vista vs. Parcelado</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Comparador: À Vista vs. Parcelado</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
                     <div>
                         <label class="block text-sm font-medium">Valor do Produto (R$)</label>
                         <input type="number" id="comp-valor" value="1000" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
@@ -281,7 +301,7 @@
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center items-center text-center space-y-3">
                     <span class="text-gray-400">Conclusão Matemática:</span>
-                    <span id="comp-resultado" class="text-2xl font-extrabold text-emerald-400">-</span>
+                    <span id="comp-resultado" class="text-xl md:text-2xl font-extrabold text-emerald-400">-</span>
                     <p id="comp-detalhes" class="text-xs text-gray-400 max-w-xs"></p>
                 </div>
             </div>
@@ -289,9 +309,9 @@
 
         <!-- ---------------- TAB 7: RESCISÃO FGTS ---------------- -->
         <section id="tab-fgts" class="tab-content hidden space-y-6">
-            <h2 class="text-2xl font-bold text-emerald-400">Calculadora de Rescisão e FGTS</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Rescisão e FGTS</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
                     <div>
                         <label class="block text-sm font-medium">Salário Bruto Mensal (R$)</label>
                         <input type="number" id="fgts-salario" value="0" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
@@ -306,7 +326,7 @@
                     </div>
                     <button onclick="calculateFGTS()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Calcular Rescisão e FGTS</button>
                 </div>
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center space-y-3">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg flex flex-col justify-center space-y-3">
                     <h3 class="text-lg font-semibold text-emerald-300">Resumo dos Valores Rescisórios</h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between border-b border-gray-700 pb-2">
@@ -323,7 +343,7 @@
                         </div>
                         <div class="flex justify-between pt-1">
                             <span class="text-gray-200 font-bold">Total Estimado a Receber:</span>
-                            <span id="fgts-res-total" class="text-xl font-extrabold text-emerald-300">R$ 0,00</span>
+                            <span id="fgts-res-total" class="text-lg md:text-xl font-extrabold text-emerald-300">R$ 0,00</span>
                         </div>
                     </div>
                 </div>
@@ -332,11 +352,11 @@
 
         <!-- ---------------- TAB 8: RESCISÃO CLT ---------------- -->
         <section id="tab-rescisao-clt" class="tab-content hidden space-y-6">
-            <h2 class="text-2xl font-bold text-emerald-400">Calculadora de Rescisão CLT</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Rescisão CLT</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 <!-- Formulário de Entrada -->
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
                     <div>
                         <label class="block text-sm font-medium">Salário Bruto Base (R$)</label>
                         <input type="number" id="clt-salario" value="0" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
@@ -383,7 +403,7 @@
                 </div>
 
                 <!-- Painel de Resultados -->
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-start space-y-4">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg flex flex-col justify-start space-y-4">
                     <h3 class="text-lg font-semibold text-emerald-300 border-b border-gray-700 pb-2">Demonstrativo de Verbas Rescisórias</h3>
                     <div class="space-y-3 text-sm flex-1">
                         <div class="flex justify-between">
@@ -410,7 +430,7 @@
                     <div class="border-t border-gray-700 pt-4 flex flex-col space-y-1">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-200 font-bold">Total Bruto a Receber:</span>
-                            <span id="clt-res-total" class="text-2xl font-extrabold text-emerald-400">R$ 0,00</span>
+                            <span id="clt-res-total" class="text-xl md:text-2xl font-extrabold text-emerald-400">R$ 0,00</span>
                         </div>
                         <span class="text-[10px] text-gray-500 text-right">* Valores brutos. Não inclui descontos de INSS/IRRF ou multa do FGTS.</span>
                     </div>
@@ -418,6 +438,12 @@
 
             </div>
         </section>
+
+        <!-- Anúncio Inferior -->
+        <div class="w-full bg-gray-800 border border-dashed border-gray-700 rounded-lg p-6 text-center flex flex-col items-center justify-center min-h-[100px] md:min-h-[120px]">
+            <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Espaço Publicitário (Banner Inferior)</span>
+            <span class="text-[10px] text-gray-600 mt-1">Recomendado: 728x90 ou Responsivo</span>
+        </div>
 
     </main>
 
