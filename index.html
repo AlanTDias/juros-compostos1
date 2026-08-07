@@ -10,50 +10,51 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col md:flex-row">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
 
-    <!-- 📱 MENU LATERAL (SIDEBAR) -->
-    <aside class="w-full md:w-72 bg-gray-800 border-r border-gray-700 p-6 flex flex-col justify-between">
-        <div>
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-emerald-400">PortalFinanceiro</h1>
-                <p class="text-xs text-gray-400 mt-1">Ferramentas de Investimento</p>
+    <!-- 📱 MENU SUPERIOR HORIZONTAL (HEADER) -->
+    <header class="w-full bg-gray-800 border-b border-gray-700 p-4 md:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+            <!-- Título / Logotipo -->
+            <div class="flex-shrink-0">
+                <h1 class="text-2xl font-bold text-emerald-400">Portal Financeiro</h1>
+                <p class="text-xs text-gray-400">Ferramentas de Investimento</p>
             </div>
 
-            <nav class="space-y-2">
-                <button onclick="switchTab('juros-compostos')" id="btn-juros-compostos" class="tab-btn w-full text-left px-4 py-3 rounded-lg bg-emerald-500 text-gray-950 font-bold transition">
+            <!-- Navegação Horizontal com Rolagem em Telas Pequenas -->
+            <nav class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-thin">
+                <button onclick="switchTab('juros-compostos')" id="btn-juros-compostos" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg bg-emerald-500 text-gray-950 font-bold transition text-sm">
                     📈 Juros Compostos
                 </button>
-                <button onclick="switchTab('reserva')" id="btn-reserva" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition">
+                <button onclick="switchTab('reserva')" id="btn-reserva" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
                     🛡️ Reserva de Emergência
                 </button>
-                <button onclick="switchTab('milhao')" id="btn-milhao" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition">
+                <button onclick="switchTab('milhao')" id="btn-milhao" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
                     🎯 Rumo ao Milhão
                 </button>
-                <button onclick="switchTab('financiamento')" id="btn-financiamento" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition">
+                <button onclick="switchTab('financiamento')" id="btn-financiamento" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
                     🏡 Financiamento (SAC/Price)
                 </button>
-                <button onclick="switchTab('inflacao')" id="btn-inflacao" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition">
+                <button onclick="switchTab('inflacao')" id="btn-inflacao" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
                     📉 Calculadora de Inflação
                 </button>
-                <button onclick="switchTab('comparador')" id="btn-comparador" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition">
+                <button onclick="switchTab('comparador')" id="btn-comparador" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
                     💸 À Vista vs. Parcelado
                 </button>
-                <button onclick="switchTab('fgts')" id="btn-fgts" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition">
+                <button onclick="switchTab('fgts')" id="btn-fgts" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
                     💼 Rescisão FGTS
                 </button>
+                <button onclick="switchTab('rescisao-clt')" id="btn-rescisao-clt" class="tab-btn whitespace-nowrap px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 transition text-sm">
+                    📄 Rescisão CLT Completa
+                </button>
             </nav>
-        </div>
 
-        <!-- Anúncio no Menu Lateral -->
-        <div class="mt-8 bg-gray-900/50 border border-dashed border-gray-700 rounded-lg p-6 text-center flex flex-col items-center justify-center min-h-[150px]">
-            <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Espaço Pub (Sidebar)</span>
-            <span class="text-[10px] text-gray-600 mt-1">Recomendado: 300x250</span>
         </div>
-    </aside>
+    </header>
 
     <!-- 💻 CONTEÚDO PRINCIPAL -->
-    <main class="flex-1 p-4 md:p-8 overflow-y-auto space-y-6">
+    <main class="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
 
         <!-- Anúncio Superior -->
         <div class="w-full bg-gray-800 border border-dashed border-gray-700 rounded-lg p-6 text-center flex flex-col items-center justify-center min-h-[100px] md:min-h-[120px]">
@@ -332,6 +333,95 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- ---------------- TAB 8: RESCISÃO CLT ---------------- -->
+        <section id="tab-rescisao-clt" class="tab-content hidden space-y-6">
+            <h2 class="text-2xl font-bold text-emerald-400">Calculadora de Rescisão CLT</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Formulário de Entrada -->
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium">Salário Bruto Base (R$)</label>
+                        <input type="number" id="clt-salario" value="0" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Motivo do Desligamento</label>
+                        <select id="clt-motivo" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                            <option value="sem-justa-causa">Demissão sem justa causa</option>
+                            <option value="pedido">Pedido de demissão</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium">Dias trabalhados no mês</label>
+                            <input type="number" id="clt-dias-mes" value="15" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Meses p/ 13º (no ano)</label>
+                            <input type="number" id="clt-meses-13" value="6" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium">Férias Vencidas?</label>
+                            <select id="clt-ferias-vencidas" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                                <option value="0">Não</option>
+                                <option value="1">Sim (1 ano inteiro)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Férias Proporcionais (meses)</label>
+                            <input type="number" id="clt-meses-ferias" value="6" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Aviso Prévio</label>
+                        <select id="clt-aviso" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                            <option value="indenizado">Indenizado pelo Empregador</option>
+                            <option value="trabalhado">Trabalhado</option>
+                            <option value="descontado">Não cumprido (Descontado pelo Empregador)</option>
+                        </select>
+                    </div>
+                    <button onclick="calculateRescisaoCLT()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Calcular Direitos</button>
+                </div>
+
+                <!-- Painel de Resultados -->
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-start space-y-4">
+                    <h3 class="text-lg font-semibold text-emerald-300 border-b border-gray-700 pb-2">Demonstrativo de Verbas Rescisórias</h3>
+                    <div class="space-y-3 text-sm flex-1">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Saldo de Salário:</span>
+                            <span id="clt-res-saldo" class="font-bold text-white">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">13º Salário Proporcional:</span>
+                            <span id="clt-res-13" class="font-bold text-white">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Férias Vencidas (+ 1/3):</span>
+                            <span id="clt-res-ferias-vencidas" class="font-bold text-white">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Férias Proporcionais (+ 1/3):</span>
+                            <span id="clt-res-ferias-prop" class="font-bold text-white">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Aviso Prévio:</span>
+                            <span id="clt-res-aviso" class="font-bold text-white">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-700 pt-4 flex flex-col space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-200 font-bold">Total Bruto a Receber:</span>
+                            <span id="clt-res-total" class="text-2xl font-extrabold text-emerald-400">R$ 0,00</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 text-right">* Valores brutos. Não inclui descontos de INSS/IRRF ou multa do FGTS.</span>
+                    </div>
+                </div>
+
             </div>
         </section>
 

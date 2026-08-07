@@ -25,6 +25,7 @@ function switchTab(tabId) {
     if (tabId === 'inflacao') calculateInflacao();
     if (tabId === 'comparador') calculateComparador();
     if (tabId === 'fgts') calculateFGTS();
+    if (tabId === 'rescisao-clt') calculateRescisaoCLT();
 }
 
 // 🌐 Buscar Indicadores em Tempo Real 
@@ -222,4 +223,72 @@ function calculateFGTS() {
     document.getElementById('fgts-res-multa').innerText = multaFgts.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('fgts-res-aviso').innerText = avisoPrevio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('fgts-res-total').innerText = totalRescisao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// 8. Calculadora de Rescisão CLT
+function calculateRescisaoCLT() {
+    let salario = parseFloat(document.getElementById('clt-salario').value) || 0;
+    let motivo = document.getElementById('clt-motivo').value;
+    let diasMes = parseInt(document.getElementById('clt-dias-mes').value) || 0;
+    let meses13 = parseInt(document.getElementById('clt-meses-13').value) || 0;
+    let temFeriasVencidas = parseInt(document.getElementById('clt-ferias-vencidas').value) === 1;
+    let mesesFerias = parseInt(document.getElementById('clt-meses-ferias').value) || 0;
+    let tipoAviso = document.getElementById('clt-aviso').value;
+
+    // Cálculos de Verbas Base
+    let saldoSalario = (salario / 30) * diasMes;
+    let decimoTerceiro = (salario / 12) * meses13;
+
+    // Férias Vencidas + Terço Constitucional
+    let feriasVencidas = 0;
+    if (temFeriasVencidas) {
+        feriasVencidas = salario + (salario / 3);
+    }
+
+    // Férias Proporcionais + Terço Constitucional
+    let feriasProporcionais = ((salario / 12) * mesesFerias);
+    feriasProporcionais += (feriasProporcionais / 3);
+
+    let valorAviso = 0;
+
+    // Lógica do Aviso Prévio baseada no Motivo
+    if (motivo === 'pedido') {
+        // Pedido de demissão: não recebe aviso do empregador.
+        // Se não cumprir (descontado), a empresa desconta um salário do acerto.
+        if (tipoAviso === 'descontado') {
+            valorAviso = -salario;
+        }
+    } else if (motivo === 'sem-justa-causa') {
+        // Demissão sem justa causa
+        if (tipoAviso === 'indenizado') {
+            valorAviso = salario; // Aqui simplificamos para 30 dias base.
+        }
+        // Se for "trabalhado", o valor já está no "Saldo de Salário", então o aviso extra é 0.
+    }
+
+    // Total Bruto
+    let totalBruto = saldoSalario + decimoTerceiro + feriasVencidas + feriasProporcionais + valorAviso;
+    // Se o desconto do aviso for maior que as verbas, o trabalhador não recebe nada (mas não fica devendo)
+    if (totalBruto < 0) totalBruto = 0;
+
+    // Atualização do HTML (UI)
+    const formatBRL = (valor) => valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    document.getElementById('clt-res-saldo').innerText = formatBRL(saldoSalario);
+    document.getElementById('clt-res-13').innerText = formatBRL(decimoTerceiro);
+    document.getElementById('clt-res-ferias-vencidas').innerText = formatBRL(feriasVencidas);
+    document.getElementById('clt-res-ferias-prop').innerText = formatBRL(feriasProporcionais);
+
+    let avisoEl = document.getElementById('clt-res-aviso');
+    avisoEl.innerText = formatBRL(valorAviso);
+
+    // Estilização dinâmica caso o aviso seja um desconto (vermelho)
+    avisoEl.classList.remove('text-red-400', 'text-white');
+    if (valorAviso < 0) {
+        avisoEl.classList.add('text-red-400');
+    } else {
+        avisoEl.classList.add('text-white');
+    }
+
+    document.getElementById('clt-res-total').innerText = formatBRL(totalBruto);
 }

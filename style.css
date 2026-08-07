@@ -1,5 +1,12 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Degradê de cores no fundo */
+    background: linear-gradient(135deg, #5f76db 0%, #47147a 100%);
+    background-attachment: fixed;
+    /* Mantém o fundo fixo ao rolar a página */
+    min-height: 100vh;
+    /* Garante que o fundo ocupe toda a altura da tela */
+    margin: 0;
 }
 
 input::-webkit-outer-spin-button,
