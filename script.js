@@ -2,9 +2,33 @@ let myChart = null;
 
 // Função executada ao carregar a página
 window.onload = function() {
+    // Aplica a máscara de moeda a todos os inputs monetários
+    document.querySelectorAll('.input-moeda').forEach(input => {
+        if (input.value) {
+            let num = input.value.replace(/\D/g, '');
+            if (num) input.value = Number(num).toLocaleString('pt-BR');
+        }
+        input.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (!value) {
+                e.target.value = '';
+                return;
+            }
+            e.target.value = Number(value).toLocaleString('pt-BR');
+        });
+    });
+
     calculateJC();
     fetchMarketIndicators();
 };
+
+// Função auxiliar para ler e limpar valores monetários formatados
+function getVal(id) {
+    let el = document.getElementById(id);
+    if (!el) return 0;
+    let limpo = el.value.replace(/\D/g, '');
+    return Number(limpo) || 0;
+}
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -40,7 +64,6 @@ async function fetchMarketIndicators() {
     const dolarEl = document.getElementById('ind-dolar');
     const poupancaEl = document.getElementById('ind-poupanca');
 
-    // Valores oficiais vigentes garantidos para evitar falhas de rede/CORS das APIs
     selicEl.innerText = "14.00% a.a.";
     cdiEl.innerText = "14.71% a.a.";
     ipcaEl.innerText = "4.55% a.a.";
@@ -62,10 +85,10 @@ async function fetchMarketIndicators() {
     dateSpan.innerText = `Atualizado em: ${hoje.toLocaleDateString('pt-BR')} às ${hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-// 1. Juros Compostos (Com Total Investido, Juros e Total Final)
+// 1. Juros Compostos
 function calculateJC() {
-    let p = parseFloat(document.getElementById('jc-initial').value) || 0;
-    let pmt = parseFloat(document.getElementById('jc-monthly').value) || 0;
+    let p = getVal('jc-initial');
+    let pmt = getVal('jc-monthly');
     let rate = parseFloat(document.getElementById('jc-rate').value) / 100 || 0;
     let rateType = document.getElementById('jc-rateType').value;
     let time = parseInt(document.getElementById('jc-time').value) || 0;
@@ -94,12 +117,10 @@ function calculateJC() {
 
     let totalJuros = currentTotal - totalInvested;
 
-    // Atualiza os cards de resultados numéricos na tela
     document.getElementById('jc-res-investido').innerText = totalInvested.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('jc-res-juros').innerText = totalJuros.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('jc-res-total').innerText = currentTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // Atualiza o Gráfico
     const ctx = document.getElementById('growthChart').getContext('2d');
     if (myChart) myChart.destroy();
 
@@ -118,15 +139,15 @@ function calculateJC() {
 
 // 2. Reserva de Emergência
 function calculateReserva() {
-    let gastos = parseFloat(document.getElementById('res-gastos').value) || 0;
+    let gastos = getVal('res-gastos');
     let meses = parseInt(document.getElementById('res-meses').value) || 6;
     document.getElementById('res-resultado').innerText = (gastos * meses).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 // 3. Rumo ao Milhão
 function calculateMilhao() {
-    let p = parseFloat(document.getElementById('milhao-inicial').value) || 0;
-    let pmt = parseFloat(document.getElementById('milhao-aporte').value) || 0;
+    let p = getVal('milhao-inicial');
+    let pmt = getVal('milhao-aporte');
     let annualRate = parseFloat(document.getElementById('milhao-taxa').value) / 100 || 0;
     let monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
     let target = 1000000;
@@ -150,8 +171,8 @@ function calculateMilhao() {
 
 // 4. Financiamento Imobiliário (SAC vs Price)
 function calculateFinanciamento() {
-    let valorImovel = parseFloat(document.getElementById('fin-valor').value) || 0;
-    let entrada = parseFloat(document.getElementById('fin-entrada').value) || 0;
+    let valorImovel = getVal('fin-valor');
+    let entrada = getVal('fin-entrada');
     let taxaAnual = parseFloat(document.getElementById('fin-taxa').value) / 100 || 0;
     let anos = parseInt(document.getElementById('fin-anos').value) || 0;
 
@@ -159,7 +180,7 @@ function calculateFinanciamento() {
     let n = anos * 12;
     let i = taxaAnual / 12;
 
-    let amortizacao = pv / n;
+    let amortizacao = pv / (n || 1);
     let p1Sac = amortizacao + (pv * i);
     let pnSac = amortizacao + (amortizacao * i);
     let totalSac = 0;
@@ -169,7 +190,7 @@ function calculateFinanciamento() {
         saldoDevedor -= amortizacao;
     }
 
-    let pPrice = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+    let pPrice = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1 || 1);
     let totalprice = pPrice * n;
 
     document.getElementById('sac-p1').innerText = p1Sac.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -182,8 +203,8 @@ function calculateFinanciamento() {
 
 // 5. Financiamento de Veículos
 function calculateVeiculo() {
-    let valor = parseFloat(document.getElementById('vei-valor').value) || 0;
-    let entrada = parseFloat(document.getElementById('vei-entrada').value) || 0;
+    let valor = getVal('vei-valor');
+    let entrada = getVal('vei-entrada');
     let taxaMensal = parseFloat(document.getElementById('vei-taxa').value) / 100 || 0;
     let meses = parseInt(document.getElementById('vei-meses').value) || 0;
 
@@ -206,10 +227,10 @@ function calculateVeiculo() {
 
 // 6. Amortização Extra
 function calculateAmortizacao() {
-    let saldoDevedor = parseFloat(document.getElementById('amo-saldo').value) || 0;
+    let saldoDevedor = getVal('amo-saldo');
     let taxa = parseFloat(document.getElementById('amo-taxa').value) / 100 || 0;
     let mesesRestantes = parseInt(document.getElementById('amo-meses').value) || 0;
-    let extra = parseFloat(document.getElementById('amo-extra').value) || 0;
+    let extra = getVal('amo-extra');
     let tipo = document.getElementById('amo-tipo').value;
 
     let i = taxa;
@@ -247,7 +268,7 @@ function calculateAmortizacao() {
         } else if (i === 0) {
             novoPrazo = Math.ceil(novoSaldo / pmtAntigo);
         } else {
-            let numerador = -Math.log(1 - (novoSaldo * i) / pmtAntigo);
+            let numerador = -Math.log(1 - (novoSaldo * i) / (pmtAntigo || 1));
             let denominador = Math.log(1 + i);
             novoPrazo = Math.ceil(numerador / denominador);
         }
@@ -267,11 +288,11 @@ function calculateAmortizacao() {
 
 // 7. Alugar vs. Comprar Imóvel
 function calculateAlugarComprar() {
-    let valorImovel = parseFloat(document.getElementById('ac-imovel').value) || 0;
-    let entrada = parseFloat(document.getElementById('ac-entrada').value) || 0;
+    let valorImovel = getVal('ac-imovel');
+    let entrada = getVal('ac-entrada');
     let taxaAnual = parseFloat(document.getElementById('ac-juros').value) / 100 || 0;
     let anos = parseInt(document.getElementById('ac-anos').value) || 30;
-    let aluguelInicial = parseFloat(document.getElementById('ac-aluguel').value) || 0;
+    let aluguelInicial = getVal('ac-aluguel');
     let rendimentoMes = parseFloat(document.getElementById('ac-rendimento').value) / 100 || 0;
     let valorizacaoAnual = parseFloat(document.getElementById('ac-valorizacao').value) / 100 || 0;
 
@@ -325,7 +346,7 @@ function calculateAlugarComprar() {
 
 // 8. Calculadora de Inflação
 function calculateInflacao() {
-    let valor = parseFloat(document.getElementById('inf-valor').value) || 0;
+    let valor = getVal('inf-valor');
     let taxa = parseFloat(document.getElementById('inf-taxa').value) / 100 || 0;
     let anos = parseInt(document.getElementById('inf-anos').value) || 0;
 
@@ -335,13 +356,13 @@ function calculateInflacao() {
 
 // 9. À Vista vs Parcelado
 function calculateComparador() {
-    let valor = parseFloat(document.getElementById('comp-valor').value) || 0;
+    let valor = getVal('comp-valor');
     let descontoPct = parseFloat(document.getElementById('comp-desconto').value) / 100 || 0;
     let parcelas = parseInt(document.getElementById('comp-parcelas').value) || 1;
     let rendimentoMes = parseFloat(document.getElementById('comp-rendimento').value) / 100 || 0;
 
     let precoAVista = valor * (1 - descontoPct);
-    let valorParcela = valor / parcelas;
+    let valorParcela = valor / (parcelas || 1);
 
     let montanteInvestido = precoAVista;
     for (let p = 0; p < parcelas; p++) {
@@ -364,8 +385,8 @@ function calculateComparador() {
 
 // 10. Cálculo Rescisão e FGTS
 function calculateFGTS() {
-    let salario = parseFloat(document.getElementById('fgts-salario').value) || 0;
-    let saldoFgts = parseFloat(document.getElementById('fgts-saldo').value) || 0;
+    let salario = getVal('fgts-salario');
+    let saldoFgts = getVal('fgts-saldo');
 
     let multaFgts = saldoFgts * 0.40;
     let avisoPrevio = salario;
@@ -379,7 +400,7 @@ function calculateFGTS() {
 
 // 11. Calculadora de Rescisão CLT
 function calculateRescisaoCLT() {
-    let salario = parseFloat(document.getElementById('clt-salario').value) || 0;
+    let salario = getVal('clt-salario');
     let motivo = document.getElementById('clt-motivo').value;
     let diasMes = parseInt(document.getElementById('clt-dias-mes').value) || 0;
     let meses13 = parseInt(document.getElementById('clt-meses-13').value) || 0;
