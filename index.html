@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Ajuste de segurança HTTPS para forçar requisições seguras -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Portal de Finanças - Simuladores</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -165,7 +167,6 @@
                     <button onclick="calculateJC()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Calcular</button>
                 </div>
                 <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg lg:col-span-2 flex flex-col justify-between space-y-6">
-                    <!-- Resumo Numérico -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="bg-gray-700 p-4 rounded-lg text-center">
                             <span class="block text-xs text-gray-400">Total Investido</span>
@@ -180,7 +181,6 @@
                             <span id="jc-res-total" class="text-base md:text-lg font-extrabold text-blue-400">R$ 0,00</span>
                         </div>
                     </div>
-                    <!-- Gráfico -->
                     <div class="w-full h-56 md:h-64"><canvas id="growthChart"></canvas></div>
                 </div>
             </div>
