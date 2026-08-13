@@ -510,6 +510,7 @@ function updateTargetFormats() {
 }
 
 // Executa a conversão baseada nas escolhas do usuário
+// Executa a conversão baseada nas escolhas do usuário
 async function convertFile() {
     const fileInput = document.getElementById('file-input-universal');
     const targetFormat = document.getElementById('conversion-target-format').value;
@@ -541,6 +542,9 @@ async function convertFile() {
             if (targetFormat === 'docx') await convertPdfToDocx(file, statusEl);
             else if (targetFormat === 'txt') await convertPdfToText(file, statusEl);
             else if (targetFormat === 'json') await convertPdfToJson(file, statusEl);
+        } else if (extension === 'csv') {
+            if (targetFormat === 'json') convertCsvToJson(file, statusEl);
+            else if (targetFormat === 'txt') convertCsvToTxt(file, statusEl);
         } else {
             throw new Error('Formato não suportado ou sem suporte de conversão direto no navegador.');
         }
@@ -555,6 +559,74 @@ async function convertFile() {
 // ------------------------------------------
 // FUNÇÕES INDIVIDUAIS DE CONVERSÃO
 // ------------------------------------------
+
+// Configura os eventos de arraste ao carregar a página
+document.addEventListener("DOMContentLoaded", () => {
+    const dropZone = document.getElementById('drop-zone');
+
+    if (dropZone) {
+        // Previne comportamentos padrão do navegador (abrir a imagem/PDF na aba)
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        // Destaque visual ao arrastar o arquivo por cima
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('border-emerald-400', 'bg-gray-700', 'scale-[1.01]');
+            }, false);
+        });
+
+        // Remove o destaque ao sair ou soltar
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('border-emerald-400', 'bg-gray-700', 'scale-[1.01]');
+            }, false);
+        });
+
+        // Processa o arquivo quando o usuário solta na caixa
+        dropZone.addEventListener('drop', handleDrop, false);
+    }
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+// Manipula o evento de soltar o arquivo na caixa
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    const fileInput = document.getElementById('file-input-universal');
+
+    if (files.length) {
+        fileInput.files = files; // Atribui os arquivos ao input oculto
+        handleFileSelect(); // Atualiza a interface e as opções do select
+    }
+}
+
+// Atualiza o texto da caixa de arraste e chama o atualizador de formatos
+function handleFileSelect() {
+    const fileInput = document.getElementById('file-input-universal');
+    const dropZoneText = document.getElementById('drop-zone-text');
+
+    if (fileInput.files.length) {
+        const file = fileInput.files[0];
+        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+
+        // Exibe o nome e tamanho do arquivo selecionado
+        dropZoneText.innerHTML = `📄 Arquivo selecionado: <strong class="text-emerald-400">${file.name}</strong> (${fileSizeMB} MB)`;
+    } else {
+        dropZoneText.innerHTML = `<span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste e solte o arquivo aqui`;
+    }
+
+    // Chama a função existente que atualiza os formatos do <select>
+    if (typeof updateTargetFormats === "function") {
+        updateTargetFormats();
+    }
+}
 
 // 1. DOCX para PDF
 function convertDocxToPdf(file, statusEl) {
@@ -778,6 +850,41 @@ function convertPdfToDocx(file, statusEl) {
         };
         reader.readAsArrayBuffer(file);
     });
+}
+
+// 8. CSV para JSON
+function convertCsvToJson(file, statusEl) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonOutput = XLSX.utils.sheet_to_json(worksheet);
+
+            downloadBlob(JSON.stringify(jsonOutput, null, 2), file.name.replace(/\.[^/.]+$/, "") + ".json", 'application/json;charset=utf-8;');
+            statusEl.innerText = "✅ CSV convertido para JSON com sucesso!";
+        } catch (err) {
+            statusEl.innerText = "❌ Erro ao converter CSV para JSON.";
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// 9. CSV para TXT (Texto simples)
+function convertCsvToTxt(file, statusEl) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const textContent = e.target.result;
+            downloadBlob(textContent, file.name.replace(/\.[^/.]+$/, "") + ".txt", 'text/plain;charset=utf-8');
+            statusEl.innerText = "✅ CSV convertido para TXT com sucesso!";
+        } catch (err) {
+            statusEl.innerText = "❌ Erro ao converter CSV para TXT.";
+        }
+    };
+    reader.readAsText(file, 'UTF-8');
 }
 
 // Utilitário global para download de arquivos

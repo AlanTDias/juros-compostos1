@@ -203,13 +203,23 @@
                 <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Central de Conversores de Arquivos</h2>
                 <p class="text-sm text-gray-400">Selecione o arquivo e escolha o formato desejado para a conversão rápida.</p>
             </div>
-
             <!-- Conversor Universal -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione o Arquivo</label>
-                        <input type="file" id="file-input-universal" accept=".docx, .xlsx, .xls, .pptx, .ppt, .pdf, .csv, .txt" onchange="updateTargetFormats()" class="w-full bg-gray-700 text-sm rounded p-3 outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione ou Arraste o Arquivo</label>
+
+                        <!-- ÁREA DE DRAG AND DROP -->
+                        <div id="drop-zone" onclick="document.getElementById('file-input-universal').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">📁</span>
+                            <p id="drop-zone-text" class="text-sm text-gray-300">
+                                <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste e solte o arquivo aqui
+                            </p>
+                            <p class="text-[11px] text-gray-400">Suporta DOCX, XLSX, XLS, PPTX, PPT, PDF, CSV e TXT</p>
+                        </div>
+
+                        <!-- Input oculto manipulado pela caixa acima -->
+                        <input type="file" id="file-input-universal" accept=".docx, .xlsx, .xls, .pptx, .ppt, .pdf, .csv, .txt" onchange="handleFileSelect()" class="hidden">
                     </div>
 
                     <div>
@@ -228,6 +238,7 @@
                 </div>
             </div>
         </section>
+
         <!-- ---------------- FERRAMENTAS DE IMAGEM ---------------- -->
         <section id="tab-imagens" class="tab-content hidden space-y-6">
             <div class="space-y-2">
@@ -271,6 +282,7 @@
                 </div>
             </div>
         </section>
+
         <!-- ---------------- TAB 2: RESERVA DE EMERGÊNCIA ---------------- -->
         <section id="tab-reserva" class="tab-content hidden space-y-6">
             <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Simulador de Reserva de Emergência</h2>
