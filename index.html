@@ -197,7 +197,7 @@
             </div>
         </section>
 
-        <!-- ---------------- TAB 12: CONVERSORES DE ARQUIVOS (Word, PDF, Excel, PPT, XLS, PPTX e Mais) ---------------- -->
+        <!-- ---------------- TAB 12: CONVERSORES DE ARQUIVOS ---------------- -->
         <section id="tab-conversores" class="tab-content hidden space-y-6">
             <div class="space-y-2">
                 <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Central de Conversores de Arquivos</h2>
@@ -209,25 +209,21 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione o Arquivo</label>
-                        <input type="file" id="file-input-universal" accept=".docx, .xlsx, .xls, .pptx, .ppt, .pdf" class="w-full bg-gray-700 text-sm rounded p-3 outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                        <input type="file" id="file-input-universal" accept=".docx, .xlsx, .xls, .pptx, .ppt, .pdf, .csv, .txt" onchange="updateTargetFormats()" class="w-full bg-gray-700 text-sm rounded p-3 outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">2. Selecione o Formato de Saída</label>
                         <select id="conversion-target-format" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="" disabled selected>Escolha o formato final...</option>
-                            <option value="pdf">PDF (.pdf)</option>
-                            <option value="txt">Texto Simples (.txt)</option>
-                            <option value="csv">Planilha CSV (.csv)</option>
-                            <option value="json">Dados JSON (.json)</option>
-                        </select>
+                    <option value="" disabled selected>Selecione um arquivo primeiro...</option>
+                </select>
                     </div>
                 </div>
 
                 <div class="pt-2">
                     <button onclick="convertFile()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm">
-                        Converter Arquivo
-                    </button>
+                Converter Arquivo
+            </button>
                     <p id="status-universal" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
                 </div>
             </div>
@@ -718,7 +714,14 @@
         </div>
 
     </main>
-
+    <!-- 📄 RODAPÉ COM DIREITOS RESERVADOS E CONTADOR -->
+    <footer class="w-full bg-gray-800 border-t border-gray-700 py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400">
+            <p>
+                © <span id="footer-year">2026</span> ExCalc Finanças e Conversores. Todos os direitos reservados.
+            </p>
+        </div>
+    </footer>
     <!-- Bibliotecas externas para gráficos e conversores (SheetJS, Mammoth, jsPDF, html2pdf) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
@@ -727,6 +730,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
     <script src="script.js"></script>
 </body>
 

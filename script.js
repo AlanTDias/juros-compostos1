@@ -454,10 +454,62 @@ function calculateRescisaoCLT() {
     document.getElementById('clt-res-total').innerText = formatBRL(totalBruto);
 }
 
-// ==========================================
-// 12. FUNÇÕES DE CONVERSÃO DE ARQUIVOS (Unificado)
-// ==========================================
 
+// CENTRAL DE CONVERSÃO DE DOCUMENTOS
+// Atualiza as opções do <select> dinamicamente com base no arquivo escolhido
+function updateTargetFormats() {
+    const fileInput = document.getElementById('file-input-universal');
+    const selectFormat = document.getElementById('conversion-target-format');
+    const statusEl = document.getElementById('status-universal');
+
+    statusEl.innerText = "";
+    selectFormat.innerHTML = '<option value="" disabled selected>Escolha o formato final...</option>';
+
+    if (!fileInput.files.length) return;
+
+    const file = fileInput.files[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    let options = [];
+
+    if (ext === 'docx') {
+        options = [
+            { value: 'pdf', label: 'PDF (.pdf)' },
+            { value: 'txt', label: 'Texto Simples (.txt)' }
+        ];
+    } else if (['xlsx', 'xls'].includes(ext)) {
+        options = [
+            { value: 'csv', label: 'Planilha CSV (.csv)' },
+            { value: 'json', label: 'Dados JSON (.json)' }
+        ];
+    } else if (ext === 'pdf') {
+        options = [
+            { value: 'docx', label: 'Documento Word (.docx)' },
+            { value: 'txt', label: 'Texto Extraído (.txt)' },
+            { value: 'json', label: 'Estrutura JSON (.json)' }
+        ];
+    } else if (ext === 'csv') {
+        options = [
+            { value: 'json', label: 'Dados JSON (.json)' },
+            { value: 'txt', label: 'Texto (.txt)' }
+        ];
+    } else if (['ppt', 'pptx'].includes(ext)) {
+        statusEl.innerText = "ℹ️ Arquivos de apresentação (PPT/PPTX) têm limitações para conversão direta via navegador sem servidor.";
+        options = [];
+    } else {
+        statusEl.innerText = "Formato de arquivo não suportado.";
+        return;
+    }
+
+    options.forEach(opt => {
+        const optionEl = document.createElement('option');
+        optionEl.value = opt.value;
+        optionEl.innerText = opt.label;
+        selectFormat.appendChild(optionEl);
+    });
+}
+
+// Executa a conversão baseada nas escolhas do usuário
 async function convertFile() {
     const fileInput = document.getElementById('file-input-universal');
     const targetFormat = document.getElementById('conversion-target-format').value;
@@ -475,53 +527,56 @@ async function convertFile() {
 
     const file = fileInput.files[0];
     const extension = file.name.split('.').pop().toLowerCase();
-    statusEl.innerText = "Processando arquivo...";
+    statusEl.innerText = "⏳ Processando arquivo...";
+    statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem] animate-pulse";
 
     try {
         if (extension === 'docx') {
             if (targetFormat === 'pdf') await convertDocxToPdf(file, statusEl);
             else if (targetFormat === 'txt') await convertDocxToTxt(file, statusEl);
-            else throw new Error('Formato de destino incompatível para arquivos Word (.docx).');
         } else if (['xlsx', 'xls'].includes(extension)) {
             if (targetFormat === 'csv') convertExcelToCsv(file, statusEl);
             else if (targetFormat === 'json') convertExcelToJson(file, statusEl);
-            else throw new Error('Formato de destino incompatível para planilhas Excel.');
         } else if (extension === 'pdf') {
-            if (targetFormat === 'txt') await convertPdfToText(file, statusEl);
+            if (targetFormat === 'docx') await convertPdfToDocx(file, statusEl);
+            else if (targetFormat === 'txt') await convertPdfToText(file, statusEl);
             else if (targetFormat === 'json') await convertPdfToJson(file, statusEl);
-            else throw new Error('Formato de destino incompatível para arquivos PDF.');
-        } else if (['ppt', 'pptx'].includes(extension)) {
-            statusEl.innerText = `Apresentação "${file.name}" carregada (${(file.size / 1024).toFixed(1)} KB). Pronta para compartilhamento.`;
         } else {
-            throw new Error('Formato de arquivo não suportado.');
+            throw new Error('Formato não suportado ou sem suporte de conversão direto no navegador.');
         }
+        statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem]";
     } catch (error) {
         console.error(error);
-        statusEl.innerText = error.message || "Erro ao processar o arquivo.";
+        statusEl.innerText = "❌ " + (error.message || "Erro ao processar o arquivo.");
+        statusEl.className = "text-xs text-center text-red-400 mt-3 min-h-[1rem]";
     }
 }
 
-// Word (.docx) para PDF
+// ------------------------------------------
+// FUNÇÕES INDIVIDUAIS DE CONVERSÃO
+// ------------------------------------------
+
+// 1. DOCX para PDF
 function convertDocxToPdf(file, statusEl) {
     return new Promise((resolve, reject) => {
-        let reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = async function(event) {
             try {
-                let result = await mammoth.convertToHtml({ arrayBuffer: event.target.result });
-                let element = document.createElement('div');
-                element.innerHTML = `<div style="font-family: Arial; padding: 20px;">${result.value}</div>`;
+                const result = await mammoth.convertToHtml({ arrayBuffer: event.target.result });
+                const element = document.createElement('div');
+                element.innerHTML = `<div style="font-family: Arial, sans-serif; padding: 30px; line-height: 1.6; color: #111;">${result.value}</div>`;
 
-                let opt = {
-                    margin: 1,
+                const opt = {
+                    margin: 0.5,
                     filename: file.name.replace(/\.[^/.]+$/, "") + ".pdf",
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2 },
                     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
                 };
 
-                statusEl.innerText = "Gerando arquivo PDF...";
+                statusEl.innerText = "⏳ Gerando arquivo PDF...";
                 await html2pdf().from(element).set(opt).save();
-                statusEl.innerText = "Conversão para PDF concluída com sucesso!";
+                statusEl.innerText = "✅ Conversão para PDF concluída!";
                 resolve();
             } catch (err) { reject(err); }
         };
@@ -529,15 +584,15 @@ function convertDocxToPdf(file, statusEl) {
     });
 }
 
-// Word (.docx) para TXT
+// 2. DOCX para TXT
 function convertDocxToTxt(file, statusEl) {
     return new Promise((resolve, reject) => {
-        let reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = async function(event) {
             try {
-                let result = await mammoth.extractRawText({ arrayBuffer: event.target.result });
+                const result = await mammoth.extractRawText({ arrayBuffer: event.target.result });
                 downloadBlob(result.value, file.name.replace(/\.[^/.]+$/, "") + ".txt", 'text/plain;charset=utf-8');
-                statusEl.innerText = "Conversão para TXT concluída com sucesso!";
+                statusEl.innerText = "✅ Conversão para TXT concluída!";
                 resolve();
             } catch (err) { reject(err); }
         };
@@ -545,62 +600,62 @@ function convertDocxToTxt(file, statusEl) {
     });
 }
 
-// Excel (.xlsx, .xls) para CSV
+// 3. Excel para CSV
 function convertExcelToCsv(file, statusEl) {
-    let reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            let data = new Uint8Array(e.target.result);
-            let workbook = XLSX.read(data, { type: 'array' });
-            let firstSheetName = workbook.SheetNames[0];
-            let worksheet = workbook.Sheets[firstSheetName];
-            let csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
 
             downloadBlob(csvOutput, file.name.replace(/\.[^/.]+$/, "") + ".csv", 'text/csv;charset=utf-8;');
-            statusEl.innerText = "Conversão para CSV concluída com sucesso!";
-        } catch (err) { statusEl.innerText = "Erro ao processar planilha Excel."; }
+            statusEl.innerText = "✅ Conversão para CSV concluída!";
+        } catch (err) { statusEl.innerText = "❌ Erro ao processar planilha Excel."; }
     };
     reader.readAsArrayBuffer(file);
 }
 
-// Excel (.xlsx, .xls) para JSON
+// 4. Excel para JSON
 function convertExcelToJson(file, statusEl) {
-    let reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            let data = new Uint8Array(e.target.result);
-            let workbook = XLSX.read(data, { type: 'array' });
-            let firstSheetName = workbook.SheetNames[0];
-            let worksheet = workbook.Sheets[firstSheetName];
-            let jsonOutput = XLSX.utils.sheet_to_json(worksheet);
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonOutput = XLSX.utils.sheet_to_json(worksheet);
 
             downloadBlob(JSON.stringify(jsonOutput, null, 2), file.name.replace(/\.[^/.]+$/, "") + ".json", 'application/json;charset=utf-8;');
-            statusEl.innerText = "Conversão para JSON concluída com sucesso!";
-        } catch (err) { statusEl.innerText = "Erro ao converter planilha para JSON."; }
+            statusEl.innerText = "✅ Conversão para JSON concluída!";
+        } catch (err) { statusEl.innerText = "❌ Erro ao converter planilha para JSON."; }
     };
     reader.readAsArrayBuffer(file);
 }
 
-// PDF para Texto (.txt)
+// 5. PDF para TXT
 function convertPdfToText(file, statusEl) {
     return new Promise((resolve, reject) => {
-        let reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = async function(event) {
             try {
-                let typedarray = new Uint8Array(event.target.result);
+                const typedarray = new Uint8Array(event.target.result);
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                let pdf = await pdfjsLib.getDocument(typedarray).promise;
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
                 let fullText = "";
 
                 for (let i = 1; i <= pdf.numPages; i++) {
-                    let page = await pdf.getPage(i);
-                    let textContent = await page.getTextContent();
-                    let pageText = textContent.items.map(item => item.str).join(' ');
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
                     fullText += `--- Página ${i} ---\n${pageText}\n\n`;
                 }
 
                 downloadBlob(fullText, file.name.replace(/\.[^/.]+$/, "") + "_extraido.txt", 'text/plain;charset=utf-8');
-                statusEl.innerText = "Texto extraído do PDF com sucesso!";
+                statusEl.innerText = "✅ Texto extraído do PDF com sucesso!";
                 resolve();
             } catch (err) { reject(err); }
         };
@@ -608,26 +663,116 @@ function convertPdfToText(file, statusEl) {
     });
 }
 
-// PDF para JSON (Texto Estruturado)
+// 6. PDF para JSON
 function convertPdfToJson(file, statusEl) {
     return new Promise((resolve, reject) => {
-        let reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = async function(event) {
             try {
-                let typedarray = new Uint8Array(event.target.result);
+                const typedarray = new Uint8Array(event.target.result);
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                let pdf = await pdfjsLib.getDocument(typedarray).promise;
-                let pdfData = { fileName: file.name, totalPages: pdf.numPages, pages: [] };
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                const pdfData = { fileName: file.name, totalPages: pdf.numPages, pages: [] };
 
                 for (let i = 1; i <= pdf.numPages; i++) {
-                    let page = await pdf.getPage(i);
-                    let textContent = await page.getTextContent();
-                    let pageText = textContent.items.map(item => item.str).join(' ');
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
                     pdfData.pages.push({ pageNumber: i, content: pageText });
                 }
 
                 downloadBlob(JSON.stringify(pdfData, null, 2), file.name.replace(/\.[^/.]+$/, "") + ".json", 'application/json;charset=utf-8;');
-                statusEl.innerText = "Dados do PDF convertidos para JSON com sucesso!";
+                statusEl.innerText = "✅ PDF convertido para JSON com sucesso!";
+                resolve();
+            } catch (err) { reject(err); }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+}
+// 7. PDF para Word (.docx)
+function convertPdfToDocx(file, statusEl) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            try {
+                const typedarray = new Uint8Array(event.target.result);
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+
+                statusEl.innerText = "⏳ Extraindo páginas e reconstruindo parágrafos...";
+
+                const docParagraphs = [];
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+
+                    // Agrupa elementos de texto que estão na mesma linha
+                    let lastY = null;
+                    let pageLines = [];
+                    let currentLine = "";
+
+                    textContent.items.forEach(item => {
+                        if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+                            pageLines.push(currentLine);
+                            currentLine = "";
+                        }
+                        currentLine += item.str + " ";
+                        lastY = item.transform[5];
+                    });
+                    if (currentLine) pageLines.push(currentLine);
+
+                    // Adiciona cabeçalho de página se houver mais de 1 página
+                    if (pdf.numPages > 1) {
+                        docParagraphs.push(
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `--- Página ${i} ---`,
+                                        bold: true,
+                                        color: "888888",
+                                        size: 18
+                                    })
+                                ],
+                                spacing: { before: 200, after: 100 }
+                            })
+                        );
+                    }
+
+                    // Transforma cada linha/parágrafo do PDF em parágrafo do Word
+                    pageLines.forEach(lineText => {
+                        if (lineText.trim().length > 0) {
+                            docParagraphs.push(
+                                new docx.Paragraph({
+                                    children: [
+                                        new docx.TextRun({
+                                            text: lineText,
+                                            font: "Arial",
+                                            size: 22 // 11pt
+                                        })
+                                    ],
+                                    spacing: { after: 120 }
+                                })
+                            );
+                        }
+                    });
+                }
+
+                statusEl.innerText = "⏳ Gerando arquivo .docx...";
+
+                // Cria a estrutura interna do arquivo DOCX
+                const doc = new docx.Document({
+                    sections: [{
+                        properties: {},
+                        children: docParagraphs
+                    }]
+                });
+
+                // Empacota o arquivo e dispara o download
+                const blob = await docx.Packer.toBlob(doc);
+                downloadBlob(blob, file.name.replace(/\.[^/.]+$/, "") + ".docx", 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+                statusEl.innerText = "✅ Conversão para Word (.docx) concluída com sucesso!";
                 resolve();
             } catch (err) { reject(err); }
         };
@@ -635,10 +780,10 @@ function convertPdfToJson(file, statusEl) {
     });
 }
 
-// Função utilitária para download automático de arquivos
+// Utilitário global para download de arquivos
 function downloadBlob(content, filename, contentType) {
-    let blob = new Blob([content], { type: contentType });
-    let link = document.createElement('a');
+    const blob = new Blob([content], { type: contentType });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
     link.click();
@@ -713,5 +858,14 @@ async function removeBackground() {
         console.error(error);
         statusEl.innerText = "Erro ao remover o fundo da imagem. Tente outra imagem mais leve.";
         statusEl.className = "text-xs text-center text-red-400 mt-3 min-h-[1rem]";
+    }
+}
+
+// Atualiza o ano dinamicamente no Rodapé
+function updateFooterAndCounter() {
+    // Atualiza o ano dinamicamente no Rodapé
+    const yearEl = document.getElementById('footer-year');
+    if (yearEl) {
+        yearEl.innerText = new Date().getFullYear();
     }
 }
