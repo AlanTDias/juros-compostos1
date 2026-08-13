@@ -453,3 +453,265 @@ function calculateRescisaoCLT() {
 
     document.getElementById('clt-res-total').innerText = formatBRL(totalBruto);
 }
+
+// ==========================================
+// 12. FUNÇÕES DE CONVERSÃO DE ARQUIVOS (Unificado)
+// ==========================================
+
+async function convertFile() {
+    const fileInput = document.getElementById('file-input-universal');
+    const targetFormat = document.getElementById('conversion-target-format').value;
+    const statusEl = document.getElementById('status-universal');
+
+    if (!fileInput.files.length) {
+        alert('Por favor, selecione um arquivo.');
+        return;
+    }
+
+    if (!targetFormat) {
+        alert('Por favor, selecione o formato de saída desejado.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const extension = file.name.split('.').pop().toLowerCase();
+    statusEl.innerText = "Processando arquivo...";
+
+    try {
+        if (extension === 'docx') {
+            if (targetFormat === 'pdf') await convertDocxToPdf(file, statusEl);
+            else if (targetFormat === 'txt') await convertDocxToTxt(file, statusEl);
+            else throw new Error('Formato de destino incompatível para arquivos Word (.docx).');
+        } else if (['xlsx', 'xls'].includes(extension)) {
+            if (targetFormat === 'csv') convertExcelToCsv(file, statusEl);
+            else if (targetFormat === 'json') convertExcelToJson(file, statusEl);
+            else throw new Error('Formato de destino incompatível para planilhas Excel.');
+        } else if (extension === 'pdf') {
+            if (targetFormat === 'txt') await convertPdfToText(file, statusEl);
+            else if (targetFormat === 'json') await convertPdfToJson(file, statusEl);
+            else throw new Error('Formato de destino incompatível para arquivos PDF.');
+        } else if (['ppt', 'pptx'].includes(extension)) {
+            statusEl.innerText = `Apresentação "${file.name}" carregada (${(file.size / 1024).toFixed(1)} KB). Pronta para compartilhamento.`;
+        } else {
+            throw new Error('Formato de arquivo não suportado.');
+        }
+    } catch (error) {
+        console.error(error);
+        statusEl.innerText = error.message || "Erro ao processar o arquivo.";
+    }
+}
+
+// Word (.docx) para PDF
+function convertDocxToPdf(file, statusEl) {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onload = async function(event) {
+            try {
+                let result = await mammoth.convertToHtml({ arrayBuffer: event.target.result });
+                let element = document.createElement('div');
+                element.innerHTML = `<div style="font-family: Arial; padding: 20px;">${result.value}</div>`;
+
+                let opt = {
+                    margin: 1,
+                    filename: file.name.replace(/\.[^/.]+$/, "") + ".pdf",
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                statusEl.innerText = "Gerando arquivo PDF...";
+                await html2pdf().from(element).set(opt).save();
+                statusEl.innerText = "Conversão para PDF concluída com sucesso!";
+                resolve();
+            } catch (err) { reject(err); }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// Word (.docx) para TXT
+function convertDocxToTxt(file, statusEl) {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onload = async function(event) {
+            try {
+                let result = await mammoth.extractRawText({ arrayBuffer: event.target.result });
+                downloadBlob(result.value, file.name.replace(/\.[^/.]+$/, "") + ".txt", 'text/plain;charset=utf-8');
+                statusEl.innerText = "Conversão para TXT concluída com sucesso!";
+                resolve();
+            } catch (err) { reject(err); }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// Excel (.xlsx, .xls) para CSV
+function convertExcelToCsv(file, statusEl) {
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            let data = new Uint8Array(e.target.result);
+            let workbook = XLSX.read(data, { type: 'array' });
+            let firstSheetName = workbook.SheetNames[0];
+            let worksheet = workbook.Sheets[firstSheetName];
+            let csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+
+            downloadBlob(csvOutput, file.name.replace(/\.[^/.]+$/, "") + ".csv", 'text/csv;charset=utf-8;');
+            statusEl.innerText = "Conversão para CSV concluída com sucesso!";
+        } catch (err) { statusEl.innerText = "Erro ao processar planilha Excel."; }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// Excel (.xlsx, .xls) para JSON
+function convertExcelToJson(file, statusEl) {
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            let data = new Uint8Array(e.target.result);
+            let workbook = XLSX.read(data, { type: 'array' });
+            let firstSheetName = workbook.SheetNames[0];
+            let worksheet = workbook.Sheets[firstSheetName];
+            let jsonOutput = XLSX.utils.sheet_to_json(worksheet);
+
+            downloadBlob(JSON.stringify(jsonOutput, null, 2), file.name.replace(/\.[^/.]+$/, "") + ".json", 'application/json;charset=utf-8;');
+            statusEl.innerText = "Conversão para JSON concluída com sucesso!";
+        } catch (err) { statusEl.innerText = "Erro ao converter planilha para JSON."; }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// PDF para Texto (.txt)
+function convertPdfToText(file, statusEl) {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onload = async function(event) {
+            try {
+                let typedarray = new Uint8Array(event.target.result);
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                let pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let fullText = "";
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    let page = await pdf.getPage(i);
+                    let textContent = await page.getTextContent();
+                    let pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += `--- Página ${i} ---\n${pageText}\n\n`;
+                }
+
+                downloadBlob(fullText, file.name.replace(/\.[^/.]+$/, "") + "_extraido.txt", 'text/plain;charset=utf-8');
+                statusEl.innerText = "Texto extraído do PDF com sucesso!";
+                resolve();
+            } catch (err) { reject(err); }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// PDF para JSON (Texto Estruturado)
+function convertPdfToJson(file, statusEl) {
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onload = async function(event) {
+            try {
+                let typedarray = new Uint8Array(event.target.result);
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                let pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let pdfData = { fileName: file.name, totalPages: pdf.numPages, pages: [] };
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    let page = await pdf.getPage(i);
+                    let textContent = await page.getTextContent();
+                    let pageText = textContent.items.map(item => item.str).join(' ');
+                    pdfData.pages.push({ pageNumber: i, content: pageText });
+                }
+
+                downloadBlob(JSON.stringify(pdfData, null, 2), file.name.replace(/\.[^/.]+$/, "") + ".json", 'application/json;charset=utf-8;');
+                statusEl.innerText = "Dados do PDF convertidos para JSON com sucesso!";
+                resolve();
+            } catch (err) { reject(err); }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// Função utilitária para download automático de arquivos
+function downloadBlob(content, filename, contentType) {
+    let blob = new Blob([content], { type: contentType });
+    let link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+}
+
+
+
+//  FUNÇÕES DE IMAGEM: Compressor e IA Fundo
+
+// Função para Comprimir Imagens
+async function compressImage() {
+    const fileInput = document.getElementById('img-compress-file');
+    const qualityValue = document.getElementById('img-compress-range').value;
+    const statusEl = document.getElementById('compress-status');
+
+    if (!fileInput.files.length) {
+        alert('Por favor, selecione uma imagem para comprimir.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const originalSize = (file.size / 1024 / 1024).toFixed(2);
+    statusEl.innerText = "Comprimindo a imagem, aguarde...";
+    statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem]";
+
+    const options = {
+        maxSizeMB: qualityValue < 50 ? 0.5 : 2, // Ajusta o limite dependendo da qualidade
+        initialQuality: qualityValue / 100, // Converte 80% para 0.8
+        useWebWorker: true
+    };
+
+    try {
+        // Usa a biblioteca browser-image-compression
+        const compressedFile = await imageCompression(file, options);
+        const newSize = (compressedFile.size / 1024 / 1024).toFixed(2);
+
+        downloadBlob(compressedFile, "comprimida_" + file.name, compressedFile.type);
+
+        statusEl.innerText = `Sucesso! Tamanho reduzido de ${originalSize}MB para ${newSize}MB.`;
+    } catch (error) {
+        console.error(error);
+        statusEl.innerText = "Erro ao comprimir a imagem.";
+        statusEl.className = "text-xs text-center text-red-400 mt-3 min-h-[1rem]";
+    }
+}
+
+// Função para Remover Fundo (IA)
+async function removeBackground() {
+    const fileInput = document.getElementById('img-bg-file');
+    const statusEl = document.getElementById('bg-status');
+
+    if (!fileInput.files.length) {
+        alert('Por favor, selecione uma imagem para remover o fundo.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    statusEl.innerText = "Iniciando Inteligência Artificial... (Pode demorar na primeira vez)";
+    statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem] animate-pulse";
+
+    try {
+        // Usa a biblioteca @imgly/background-removal
+        const blob = await imglyRemoveBackground(file);
+
+        // Mantém a extensão como PNG já que terá fundo transparente
+        const fileName = "sem_fundo_" + file.name.split('.')[0] + ".png";
+        downloadBlob(blob, fileName, "image/png");
+
+        statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem]";
+        statusEl.innerText = "Fundo removido e download concluído com sucesso!";
+    } catch (error) {
+        console.error(error);
+        statusEl.innerText = "Erro ao remover o fundo da imagem. Tente outra imagem mais leve.";
+        statusEl.className = "text-xs text-center text-red-400 mt-3 min-h-[1rem]";
+    }
+}

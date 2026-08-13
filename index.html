@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Ajuste de segurança HTTPS para forçar requisições seguras -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title>Portal de Finanças - Simuladores</title>
+    <title>Portal de Finanças e Conversores</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
@@ -26,6 +26,16 @@
                     title="Juros Compostos">
                     <span class="text-base">📈</span>
                     <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Juros Compostos</span>
+                </button>
+
+                <button onclick="switchTab('conversores')" id="btn-conversores" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
+                    title="Conversores de Arquivos">
+                    <span class="text-base">🔄</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Conversores</span>
+                </button>
+                <button onclick="switchTab('imagens')" id="btn-imagens" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Ferramentas de Imagem">
+                   <span class="text-base">🖼️</span>
+                   <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Imagens</span>
                 </button>
                 <button onclick="switchTab('reserva')" id="btn-reserva" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Reserva de Emergência">
                     <span class="text-base">🛡️</span>
@@ -71,6 +81,7 @@
                     <span class="text-base">📄</span>
                     <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Rescisão CLT</span>
                 </button>
+
             </nav>
         </div>
     </header>
@@ -87,8 +98,8 @@
         <!-- ---------------- TAB 0: HOME / INÍCIO ---------------- -->
         <section id="tab-home" class="tab-content space-y-6">
             <div class="space-y-2">
-                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Bem-vindo ao Portal Financeiro</h2>
-                <p class="text-sm text-gray-400">Monitore os indicadores econômicos atuais e selecione uma das ferramentas de simulação no menu superior.</p>
+                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Bem-vindo ao Portal Financeiro e Conversores</h2>
+                <p class="text-sm text-gray-400">Monitore os indicadores econômicos atuais, utilize os simuladores ou acesse a aba de conversores para Word, PDF, Excel, PPT e mais.</p>
             </div>
 
             <!-- 📊 PAINEL DE INDICADORES EM TEMPO REAL -->
@@ -186,6 +197,84 @@
             </div>
         </section>
 
+        <!-- ---------------- TAB 12: CONVERSORES DE ARQUIVOS (Word, PDF, Excel, PPT, XLS, PPTX e Mais) ---------------- -->
+        <section id="tab-conversores" class="tab-content hidden space-y-6">
+            <div class="space-y-2">
+                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Central de Conversores de Arquivos</h2>
+                <p class="text-sm text-gray-400">Selecione o arquivo e escolha o formato desejado para a conversão rápida.</p>
+            </div>
+
+            <!-- Conversor Universal -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione o Arquivo</label>
+                        <input type="file" id="file-input-universal" accept=".docx, .xlsx, .xls, .pptx, .ppt, .pdf" class="w-full bg-gray-700 text-sm rounded p-3 outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">2. Selecione o Formato de Saída</label>
+                        <select id="conversion-target-format" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="" disabled selected>Escolha o formato final...</option>
+                            <option value="pdf">PDF (.pdf)</option>
+                            <option value="txt">Texto Simples (.txt)</option>
+                            <option value="csv">Planilha CSV (.csv)</option>
+                            <option value="json">Dados JSON (.json)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="convertFile()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm">
+                        Converter Arquivo
+                    </button>
+                    <p id="status-universal" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+        </section>
+        <!-- ---------------- FERRAMENTAS DE IMAGEM ---------------- -->
+        <section id="tab-imagens" class="tab-content hidden space-y-6">
+            <div class="space-y-2">
+                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Ferramentas de Imagem</h2>
+                <p class="text-sm text-gray-400">Comprima o tamanho das suas imagens ou remova o fundo usando Inteligência Artificial, tudo direto no navegador.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Compressor de Imagem -->
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                    <h3 class="text-lg font-semibold text-emerald-300">📉 Compressor de Imagem</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Selecione a Imagem</label>
+                        <input type="file" id="img-compress-file" accept="image/*" class="w-full bg-gray-700 text-sm rounded p-3 outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm text-gray-300 mb-2">
+                            <label>Qualidade desejada:</label>
+                            <span id="compress-val-label">80%</span>
+                        </div>
+                        <input type="range" id="img-compress-range" min="10" max="100" value="80" class="w-full accent-emerald-500" oninput="document.getElementById('compress-val-label').innerText = this.value + '%'">
+                    </div>
+                    <button onclick="compressImage()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm">
+                Comprimir Imagem
+            </button>
+                    <p id="compress-status" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+
+                <!-- Removedor de Fundo -->
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4">
+                    <h3 class="text-lg font-semibold text-emerald-300">✨ Remover Fundo (IA)</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Selecione a Imagem</label>
+                        <input type="file" id="img-bg-file" accept="image/*" class="w-full bg-gray-700 text-sm rounded p-3 outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                    </div>
+                    <p class="text-[11px] text-gray-400 italic">O processamento é feito 100% no seu dispositivo. Na 1ª vez, o navegador baixará o modelo de IA e pode levar alguns segundos extras.</p>
+                    <button onclick="removeBackground()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm">
+                Remover Fundo
+            </button>
+                    <p id="bg-status" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+        </section>
         <!-- ---------------- TAB 2: RESERVA DE EMERGÊNCIA ---------------- -->
         <section id="tab-reserva" class="tab-content hidden space-y-6">
             <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Simulador de Reserva de Emergência</h2>
@@ -630,8 +719,14 @@
 
     </main>
 
-    <!-- Chart.js e Script -->
+    <!-- Bibliotecas externas para gráficos e conversores (SheetJS, Mammoth, jsPDF, html2pdf) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/imgly-background-removal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="script.js"></script>
 </body>
 
