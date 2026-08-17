@@ -508,8 +508,6 @@ function updateTargetFormats() {
         selectFormat.appendChild(optionEl);
     });
 }
-
-// Executa a conversão baseada nas escolhas do usuário
 // Executa a conversão baseada nas escolhas do usuário
 async function convertFile() {
     const fileInput = document.getElementById('file-input-universal');
@@ -895,7 +893,134 @@ function downloadBlob(content, filename, contentType) {
     link.download = filename;
     link.click();
 }
+// Exibe o nome do arquivo selecionado no card do compressor
+function handleCompressFileSelect() {
+    const input = document.getElementById('file-input-compress');
+    const dropText = document.getElementById('drop-zone-compress-text');
 
+    if (input.files.length > 0) {
+        const file = input.files[0];
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        dropText.innerHTML = `<span class="font-semibold text-emerald-400">${file.name}</span> (${sizeMB} MB)`;
+    }
+}
+
+// Suporte a Drag and Drop para o Compressor
+const dropZoneCompress = document.getElementById('drop-zone-compress');
+
+if (dropZoneCompress) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZoneCompress.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZoneCompress.addEventListener(eventName, () => {
+            dropZoneCompress.classList.add('border-emerald-500', 'bg-gray-700');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZoneCompress.addEventListener(eventName, () => {
+            dropZoneCompress.classList.remove('border-emerald-500', 'bg-gray-700');
+        }, false);
+    });
+
+    dropZoneCompress.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        const input = document.getElementById('file-input-compress');
+
+        if (files.length > 0 && files[0].type === "application/pdf") {
+            input.files = files;
+            handleCompressFileSelect();
+        } else {
+            alert('Por favor, envie apenas arquivos no formato PDF.');
+        }
+    });
+}
+
+// Função principal para comprimir o PDF
+async function compressPDF() {
+    const input = document.getElementById('file-input-compress');
+    const quality = parseFloat(document.getElementById('compression-level').value);
+    const statusEl = document.getElementById('status-compress');
+
+    if (!input.files.length) {
+        alert('Por favor, selecione um arquivo PDF primeiro.');
+        return;
+    }
+
+    const file = input.files[0];
+    const initialSize = file.size;
+
+    statusEl.innerText = "⏳ Comprimindo PDF... Isso pode levar alguns segundos.";
+    statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem] animate-pulse";
+
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const newPdfDoc = await PDFLib.PDFDocument.create();
+
+        for (let i = 1; i <= pdfDoc.numPages; i++) {
+            statusEl.innerText = `⏳ Processando página ${i} de ${pdfDoc.numPages}...`;
+
+            const page = await pdfDoc.getPage(i);
+            const viewport = page.getViewport({ scale: 1.5 }); // Escala balanceada de resolução
+
+            // Renderiza a página em um canvas
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+            // Converte o canvas para imagem JPEG com a qualidade escolhida
+            const imgDataUrl = canvas.toDataURL('image/jpeg', quality);
+
+            // Incorpora a imagem no novo PDF
+            const jpegImage = await newPdfDoc.embedJpg(imgDataUrl);
+            const newPage = newPdfDoc.addPage([viewport.width, viewport.height]);
+            newPage.drawImage(jpegImage, {
+                x: 0,
+                y: 0,
+                width: viewport.width,
+                height: viewport.height,
+            });
+        }
+
+        // Salva o novo arquivo PDF comprimido
+        const compressedBytes = await newPdfDoc.save();
+        const finalBlob = new Blob([compressedBytes], { type: 'application/pdf' });
+        const finalSize = finalBlob.size;
+
+        // Calcula redução de tamanho
+        const savedPercent = (((initialSize - finalSize) / initialSize) * 100).toFixed(1);
+        const originalMB = (initialSize / (1024 * 1024)).toFixed(2);
+        const finalMB = (finalSize / (1024 * 1024)).toFixed(2);
+
+        // Download do arquivo
+        const downloadUrl = URL.createObjectURL(finalBlob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = file.name.replace(/\.pdf$/i, '_comprimido.pdf');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+
+        statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem]";
+        statusEl.innerText = `✅ Concluído! De ${originalMB}MB para ${finalMB}MB (${savedPercent}% de redução).`;
+
+    } catch (error) {
+        console.error(error);
+        statusEl.className = "text-xs text-center text-red-400 mt-3 min-h-[1rem]";
+        statusEl.innerText = "❌ Ocorreu um erro ao comprimir o PDF.";
+    }
+}
 
 
 //  FUNÇÕES DE IMAGEM: Compressor e IA Fundo
