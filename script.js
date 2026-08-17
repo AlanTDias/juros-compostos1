@@ -64,10 +64,11 @@ async function fetchMarketIndicators() {
     const dolarEl = document.getElementById('ind-dolar');
     const poupancaEl = document.getElementById('ind-poupanca');
 
+    // valores padrão (usados só se a busca em tempo real falhar)
     selicEl.innerText = "14.00% a.a.";
-    cdiEl.innerText = "14.71% a.a.";
-    ipcaEl.innerText = "4.55% a.a.";
-    poupancaEl.innerText = "6.17% a.a.";
+    cdiEl.innerText = "13.90% a.a.";
+    ipcaEl.innerText = "4.44% a.a.";
+    poupancaEl.innerText = "8.34% a.a.";
     dolarEl.innerText = "R$ 5,50";
 
     try {
@@ -81,10 +82,55 @@ async function fetchMarketIndicators() {
         console.warn("Aviso: Não foi possível atualizar o dólar em tempo real, mantendo padrão.", error);
     }
 
+    //  Selic — série SGS 432 (Meta Selic definida pelo Copom)
+    try {
+        let resSelic = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json');
+        let dataSelic = await resSelic.json();
+        if (dataSelic && dataSelic[0] && dataSelic[0].valor) {
+            selicEl.innerText = `${parseFloat(dataSelic[0].valor).toFixed(2)}% a.a.`;
+        }
+    } catch (error) {
+        console.warn("Aviso: Não foi possível atualizar a Selic em tempo real, mantendo padrão.", error);
+    }
+
+    //  CDI — série SGS 4389 (CDI anualizada base 252)
+    try {
+        let resCdi = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json');
+        let dataCdi = await resCdi.json();
+        if (dataCdi && dataCdi[0] && dataCdi[0].valor) {
+            cdiEl.innerText = `${parseFloat(dataCdi[0].valor).toFixed(2)}% a.a.`;
+        }
+    } catch (error) {
+        console.warn("Aviso: Não foi possível atualizar o CDI em tempo real, mantendo padrão.", error);
+    }
+
+    //  IPCA — série SGS 13522 (acumulado 12 meses)
+    try {
+        let resIpca = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.13522/dados/ultimos/1?formato=json');
+        let dataIpca = await resIpca.json();
+        if (dataIpca && dataIpca[0] && dataIpca[0].valor) {
+            ipcaEl.innerText = `${parseFloat(dataIpca[0].valor).toFixed(2)}% a.a.`;
+        }
+    } catch (error) {
+        console.warn("Aviso: Não foi possível atualizar o IPCA em tempo real, mantendo padrão.", error);
+    }
+
+    //  Poupança — série SGS 195 (rentabilidade mensal, já com TR embutida)
+    try {
+        let resPoupanca = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.195/dados/ultimos/1?formato=json');
+        let dataPoupanca = await resPoupanca.json();
+        if (dataPoupanca && dataPoupanca[0] && dataPoupanca[0].valor) {
+            let mensal = parseFloat(dataPoupanca[0].valor) / 100;
+            let anual = (Math.pow(1 + mensal, 12) - 1) * 100;
+            poupancaEl.innerText = `${anual.toFixed(2)}% a.a.`;
+        }
+    } catch (error) {
+        console.warn("Aviso: Não foi possível atualizar a poupança em tempo real, mantendo padrão.", error);
+    }
+
     let hoje = new Date();
     dateSpan.innerText = `Atualizado em: ${hoje.toLocaleDateString('pt-BR')} às ${hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
-
 // 1. Juros Compostos
 function calculateJC() {
     let p = getVal('jc-initial');

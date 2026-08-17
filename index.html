@@ -135,8 +135,108 @@
                     </div>
                 </div>
             </section>
-        </section>
+            <!-- 📘 GUIA EXPLICATIVO DOS INDICADORES ECONÔMICOS -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
+                <div class="border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>💡</span> O que significa cada indicador?
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Entenda como essas taxas impactam seus rendimentos, financiamentos e o custo de vida no dia a dia.
+                    </p>
+                </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs text-gray-300">
+
+                    <!-- Taxa Selic -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Taxa Selic</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Taxa Básica</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                É a taxa básica de juros da economia brasileira, definida pelo Banco Central (COPOM). Ela serve como referência para todas as outras taxas de juros cobradas em empréstimos, financiamentos e rendimentos no país.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Impacto:</strong> Selic alta desacelera a inflação, mas encarece o crédito e valoriza investimentos em Renda Fixa.
+                        </div>
+                    </div>
+
+                    <!-- CDI -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">CDI (a.a.)</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Benchmark</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Sigla para <em class="text-gray-300">Certificado de Depósito Interbancário</em>. É a taxa cobrada nos empréstimos de curtíssimo prazo realizados entre os próprios bancos. Na prática, anda quase colada na Taxa Selic (geralmente
+                                0,10% abaixo).
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Impacto:</strong> É a principal referência de rentabilidade para Caixinhas, CDBs, LCIs e LCAs.
+                        </div>
+                    </div>
+
+                    <!-- IPCA -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">IPCA (12m)</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 rounded-full font-medium">Inflação</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                O <em class="text-gray-300">Índice Nacional de Preços ao Consumidor Amplo</em> é o indicador oficial da inflação no Brasil. Mede a variação acumulada dos preços de um conjunto de produtos e serviços consumidos pelas famílias.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Impacto:</strong> Para ter um ganho real, seus investimentos precisam render acima da taxa acumulada do IPCA.
+                        </div>
+                    </div>
+
+                    <!-- Dólar Comercial -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Dólar Comercial</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Câmbio</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Cotação da moeda americana utilizada em grandes operações do comércio exterior, importações, exportações e transferências empresariais de grande porte.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Impacto:</strong> Influencia diretamente o preço de produtos importados, combustíveis, pão (trigo) e eletrônicos no mercado nacional.
+                        </div>
+                    </div>
+
+                    <!-- Poupança -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between md:col-span-2 lg:col-span-2">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Poupança (Regra Nova)</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-gray-500/20 text-gray-300 rounded-full font-medium">Rendimento Fixo</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Rendimento dos depósitos feitos após maio de 2012. Sua regra de rendimento muda de acordo com a Taxa Selic:
+                            </p>
+                            <ul class="mt-2 space-y-1 list-disc list-inside text-gray-400">
+                                <li><strong class="text-gray-200">Se a Selic for maior que 8,5% a.a.:</strong> Rende 0,5% ao mês + Taxa Referencial (TR).</li>
+                                <li><strong class="text-gray-200">Se a Selic for igual ou menor que 8,5% a.a.:</strong> Rende 70% da Selic + TR.</li>
+                            </ul>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Impacto:</strong> É isenta de Imposto de Renda, porém costuma render consideravelmente menos que o Tesouro Selic e CDBs 100% CDI.
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </section>
         <!-- ---------------- TAB 1: JUROS COMPOSTOS ---------------- -->
         <section id="tab-juros-compostos" class="tab-content hidden space-y-6">
             <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Juros Compostos</h2>
