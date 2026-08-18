@@ -34,6 +34,10 @@
                     <span class="text-base">🔄</span>
                     <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Conversores</span>
                 </button>
+                <button onclick="switchTab('documentos')" id="btn-documentos" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Gerador de Documentos">
+                    <span class="text-base">📄</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Gerador Documentos</span>
+                </button>
                 <button onclick="switchTab('imagens')" id="btn-imagens" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Ferramentas de Imagem">
                    <span class="text-base">🖼️</span>
                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Imagens</span>
@@ -64,10 +68,6 @@
                     title="Alugar vs. Comprar">
                     <span class="text-base">⚖️</span>
                     <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Alugar vs Comp.</span>
-                </button>
-                <button onclick="switchTab('inflacao')" id="btn-inflacao" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Calculadora de Inflação">
-                    <span class="text-base">📉</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Inflação</span>
                 </button>
                 <button onclick="switchTab('comparador')" id="btn-comparador" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="À Vista vs. Parcelado">
                     <span class="text-base">💸</span>
@@ -1212,87 +1212,329 @@
             </section>
         </section>
 
-        <!-- ---------------- TAB 8: CALCULADORA DE INFLAÇÃO ---------------- -->
-        <section id="tab-inflacao" class="tab-content hidden space-y-6">
-            <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Inflação (Poder de Compra)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium">Valor Atual (R$)</label>
-                        <input type="text" id="inf-valor" value="1.000" class="input-moeda w-full bg-gray-700 rounded p-2 mt-1 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">Inflação Anual Estimada (%)</label>
-                        <input type="number" step="0.1" id="inf-taxa" value="4.5" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">Tempo (Anos)</label>
-                        <input type="number" id="inf-anos" value="10" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
-                    </div>
-                    <button onclick="calculateInflacao()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Calcular Poder de Compra</button>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center items-center text-center space-y-3">
-                    <span class="text-gray-400">Poder de compra equivalente no futuro:</span>
-                    <span id="inf-resultado" class="text-2xl md:text-3xl font-extrabold text-emerald-400">R$ 0,00</span>
+        <!-- ---------------- TAB: GERADOR DE DOCUMENTOS ---------------- -->
+        <section id="tab-documentos" class="tab-content hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Gerador de Documentos Profissionais</h2>
+
+                <!-- Seletor de Tipo de Documento -->
+                <div class="flex bg-gray-800 p-1 rounded-lg border border-gray-700">
+                    <button onclick="switchDocType('curriculo')" id="doc-type-curriculo" class="doc-type-btn flex-1 md:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 bg-emerald-500 text-gray-950 shadow">
+                👤 Currículo
+            </button>
+                    <button onclick="switchDocType('contrato')" id="doc-type-contrato" class="doc-type-btn flex-1 md:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 text-gray-400 hover:text-white">
+                📜 Contrato
+            </button>
+                    <button onclick="switchDocType('orcamento')" id="doc-type-orcamento" class="doc-type-btn flex-1 md:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 text-gray-400 hover:text-white">
+                📄 Orçamento
+            </button>
                 </div>
             </div>
-            <!-- 📉 COMO FUNCIONA A CALCULADORA DE INFLAÇÃO -->
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Painel de Formulários Dinâmicos -->
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+
+                    <!-- FORMULÁRIO 1: CURRÍCULO -->
+                    <div id="form-doc-curriculo" class="doc-form space-y-4">
+                        <div class="space-y-3 border-b border-gray-700 pb-4">
+                            <h4 class="text-sm font-semibold text-emerald-400">Dados Pessoais</h4>
+                            <div>
+                                <label class="block text-xs font-medium">Nome Completo</label>
+                                <input type="text" id="cur-nome" value="Maria Silva" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium">Cargo / Título Profissional</label>
+                                    <input type="text" id="cur-cargo" value="Especialista em Recursos Humanos" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium">E-mail / Telefone</label>
+                                    <input type="text" id="cur-contato" value="maria.rh@email.com | (11) 99999-9999" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium">Resumo Profissional</label>
+                                <textarea id="cur-resumo" rows="3" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">Profissional de Recursos Humanos com mais de 6 anos de experiência em Recrutamento & Seleção, T&D e Gestão de Pessoas. Focada no alinhamento estratégico do capital humano aos objetivos do negócio e na melhoria do clima organizacional.</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium">Experiência Profissional</label>
+                                <textarea id="cur-experiencia" rows="4" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">• Especialista de RH - Corporação Alfa (2022 - Atual)
+Liderança de processos seletivos ponta a ponta, programas de integração (onboarding) e implementação de pesquisas de clima.
+
+• Analista de RH Pleno - Soluções Pessoas (2019 - 2022)
+Gestão do plano de cargos e salários, avaliação de desempenho e mediação de conflitos.</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium">Educação e Habilidades</label>
+                                <textarea id="cur-educacao" rows="3" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">• Bacharel em Psicologia - Universidade XYZ (2014 - 2018)
+• Pós-graduação em Gestão Estratégica de Pessoas (2020 - 2021)
+• Habilidades: R&S, Avaliação de Desempenho, Comunicação Assertiva, Gupy, People Analytics, Legislação Trabalhista</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FORMULÁRIO 2: CONTRATO -->
+                    <div id="form-doc-contrato" class="doc-form hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 border-b border-gray-700 pb-4">
+                            <div>
+                                <label class="block text-xs font-medium">Contratante (Cliente)</label>
+                                <input type="text" id="con-contratante" value="Empresa ABC Ltda" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium">Contratado (Prestador)</label>
+                                <input type="text" id="con-contratado" value="João Serviços Web MEI" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium">Objeto do Contrato (Descrição do Serviço)</label>
+                                <textarea id="con-objeto" rows="3" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">O CONTRATADO compromete-se a realizar a prestação de serviços de desenvolvimento de website institucional, incluindo design responsivo e otimização para motores de busca (SEO).</textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium">Valor Total (R$)</label>
+                                    <input type="text" id="con-valor" value="3.500,00" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium">Prazo de Entrega</label>
+                                    <input type="text" id="con-prazo" value="30 dias úteis" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium">Foro / Cidade</label>
+                                <input type="text" id="con-foro" value="São Paulo - SP" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FORMULÁRIO 3: ORÇAMENTO -->
+                    <div id="form-doc-orcamento" class="doc-form hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-700 pb-4">
+                            <div>
+                                <label class="block text-sm font-medium">Nome do Emissor / Empresa</label>
+                                <input type="text" id="orc-emissor" value="Minha Empresa Serviços" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium">Nome do Cliente</label>
+                                <input type="text" id="orc-cliente" value="João Silva" oninput="updateDocumentPreview()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-medium">Itens do Orçamento</label>
+                                <button onclick="addOrcamentoItem()" class="text-xs bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 px-2.5 py-1 rounded-md font-semibold transition">
+                            + Adicionar Item
+                        </button>
+                            </div>
+
+                            <div id="orc-itens-container" class="space-y-3">
+                                <div class="orc-item flex items-center gap-2 bg-gray-700/50 p-2 rounded border border-gray-700">
+                                    <input type="text" placeholder="Descrição do serviço/produto" value="Desenvolvimento Web" oninput="updateDocumentPreview()" class="orc-desc w-full bg-gray-700 rounded p-1.5 text-sm outline-none">
+                                    <input type="number" placeholder="Qtd" value="1" min="1" oninput="updateDocumentPreview()" class="orc-qtd w-20 bg-gray-700 rounded p-1.5 text-sm outline-none text-center">
+                                    <input type="text" placeholder="Valor (R$)" value="1.500,00" oninput="updateDocumentPreview()" class="orc-valor w-28 bg-gray-700 rounded p-1.5 text-sm outline-none text-right">
+                                    <button onclick="removeOrcamentoItem(this)" class="text-red-400 hover:text-red-300 p-1 font-bold text-sm">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botão de Impressão -->
+                    <div class="pt-2 flex gap-3">
+                        <button onclick="printDocument()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded transition flex items-center justify-center gap-2">
+                    <span>🖨️</span> Imprimir / Exportar para PDF
+                </button>
+                    </div>
+                </div>
+
+                <!-- Painel da Prévia (Fundo Claro para Impressão) -->
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-emerald-300 border-b border-gray-700 pb-2 mb-4">
+                            Prévia do Documento
+                        </h3>
+
+                        <!-- Área Impressa Genérica -->
+                        <div id="doc-printable-area" class="bg-white text-gray-900 p-6 rounded-lg shadow-inner space-y-6 font-sans">
+
+                            <!-- PREVIA 1: CURRÍCULO -->
+                            <div id="preview-doc-curriculo" class="doc-preview space-y-4 text-xs">
+                                <div class="border-b-2 border-gray-800 pb-3">
+                                    <h1 id="preview-cur-nome" class="text-2xl font-bold text-gray-900 uppercase">Maria Silva</h1>
+                                    <p id="preview-cur-cargo" class="text-emerald-700 font-semibold text-sm">Especialista em Recursos Humanos</p>
+                                    <p id="preview-cur-contato" class="text-gray-600 mt-1">maria.rh@email.com | (11) 99999-9999</p>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <h2 class="font-bold text-gray-800 uppercase border-b border-gray-300 pb-0.5">Resumo Profissional</h2>
+                                    <p id="preview-cur-resumo" class="text-gray-700 whitespace-pre-line leading-relaxed">Profissional de Recursos Humanos com mais de 6 anos de experiência em Recrutamento & Seleção, T&D e Gestão de Pessoas. Focada no alinhamento estratégico do capital humano aos objetivos do negócio e na melhoria do clima
+                                        organizacional.
+                                    </p>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <h2 class="font-bold text-gray-800 uppercase border-b border-gray-300 pb-0.5">Experiência Profissional</h2>
+                                    <p id="preview-cur-experiencia" class="text-gray-700 whitespace-pre-line leading-relaxed">• Especialista de RH - Corporação Alfa (2022 - Atual) Liderança de processos seletivos ponta a ponta, programas de integração (onboarding) e implementação de pesquisas de clima. • Analista de RH Pleno - Soluções Pessoas
+                                        (2019 - 2022) Gestão do plano de cargos e salários, avaliação de desempenho e mediação de conflitos.</p>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <h2 class="font-bold text-gray-800 uppercase border-b border-gray-300 pb-0.5">Educação e Habilidades</h2>
+                                    <p id="preview-cur-educacao" class="text-gray-700 whitespace-pre-line leading-relaxed">• Bacharel em Psicologia - Universidade XYZ (2014 - 2018) • Pós-graduação em Gestão Estratégica de Pessoas (2020 - 2021) • Habilidades: R&S, Avaliação de Desempenho, Comunicação Assertiva, Gupy, People Analytics, Legislação
+                                        Trabalhista
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- PREVIA 2: CONTRATO -->
+                            <div id="preview-doc-contrato" class="doc-preview hidden space-y-4 text-xs text-gray-800 text-justify leading-relaxed">
+                                <h1 class="text-base font-bold text-center text-gray-900 uppercase border-b border-gray-300 pb-2">
+                                    Contrato de Prestação de Serviços
+                                </h1>
+
+                                <p>
+                                    Pelo presente instrumento particular, de um lado <strong id="preview-con-contratante">Empresa ABC Ltda</strong> (denominado CONTRATANTE) e de outro lado <strong id="preview-con-contratado">João Serviços Web MEI</strong>                                    (denominado CONTRATADO), ajustam entre si o seguinte:
+                                </p>
+
+                                <div>
+                                    <strong class="block text-gray-900">CLÁUSULA PRIMEIRA - DO OBJETO</strong>
+                                    <p id="preview-con-objeto" class="mt-0.5 text-gray-700 whitespace-pre-line"></p>
+                                </div>
+
+                                <div>
+                                    <strong class="block text-gray-900">CLÁUSULA SEGUNDA - DO VALOR E PRAZO</strong>
+                                    <p class="mt-0.5 text-gray-700">
+                                        Pela prestação dos serviços acordados, o CONTRATANTE pagará ao CONTRATADO o valor total de <strong class="text-gray-900">R$ <span id="preview-con-valor">0,00</span></strong>. O prazo estimado para conclusão dos
+                                        serviços é de <strong class="text-gray-900" id="preview-con-prazo">30 dias</strong>.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <strong class="block text-gray-900">CLÁUSULA TERCEIRA - DO FORO</strong>
+                                    <p class="mt-0.5 text-gray-700">
+                                        Para dirimir quaisquer controvérsias oriundas deste contrato, as partes elegem o foro da comarca de <strong id="preview-con-foro" class="text-gray-900">São Paulo - SP</strong>.
+                                    </p>
+                                </div>
+
+                                <div class="pt-8 grid grid-cols-2 gap-8 text-center text-xs">
+                                    <div class="border-t border-gray-400 pt-1">
+                                        <p class="font-semibold text-gray-900">CONTRATANTE</p>
+                                    </div>
+                                    <div class="border-t border-gray-400 pt-1">
+                                        <p class="font-semibold text-gray-900">CONTRATADO</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PREVIA 3: ORÇAMENTO -->
+                            <div id="preview-doc-orcamento" class="doc-preview hidden space-y-6">
+                                <div class="flex justify-between items-start border-b border-gray-200 pb-4">
+                                    <div>
+                                        <h1 id="preview-orc-emissor" class="text-xl font-bold text-gray-800">Minha Empresa Serviços</h1>
+                                        <p class="text-xs text-gray-500">Documento de Orçamento Comercial</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded">ORÇAMENTO</span>
+                                        <p id="preview-orc-data" class="text-xs text-gray-500 mt-1">Data: --/--/----</p>
+                                    </div>
+                                </div>
+
+                                <div class="text-xs text-gray-600 bg-gray-50 p-3 rounded border border-gray-100">
+                                    <strong class="text-gray-800 block text-sm">Cliente:</strong>
+                                    <span id="preview-orc-cliente" class="text-gray-700 font-medium text-sm">João Silva</span>
+                                </div>
+
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="border-b-2 border-gray-300 text-gray-600">
+                                            <th class="py-2">Item / Descrição</th>
+                                            <th class="py-2 text-center w-12">Qtd</th>
+                                            <th class="py-2 text-right w-24">Unitário</th>
+                                            <th class="py-2 text-right w-24">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="preview-orc-itens-body" class="divide-y divide-gray-200"></tbody>
+                                </table>
+
+                                <div class="border-t-2 border-gray-300 pt-3 flex justify-between items-center">
+                                    <span class="text-xs text-gray-500">Validade deste orçamento: 15 dias</span>
+                                    <div class="text-right">
+                                        <span class="text-xs text-gray-600 uppercase block">Total Geral</span>
+                                        <span id="preview-orc-total" class="text-xl font-extrabold text-emerald-600">R$ 0,00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <p class="text-[10px] text-gray-500 text-center mt-4">
+                        * Clique em "Imprimir / Exportar para PDF" para salvar o documento formatado.
+                    </p>
+                </div>
+            </div>
+            <!-- 📄 COMO FUNCIONA O GERADOR DE DOCUMENTOS -->
             <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
                 <div class="border-b border-gray-700 pb-3 mb-4">
                     <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-                        <span>📉</span> Como Funciona a Calculadora de Inflação (Poder de Compra)?
+                        <span>📄</span> Como Funciona o Gerador de Documentos?
                     </h3>
                     <p class="text-xs text-gray-400 mt-1">
-                        Compreenda como a taxa de inflação reduz o poder de compra e o valor real do seu dinheiro com o passar do tempo.
+                        Crie, personalize e exporte documentos profissionais em tempo real sem complicações de formatação.
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
-                    <!-- Card 1: Perda do Poder de Compra -->
+                    <!-- Card 1: Edição Dinâmica -->
                     <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Poder de Compra</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-red-500/20 text-red-400 rounded-full font-medium">Corrosão da Moeda</span>
+                                <span class="font-bold text-white text-sm">Edição Dinâmica</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Tempo Real</span>
                             </div>
                             <p class="text-gray-400 leading-relaxed">
-                                A inflação representa o aumento generalizado dos preços de bens e serviços. A quantia de R$ 1.000 hoje não conseguirá adquirir a mesma cesta de produtos daqui a alguns anos.
+                                Preencha os campos do formulário no painel esquerdo. As alterações são refletidas <strong class="text-gray-200">instantaneamente</strong> na prévia do documento.
                             </p>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
-                            📌 <strong class="text-gray-200">Efeito Prático:</strong> Com inflação média constante, o valor nominal permanece o mesmo, mas a capacidade de compra cai ano a ano.
+                            📌 <strong class="text-gray-200">Agilidade:</strong> Visualize a formatação final do seu documento enquanto digita.
                         </div>
                     </div>
 
-                    <!-- Card 2: Valor Equivalente no Futuro -->
+                    <!-- Card 2: Múltiplos Modelos -->
                     <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Cálculo de Equivalência</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 rounded-full font-medium">Correção Monetária</span>
+                                <span class="font-bold text-white text-sm">Múltiplos Modelos</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">3 em 1</span>
                             </div>
                             <p class="text-gray-400 leading-relaxed">
-                                O simulador projeta quanto você precisará desembolsar no futuro para obter exatamente o mesmo padrão de consumo que o valor atual proporciona hoje.
+                                Alterne facilmente entre <strong class="text-gray-200">Currículos</strong>, <strong class="text-gray-200">Contratos</strong> e <strong class="text-gray-200">Orçamentos Detalhados</strong> com um único clique.
                             </p>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
-                            📌 <strong class="text-gray-200">Fórmula de Acúmulo:</strong> Aplica a taxa de inflação anual composta pelo total de anos estipulado no prazo.
+                            📌 <strong class="text-gray-200">Versatilidade:</strong> Estruturas prontas para diversas necessidades profissionais.
                         </div>
                     </div>
 
-                    <!-- Card 3: Proteção Financeira -->
+                    <!-- Card 3: Exportação Pronta -->
                     <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Proteção e Ganho Real</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Rentabilidade Real</span>
+                                <span class="font-bold text-white text-sm">Exportação Pronta</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Impressão & PDF</span>
                             </div>
                             <p class="text-gray-400 leading-relaxed">
-                                Para manter o patrimônio protegido da perda de valor, seus investimentos devem entregar rendimento nominal superior à taxa de inflação acumulada do período.
+                                A área de prévia utiliza fundo claro <strong class="text-gray-200">otimizado para impressão</strong> física ou salvamento direto em arquivo PDF.
                             </p>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
-                            📌 <strong class="text-gray-200">Dica:</strong> Busque aplicações atreladas a índices inflacionários (como IPCA+) para assegurar ganho real ao longo do tempo.
+                            📌 <strong class="text-gray-200">Praticidade:</strong> Exporte o arquivo final formatado diretamente pelo navegador.
                         </div>
                     </div>
                 </div>
