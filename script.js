@@ -633,49 +633,78 @@ function calculateRescisaoCLT() {
 }
 
 
+
+// ==========================================
 // CENTRAL DE CONVERSÃO DE DOCUMENTOS
-// Atualiza as opções do <select> dinamicamente com base no arquivo escolhido
+// ==========================================
+// Mapeamento global de conversões permitidas entre formatos
+const CONVERSION_MATRIX = {
+    'docx': [
+        { value: 'pdf', label: 'PDF (.pdf)' },
+        { value: 'txt', label: 'Texto Simples (.txt)' },
+        { value: 'json', label: 'Estrutura JSON (.json)' }
+    ],
+    'pdf': [
+        { value: 'docx', label: 'Documento Word (.docx)' },
+        { value: 'txt', label: 'Texto Extraído (.txt)' },
+        { value: 'json', label: 'Estrutura JSON (.json)' }
+    ],
+    'xlsx': [
+        { value: 'csv', label: 'Planilha CSV (.csv)' },
+        { value: 'json', label: 'Dados JSON (.json)' },
+        { value: 'txt', label: 'Texto (.txt)' },
+        { value: 'pdf', label: 'PDF (.pdf)' }
+    ],
+    'xls': [
+        { value: 'csv', label: 'Planilha CSV (.csv)' },
+        { value: 'json', label: 'Dados JSON (.json)' },
+        { value: 'txt', label: 'Texto (.txt)' },
+        { value: 'pdf', label: 'PDF (.pdf)' }
+    ],
+    'csv': [
+        { value: 'xlsx', label: 'Planilha Excel (.xlsx)' },
+        { value: 'json', label: 'Dados JSON (.json)' },
+        { value: 'txt', label: 'Texto (.txt)' },
+        { value: 'pdf', label: 'PDF (.pdf)' },
+        { value: 'docx', label: 'Documento Word (.docx)' }
+    ],
+    'json': [
+        { value: 'csv', label: 'Planilha CSV (.csv)' },
+        { value: 'xlsx', label: 'Planilha Excel (.xlsx)' },
+        { value: 'txt', label: 'Texto (.txt)' },
+        { value: 'pdf', label: 'PDF (.pdf)' },
+        { value: 'docx', label: 'Documento Word (.docx)' }
+    ],
+    'txt': [
+        { value: 'docx', label: 'Documento Word (.docx)' },
+        { value: 'pdf', label: 'PDF (.pdf)' },
+        { value: 'json', label: 'Estrutura JSON (.json)' }
+    ]
+};
+
+// Atualiza as opções do <select> dinamicamente
 function updateTargetFormats() {
     const fileInput = document.getElementById('file-input-universal');
     const selectFormat = document.getElementById('conversion-target-format');
     const statusEl = document.getElementById('status-universal');
 
-    statusEl.innerText = "";
+    if (statusEl) statusEl.innerText = "";
     selectFormat.innerHTML = '<option value="" disabled selected>Escolha o formato final...</option>';
 
-    if (!fileInput.files.length) return;
+    if (!fileInput || !fileInput.files.length) return;
 
     const file = fileInput.files[0];
-    const ext = file.name.split('.').pop().toLowerCase();
+    const ext = getFileExtension(file.name);
 
-    let options = [];
+    if (['ppt', 'pptx'].includes(ext)) {
+        if (statusEl) statusEl.innerText = "ℹ️ Arquivos PPT/PPTX exigem processamento em servidor.";
+        return;
+    }
 
-    if (ext === 'docx') {
-        options = [
-            { value: 'pdf', label: 'PDF (.pdf)' },
-            { value: 'txt', label: 'Texto Simples (.txt)' }
-        ];
-    } else if (['xlsx', 'xls'].includes(ext)) {
-        options = [
-            { value: 'csv', label: 'Planilha CSV (.csv)' },
-            { value: 'json', label: 'Dados JSON (.json)' }
-        ];
-    } else if (ext === 'pdf') {
-        options = [
-            { value: 'docx', label: 'Documento Word (.docx)' },
-            { value: 'txt', label: 'Texto Extraído (.txt)' },
-            { value: 'json', label: 'Estrutura JSON (.json)' }
-        ];
-    } else if (ext === 'csv') {
-        options = [
-            { value: 'json', label: 'Dados JSON (.json)' },
-            { value: 'txt', label: 'Texto (.txt)' }
-        ];
-    } else if (['ppt', 'pptx'].includes(ext)) {
-        statusEl.innerText = "ℹ️ Arquivos de apresentação (PPT/PPTX) têm limitações para conversão direta via navegador sem servidor.";
-        options = [];
-    } else {
-        statusEl.innerText = "Formato de arquivo não suportado.";
+    const options = CONVERSION_MATRIX[ext];
+
+    if (!options) {
+        if (statusEl) statusEl.innerText = "Formato de arquivo não suportado.";
         return;
     }
 
@@ -686,82 +715,417 @@ function updateTargetFormats() {
         selectFormat.appendChild(optionEl);
     });
 }
+
 // Executa a conversão baseada nas escolhas do usuário
 async function convertFile() {
     const fileInput = document.getElementById('file-input-universal');
-    const targetFormat = document.getElementById('conversion-target-format').value;
+    const targetFormatSelect = document.getElementById('conversion-target-format');
     const statusEl = document.getElementById('status-universal');
 
-    if (!fileInput.files.length) {
+    if (!fileInput || !fileInput.files.length) {
         alert('Por favor, selecione um arquivo.');
         return;
     }
 
+    const targetFormat = targetFormatSelect.value;
     if (!targetFormat) {
         alert('Por favor, selecione o formato de saída desejado.');
         return;
     }
 
     const file = fileInput.files[0];
-    const extension = file.name.split('.').pop().toLowerCase();
-    statusEl.innerText = "⏳ Processando arquivo...";
-    statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem] animate-pulse";
+    const ext = getFileExtension(file.name);
+
+    updateStatus(statusEl, "⏳ Processando arquivo...", true);
 
     try {
-        if (extension === 'docx') {
+        // Roteamento de conversão
+        if (ext === 'docx') {
             if (targetFormat === 'pdf') await convertDocxToPdf(file, statusEl);
             else if (targetFormat === 'txt') await convertDocxToTxt(file, statusEl);
-        } else if (['xlsx', 'xls'].includes(extension)) {
-            if (targetFormat === 'csv') convertExcelToCsv(file, statusEl);
-            else if (targetFormat === 'json') convertExcelToJson(file, statusEl);
-        } else if (extension === 'pdf') {
+            else if (targetFormat === 'json') await convertDocxToJson(file, statusEl);
+        } else if (['xlsx', 'xls'].includes(ext)) {
+            if (targetFormat === 'csv') await convertExcelToCsv(file, statusEl);
+            else if (targetFormat === 'json') await convertExcelToJson(file, statusEl);
+            else if (targetFormat === 'txt') await convertExcelToTxt(file, statusEl);
+            else if (targetFormat === 'pdf') await convertExcelToPdf(file, statusEl);
+        } else if (ext === 'pdf') {
             if (targetFormat === 'docx') await convertPdfToDocx(file, statusEl);
             else if (targetFormat === 'txt') await convertPdfToText(file, statusEl);
             else if (targetFormat === 'json') await convertPdfToJson(file, statusEl);
-        } else if (extension === 'csv') {
-            if (targetFormat === 'json') convertCsvToJson(file, statusEl);
-            else if (targetFormat === 'txt') convertCsvToTxt(file, statusEl);
+        } else if (ext === 'csv') {
+            if (targetFormat === 'json') await convertCsvToJson(file, statusEl);
+            else if (targetFormat === 'txt') await convertCsvToTxt(file, statusEl);
+            else if (targetFormat === 'xlsx') await convertCsvToXlsx(file, statusEl);
+            else if (targetFormat === 'pdf') await convertCsvToPdf(file, statusEl);
+            else if (targetFormat === 'docx') await convertCsvToDocx(file, statusEl);
+        } else if (ext === 'json') {
+            if (targetFormat === 'csv') await convertJsonToCsv(file, statusEl);
+            else if (targetFormat === 'xlsx') await convertJsonToXlsx(file, statusEl);
+            else if (targetFormat === 'txt') await convertJsonToTxt(file, statusEl);
+            else if (targetFormat === 'pdf') await convertJsonToPdf(file, statusEl);
+            else if (targetFormat === 'docx') await convertJsonToDocx(file, statusEl);
+        } else if (ext === 'txt') {
+            if (targetFormat === 'docx') await convertTxtToDocx(file, statusEl);
+            else if (targetFormat === 'pdf') await convertTxtToPdf(file, statusEl);
+            else if (targetFormat === 'json') await convertTxtToJson(file, statusEl);
         } else {
-            throw new Error('Formato não suportado ou sem suporte de conversão direto no navegador.');
+            throw new Error('Formato sem suporte direto no navegador.');
         }
-        statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem]";
     } catch (error) {
         console.error(error);
-        statusEl.innerText = "❌ " + (error.message || "Erro ao processar o arquivo.");
-        statusEl.className = "text-xs text-center text-red-400 mt-3 min-h-[1rem]";
+        updateStatus(statusEl, "❌ " + (error.message || "Erro ao processar o arquivo."), false, true);
     }
 }
 
-// ------------------------------------------
+// ==========================================
 // FUNÇÕES INDIVIDUAIS DE CONVERSÃO
-// ------------------------------------------
+// ==========================================
 
-// Configura os eventos de arraste ao carregar a página
+// --- DOCX CONVERSIONS ---
+async function convertDocxToPdf(file, statusEl) {
+    const buffer = await readFileAsArrayBuffer(file);
+    const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
+    await exportHtmlToPdf(result.value, file.name, statusEl);
+}
+
+async function convertDocxToTxt(file, statusEl) {
+    const buffer = await readFileAsArrayBuffer(file);
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    downloadBlob(result.value, getBaseFileName(file.name) + ".txt", 'text/plain;charset=utf-8');
+    updateStatus(statusEl, "✅ Conversão para TXT concluída!");
+}
+
+async function convertDocxToJson(file, statusEl) {
+    const buffer = await readFileAsArrayBuffer(file);
+    const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+    const lines = result.value.split('\n').filter(l => l.trim().length > 0);
+    const jsonData = { fileName: file.name, content: lines };
+    downloadBlob(JSON.stringify(jsonData, null, 2), getBaseFileName(file.name) + ".json", 'application/json;charset=utf-8');
+    updateStatus(statusEl, "✅ Conversão para JSON concluída!");
+}
+
+// --- EXCEL (XLSX/XLS) CONVERSIONS ---
+async function convertExcelToCsv(file, statusEl) {
+    const workbook = await readExcelWorkbook(file);
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+    downloadBlob(csvOutput, getBaseFileName(file.name) + ".csv", 'text/csv;charset=utf-8;');
+    updateStatus(statusEl, "✅ Conversão para CSV concluída!");
+}
+
+async function convertExcelToJson(file, statusEl) {
+    const workbook = await readExcelWorkbook(file);
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonOutput = XLSX.utils.sheet_to_json(worksheet);
+    downloadBlob(JSON.stringify(jsonOutput, null, 2), getBaseFileName(file.name) + ".json", 'application/json;charset=utf-8;');
+    updateStatus(statusEl, "✅ Conversão para JSON concluída!");
+}
+
+async function convertExcelToTxt(file, statusEl) {
+    const workbook = await readExcelWorkbook(file);
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const csvOutput = XLSX.utils.sheet_to_csv(worksheet, { FS: "\t" });
+    downloadBlob(csvOutput, getBaseFileName(file.name) + ".txt", 'text/plain;charset=utf-8;');
+    updateStatus(statusEl, "✅ Conversão para TXT concluída!");
+}
+
+async function convertExcelToPdf(file, statusEl) {
+    const workbook = await readExcelWorkbook(file);
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const htmlTable = XLSX.utils.sheet_to_html(worksheet);
+    await exportHtmlToPdf(htmlTable, file.name, statusEl);
+}
+
+// --- PDF CONVERSIONS ---
+async function convertPdfToText(file, statusEl) {
+    const pages = await extractPdfPagesText(file);
+    const fullText = pages.map(p => `--- Página ${p.pageNumber} ---\n${p.content}`).join('\n\n');
+    downloadBlob(fullText, getBaseFileName(file.name) + "_extraido.txt", 'text/plain;charset=utf-8');
+    updateStatus(statusEl, "✅ Texto extraído do PDF com sucesso!");
+}
+
+async function convertPdfToJson(file, statusEl) {
+    const pages = await extractPdfPagesText(file);
+    const pdfData = { fileName: file.name, totalPages: pages.length, pages };
+    downloadBlob(JSON.stringify(pdfData, null, 2), getBaseFileName(file.name) + ".json", 'application/json;charset=utf-8;');
+    updateStatus(statusEl, "✅ PDF convertido para JSON com sucesso!");
+}
+
+async function convertPdfToDocx(file, statusEl) {
+    const pages = await extractPdfPagesText(file);
+    updateStatus(statusEl, "⏳ Reconstruindo parágrafos em DOCX...", true);
+
+    const docParagraphs = [];
+    pages.forEach(p => {
+        if (pages.length > 1) {
+            docParagraphs.push(new docx.Paragraph({
+                children: [new docx.TextRun({ text: `--- Página ${p.pageNumber} ---`, bold: true, color: "888888", size: 18 })],
+                spacing: { before: 200, after: 100 }
+            }));
+        }
+        p.content.split('\n').forEach(lineText => {
+            if (lineText.trim()) {
+                docParagraphs.push(new docx.Paragraph({
+                    children: [new docx.TextRun({ text: lineText, font: "Arial", size: 22 })],
+                    spacing: { after: 120 }
+                }));
+            }
+        });
+    });
+
+    await exportParagraphsToDocx(docParagraphs, file.name);
+    updateStatus(statusEl, "✅ Conversão para Word (.docx) concluída!");
+}
+
+// --- CSV CONVERSIONS ---
+async function convertCsvToJson(file, statusEl) {
+    const workbook = await readExcelWorkbook(file);
+    const jsonOutput = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+    downloadBlob(JSON.stringify(jsonOutput, null, 2), getBaseFileName(file.name) + ".json", 'application/json;charset=utf-8;');
+    updateStatus(statusEl, "✅ CSV convertido para JSON com sucesso!");
+}
+
+async function convertCsvToTxt(file, statusEl) {
+    const textContent = await readFileAsText(file);
+    downloadBlob(textContent, getBaseFileName(file.name) + ".txt", 'text/plain;charset=utf-8');
+    updateStatus(statusEl, "✅ CSV convertido para TXT com sucesso!");
+}
+
+async function convertCsvToXlsx(file, statusEl) {
+    const workbook = await readExcelWorkbook(file);
+    const xlsxBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    downloadBlob(xlsxBuffer, getBaseFileName(file.name) + ".xlsx", 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    updateStatus(statusEl, "✅ CSV convertido para XLSX com sucesso!");
+}
+
+async function convertCsvToPdf(file, statusEl) {
+    const workbook = await readExcelWorkbook(file);
+    const htmlTable = XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]]);
+    await exportHtmlToPdf(htmlTable, file.name, statusEl);
+}
+
+async function convertCsvToDocx(file, statusEl) {
+    const text = await readFileAsText(file);
+    await exportTextToDocx(text, file.name);
+    updateStatus(statusEl, "✅ CSV convertido para DOCX com sucesso!");
+}
+
+// --- JSON CONVERSIONS ---
+async function convertJsonToCsv(file, statusEl) {
+    const jsonData = await parseJsonFile(file);
+    const worksheet = XLSX.utils.json_to_sheet(Array.isArray(jsonData) ? jsonData : [jsonData]);
+    const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+    downloadBlob(csvOutput, getBaseFileName(file.name) + ".csv", 'text/csv;charset=utf-8;');
+    updateStatus(statusEl, "✅ JSON convertido para CSV com sucesso!");
+}
+
+async function convertJsonToXlsx(file, statusEl) {
+    const jsonData = await parseJsonFile(file);
+    const worksheet = XLSX.utils.json_to_sheet(Array.isArray(jsonData) ? jsonData : [jsonData]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");
+    const xlsxBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    downloadBlob(xlsxBuffer, getBaseFileName(file.name) + ".xlsx", 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    updateStatus(statusEl, "✅ JSON convertido para XLSX com sucesso!");
+}
+
+async function convertJsonToTxt(file, statusEl) {
+    const jsonData = await parseJsonFile(file);
+    const txtOutput = JSON.stringify(jsonData, null, 2);
+    downloadBlob(txtOutput, getBaseFileName(file.name) + ".txt", 'text/plain;charset=utf-8');
+    updateStatus(statusEl, "✅ JSON convertido para TXT com sucesso!");
+}
+
+async function convertJsonToPdf(file, statusEl) {
+    const jsonData = await parseJsonFile(file);
+    const htmlContent = `<pre style="font-family: monospace; padding: 20px;">${escapeHtml(JSON.stringify(jsonData, null, 2))}</pre>`;
+    await exportHtmlToPdf(htmlContent, file.name, statusEl);
+}
+
+async function convertJsonToDocx(file, statusEl) {
+    const jsonData = await parseJsonFile(file);
+    const txtOutput = JSON.stringify(jsonData, null, 2);
+    await exportTextToDocx(txtOutput, file.name);
+    updateStatus(statusEl, "✅ JSON convertido para DOCX com sucesso!");
+}
+
+// --- TXT CONVERSIONS ---
+async function convertTxtToDocx(file, statusEl) {
+    const text = await readFileAsText(file);
+    await exportTextToDocx(text, file.name);
+    updateStatus(statusEl, "✅ TXT convertido para DOCX com sucesso!");
+}
+
+async function convertTxtToPdf(file, statusEl) {
+    const text = await readFileAsText(file);
+    const htmlContent = `<div style="font-family: monospace; white-space: pre-wrap; padding: 20px;">${escapeHtml(text)}</div>`;
+    await exportHtmlToPdf(htmlContent, file.name, statusEl);
+}
+
+async function convertTxtToJson(file, statusEl) {
+    const text = await readFileAsText(file);
+    const lines = text.split('\n').map(line => line.replace('\r', ''));
+    const jsonData = { fileName: file.name, lines };
+    downloadBlob(JSON.stringify(jsonData, null, 2), getBaseFileName(file.name) + ".json", 'application/json;charset=utf-8');
+    updateStatus(statusEl, "✅ TXT convertido para JSON com sucesso!");
+}
+
+// ==========================================
+// FUNÇÕES AUXILIARES E UTILITÁRIOS
+// ==========================================
+
+function getFileExtension(filename) {
+    return filename.split('.').pop().toLowerCase();
+}
+
+function getBaseFileName(filename) {
+    return filename.replace(/\.[^/.]+$/, "");
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function updateStatus(element, message, isAnimating = false, isError = false) {
+    if (!element) return;
+    element.innerText = message;
+    let classes = "text-xs text-center mt-3 min-h-[1rem] ";
+    if (isError) classes += "text-red-400";
+    else classes += "text-emerald-400";
+    if (isAnimating) classes += " animate-pulse";
+    element.className = classes;
+}
+
+function readFileAsArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsText(file, 'UTF-8');
+    });
+}
+
+async function parseJsonFile(file) {
+    const text = await readFileAsText(file);
+    return JSON.parse(text);
+}
+
+async function readExcelWorkbook(file) {
+    const buffer = await readFileAsArrayBuffer(file);
+    return XLSX.read(new Uint8Array(buffer), { type: 'array' });
+}
+
+async function extractPdfPagesText(file) {
+    const buffer = await readFileAsArrayBuffer(file);
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument(new Uint8Array(buffer)).promise;
+
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+
+        let lastY = null;
+        let pageLines = [];
+        let currentLine = "";
+
+        textContent.items.forEach(item => {
+            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+                pageLines.push(currentLine);
+                currentLine = "";
+            }
+            currentLine += item.str + " ";
+            lastY = item.transform[5];
+        });
+        if (currentLine) pageLines.push(currentLine);
+
+        pages.push({ pageNumber: i, content: pageLines.join('\n') });
+    }
+    return pages;
+}
+
+async function exportHtmlToPdf(htmlMarkup, originalFileName, statusEl) {
+    const container = document.createElement('div');
+    container.innerHTML = `<div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.5; color: #111;">${htmlMarkup}</div>`;
+
+    const opt = {
+        margin: 0.5,
+        filename: getBaseFileName(originalFileName) + ".pdf",
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    updateStatus(statusEl, "⏳ Gerando arquivo PDF...", true);
+    await html2pdf().from(container).set(opt).save();
+    updateStatus(statusEl, "✅ Conversão para PDF concluída!");
+}
+
+async function exportParagraphsToDocx(paragraphs, originalFileName) {
+    const doc = new docx.Document({ sections: [{ children: paragraphs }] });
+    const blob = await docx.Packer.toBlob(doc);
+    downloadBlob(blob, getBaseFileName(originalFileName) + ".docx", 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+}
+
+async function exportTextToDocx(text, originalFileName) {
+    const lines = text.split('\n');
+    const paragraphs = lines.map(line => new docx.Paragraph({
+        children: [new docx.TextRun({ text: line, font: "Arial", size: 22 })],
+        spacing: { after: 120 }
+    }));
+    await exportParagraphsToDocx(paragraphs, originalFileName);
+}
+
+// ÚNICA FUNÇÃO GLOBAL DE DOWNLOAD DE BLOB
+function downloadBlob(content, filename, contentType) {
+    let blob = content instanceof Blob ? content : new Blob([content], { type: contentType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+
+    setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, 100);
+}
+
+// ==========================================
+// DRAG & DROP E EVENTOS DE INTERFACE
+// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
     const dropZone = document.getElementById('drop-zone');
 
     if (dropZone) {
-        // Previne comportamentos padrão do navegador (abrir a imagem/PDF na aba)
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
             document.body.addEventListener(eventName, preventDefaults, false);
         });
 
-        // Destaque visual ao arrastar o arquivo por cima
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, () => {
                 dropZone.classList.add('border-emerald-400', 'bg-gray-700', 'scale-[1.01]');
             }, false);
         });
 
-        // Remove o destaque ao sair ou soltar
         ['dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, () => {
                 dropZone.classList.remove('border-emerald-400', 'bg-gray-700', 'scale-[1.01]');
             }, false);
         });
 
-        // Processa o arquivo quando o usuário solta na caixa
         dropZone.addEventListener('drop', handleDrop, false);
     }
 });
@@ -771,19 +1135,16 @@ function preventDefaults(e) {
     e.stopPropagation();
 }
 
-// Manipula o evento de soltar o arquivo na caixa
 function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
+    const files = e.dataTransfer.files;
     const fileInput = document.getElementById('file-input-universal');
 
     if (files.length) {
-        fileInput.files = files; // Atribui os arquivos ao input oculto
-        handleFileSelect(); // Atualiza a interface e as opções do select
+        fileInput.files = files;
+        handleFileSelect();
     }
 }
 
-// Atualiza o texto da caixa de arraste e chama o atualizador de formatos
 function handleFileSelect() {
     const fileInput = document.getElementById('file-input-universal');
     const dropZoneText = document.getElementById('drop-zone-text');
@@ -791,295 +1152,13 @@ function handleFileSelect() {
     if (fileInput.files.length) {
         const file = fileInput.files[0];
         const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-
-        // Exibe o nome e tamanho do arquivo selecionado
         dropZoneText.innerHTML = `📄 Arquivo selecionado: <strong class="text-emerald-400">${file.name}</strong> (${fileSizeMB} MB)`;
     } else {
         dropZoneText.innerHTML = `<span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste e solte o arquivo aqui`;
     }
 
-    // Chama a função existente que atualiza os formatos do <select>
     if (typeof updateTargetFormats === "function") {
         updateTargetFormats();
-    }
-}
-
-// 1. DOCX para PDF
-function convertDocxToPdf(file, statusEl) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-            try {
-                const result = await mammoth.convertToHtml({ arrayBuffer: event.target.result });
-                const element = document.createElement('div');
-                element.innerHTML = `<div style="font-family: Arial, sans-serif; padding: 30px; line-height: 1.6; color: #111;">${result.value}</div>`;
-
-                const opt = {
-                    margin: 0.5,
-                    filename: file.name.replace(/\.[^/.]+$/, "") + ".pdf",
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-                };
-
-                statusEl.innerText = "⏳ Gerando arquivo PDF...";
-                await html2pdf().from(element).set(opt).save();
-                statusEl.innerText = "✅ Conversão para PDF concluída!";
-                resolve();
-            } catch (err) { reject(err); }
-        };
-        reader.readAsArrayBuffer(file);
-    });
-}
-
-// 2. DOCX para TXT
-function convertDocxToTxt(file, statusEl) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-            try {
-                const result = await mammoth.extractRawText({ arrayBuffer: event.target.result });
-                downloadBlob(result.value, file.name.replace(/\.[^/.]+$/, "") + ".txt", 'text/plain;charset=utf-8');
-                statusEl.innerText = "✅ Conversão para TXT concluída!";
-                resolve();
-            } catch (err) { reject(err); }
-        };
-        reader.readAsArrayBuffer(file);
-    });
-}
-
-// 3. Excel para CSV
-function convertExcelToCsv(file, statusEl) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
-
-            downloadBlob(csvOutput, file.name.replace(/\.[^/.]+$/, "") + ".csv", 'text/csv;charset=utf-8;');
-            statusEl.innerText = "✅ Conversão para CSV concluída!";
-        } catch (err) { statusEl.innerText = "❌ Erro ao processar planilha Excel."; }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-// 4. Excel para JSON
-function convertExcelToJson(file, statusEl) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonOutput = XLSX.utils.sheet_to_json(worksheet);
-
-            downloadBlob(JSON.stringify(jsonOutput, null, 2), file.name.replace(/\.[^/.]+$/, "") + ".json", 'application/json;charset=utf-8;');
-            statusEl.innerText = "✅ Conversão para JSON concluída!";
-        } catch (err) { statusEl.innerText = "❌ Erro ao converter planilha para JSON."; }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-// 5. PDF para TXT
-function convertPdfToText(file, statusEl) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-            try {
-                const typedarray = new Uint8Array(event.target.result);
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                let fullText = "";
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    fullText += `--- Página ${i} ---\n${pageText}\n\n`;
-                }
-
-                downloadBlob(fullText, file.name.replace(/\.[^/.]+$/, "") + "_extraido.txt", 'text/plain;charset=utf-8');
-                statusEl.innerText = "✅ Texto extraído do PDF com sucesso!";
-                resolve();
-            } catch (err) { reject(err); }
-        };
-        reader.readAsArrayBuffer(file);
-    });
-}
-
-// 6. PDF para JSON
-function convertPdfToJson(file, statusEl) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-            try {
-                const typedarray = new Uint8Array(event.target.result);
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                const pdfData = { fileName: file.name, totalPages: pdf.numPages, pages: [] };
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    pdfData.pages.push({ pageNumber: i, content: pageText });
-                }
-
-                downloadBlob(JSON.stringify(pdfData, null, 2), file.name.replace(/\.[^/.]+$/, "") + ".json", 'application/json;charset=utf-8;');
-                statusEl.innerText = "✅ PDF convertido para JSON com sucesso!";
-                resolve();
-            } catch (err) { reject(err); }
-        };
-        reader.readAsArrayBuffer(file);
-    });
-}
-// 7. PDF para Word (.docx)
-function convertPdfToDocx(file, statusEl) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-            try {
-                const typedarray = new Uint8Array(event.target.result);
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-
-                statusEl.innerText = "⏳ Extraindo páginas e reconstruindo parágrafos...";
-
-                const docParagraphs = [];
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-
-                    // Agrupa elementos de texto que estão na mesma linha
-                    let lastY = null;
-                    let pageLines = [];
-                    let currentLine = "";
-
-                    textContent.items.forEach(item => {
-                        if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
-                            pageLines.push(currentLine);
-                            currentLine = "";
-                        }
-                        currentLine += item.str + " ";
-                        lastY = item.transform[5];
-                    });
-                    if (currentLine) pageLines.push(currentLine);
-
-                    // Adiciona cabeçalho de página se houver mais de 1 página
-                    if (pdf.numPages > 1) {
-                        docParagraphs.push(
-                            new docx.Paragraph({
-                                children: [
-                                    new docx.TextRun({
-                                        text: `--- Página ${i} ---`,
-                                        bold: true,
-                                        color: "888888",
-                                        size: 18
-                                    })
-                                ],
-                                spacing: { before: 200, after: 100 }
-                            })
-                        );
-                    }
-
-                    // Transforma cada linha/parágrafo do PDF em parágrafo do Word
-                    pageLines.forEach(lineText => {
-                        if (lineText.trim().length > 0) {
-                            docParagraphs.push(
-                                new docx.Paragraph({
-                                    children: [
-                                        new docx.TextRun({
-                                            text: lineText,
-                                            font: "Arial",
-                                            size: 22 // 11pt
-                                        })
-                                    ],
-                                    spacing: { after: 120 }
-                                })
-                            );
-                        }
-                    });
-                }
-
-                statusEl.innerText = "⏳ Gerando arquivo .docx...";
-
-                // Cria a estrutura interna do arquivo DOCX
-                const doc = new docx.Document({
-                    sections: [{
-                        properties: {},
-                        children: docParagraphs
-                    }]
-                });
-
-                // Empacota o arquivo e dispara o download
-                const blob = await docx.Packer.toBlob(doc);
-                downloadBlob(blob, file.name.replace(/\.[^/.]+$/, "") + ".docx", 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-
-                statusEl.innerText = "✅ Conversão para Word (.docx) concluída com sucesso!";
-                resolve();
-            } catch (err) { reject(err); }
-        };
-        reader.readAsArrayBuffer(file);
-    });
-}
-
-// 8. CSV para JSON
-function convertCsvToJson(file, statusEl) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonOutput = XLSX.utils.sheet_to_json(worksheet);
-
-            downloadBlob(JSON.stringify(jsonOutput, null, 2), file.name.replace(/\.[^/.]+$/, "") + ".json", 'application/json;charset=utf-8;');
-            statusEl.innerText = "✅ CSV convertido para JSON com sucesso!";
-        } catch (err) {
-            statusEl.innerText = "❌ Erro ao converter CSV para JSON.";
-        }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-// 9. CSV para TXT (Texto simples)
-function convertCsvToTxt(file, statusEl) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const textContent = e.target.result;
-            downloadBlob(textContent, file.name.replace(/\.[^/.]+$/, "") + ".txt", 'text/plain;charset=utf-8');
-            statusEl.innerText = "✅ CSV convertido para TXT com sucesso!";
-        } catch (err) {
-            statusEl.innerText = "❌ Erro ao converter CSV para TXT.";
-        }
-    };
-    reader.readAsText(file, 'UTF-8');
-}
-
-// Utilitário global para download de arquivos
-function downloadBlob(content, filename, contentType) {
-    const blob = new Blob([content], { type: contentType });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-}
-// Exibe o nome do arquivo selecionado no card do compressor
-function handleCompressFileSelect() {
-    const input = document.getElementById('file-input-compress');
-    const dropText = document.getElementById('drop-zone-compress-text');
-
-    if (input.files.length > 0) {
-        const file = input.files[0];
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        dropText.innerHTML = `<span class="font-semibold text-emerald-400">${file.name}</span> (${sizeMB} MB)`;
     }
 }
 
@@ -1201,75 +1280,6 @@ async function compressPDF() {
 }
 
 
-//  FUNÇÕES DE IMAGEM: Compressor e IA Fundo
-
-// Função para Comprimir Imagens
-async function compressImage() {
-    const fileInput = document.getElementById('img-compress-file');
-    const qualityValue = document.getElementById('img-compress-range').value;
-    const statusEl = document.getElementById('compress-status');
-
-    if (!fileInput.files.length) {
-        alert('Por favor, selecione uma imagem para comprimir.');
-        return;
-    }
-
-    const file = fileInput.files[0];
-    const originalSize = (file.size / 1024 / 1024).toFixed(2);
-    statusEl.innerText = "Comprimindo a imagem, aguarde...";
-    statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem]";
-
-    const options = {
-        maxSizeMB: qualityValue < 50 ? 0.5 : 2, // Ajusta o limite dependendo da qualidade
-        initialQuality: qualityValue / 100, // Converte 80% para 0.8
-        useWebWorker: true
-    };
-
-    try {
-        // Usa a biblioteca browser-image-compression
-        const compressedFile = await imageCompression(file, options);
-        const newSize = (compressedFile.size / 1024 / 1024).toFixed(2);
-
-        downloadBlob(compressedFile, "comprimida_" + file.name, compressedFile.type);
-
-        statusEl.innerText = `Sucesso! Tamanho reduzido de ${originalSize}MB para ${newSize}MB.`;
-    } catch (error) {
-        console.error(error);
-        statusEl.innerText = "Erro ao comprimir a imagem.";
-        statusEl.className = "text-xs text-center text-red-400 mt-3 min-h-[1rem]";
-    }
-}
-
-// Função para Remover Fundo (IA)
-async function removeBackground() {
-    const fileInput = document.getElementById('img-bg-file');
-    const statusEl = document.getElementById('bg-status');
-
-    if (!fileInput.files.length) {
-        alert('Por favor, selecione uma imagem para remover o fundo.');
-        return;
-    }
-
-    const file = fileInput.files[0];
-    statusEl.innerText = "Iniciando Inteligência Artificial... (Pode demorar na primeira vez)";
-    statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem] animate-pulse";
-
-    try {
-        // Usa a biblioteca @imgly/background-removal
-        const blob = await imglyRemoveBackground(file);
-
-        // Mantém a extensão como PNG já que terá fundo transparente
-        const fileName = "sem_fundo_" + file.name.split('.')[0] + ".png";
-        downloadBlob(blob, fileName, "image/png");
-
-        statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem]";
-        statusEl.innerText = "Fundo removido e download concluído com sucesso!";
-    } catch (error) {
-        console.error(error);
-        statusEl.innerText = "Erro ao remover o fundo da imagem. Tente outra imagem mais leve.";
-        statusEl.className = "text-xs text-center text-red-400 mt-3 min-h-[1rem]";
-    }
-}
 
 // Atualiza o ano dinamicamente no Rodapé
 function updateFooterAndCounter() {
@@ -1277,5 +1287,312 @@ function updateFooterAndCounter() {
     const yearEl = document.getElementById('footer-year');
     if (yearEl) {
         yearEl.innerText = new Date().getFullYear();
+    }
+}
+
+// ==================== 1. GERADOR DE QR CODE ====================
+
+function generateQRCode() {
+    const input = document.getElementById('qr-input').value;
+    const size = parseInt(document.getElementById('qr-size').value, 10);
+    const container = document.getElementById('qr-code-container');
+    const placeholder = document.getElementById('qr-placeholder');
+    const downloadBtn = document.getElementById('qr-download');
+
+    if (!input.trim()) {
+        alert('Por favor, insira um texto ou URL.');
+        return;
+    }
+
+    container.innerHTML = '';
+    container.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+
+    new QRCode(container, {
+        text: input,
+        width: size,
+        height: size
+    });
+
+    setTimeout(() => {
+        const img = container.querySelector('img');
+        const canvas = container.querySelector('canvas');
+
+        let src = '';
+        if (img && img.src) {
+            src = img.src;
+        } else if (canvas) {
+            src = canvas.toDataURL('image/png');
+        }
+
+        if (src) {
+            downloadBtn.href = src;
+            downloadBtn.download = 'qrcode.png';
+            downloadBtn.classList.remove('hidden');
+        }
+    }, 300);
+} // ==========================================
+// UTILITÁRIOS
+// ==========================================
+
+// Formata tamanhos em bytes para KB ou MB
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Dispara o download automático do arquivo gerado
+function downloadFile(blob, fileName) {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+}
+
+// Carrega um arquivo de imagem em um elemento <img> nativo do JS
+function loadImageFromFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('Erro ao carregar a imagem. O arquivo pode estar corrompido ou o formato não é suportado pelo navegador.'));
+            img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('Erro ao ler o arquivo.'));
+        reader.readAsDataURL(file);
+    });
+}
+
+
+// ==========================================
+// 1. COMPRESSOR DE IMAGEM
+// ==========================================
+
+async function compressImage() {
+    const fileInput = document.getElementById('img-compress-file');
+    const rangeInput = document.getElementById('img-compress-range');
+    const statusEl = document.getElementById('compress-status');
+
+    const file = fileInput.files[0];
+
+    if (!file) {
+        statusEl.innerText = '❌ Por favor, selecione uma imagem primeiro.';
+        statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
+        return;
+    }
+
+    try {
+        statusEl.innerText = '⏳ Comprimindo imagem...';
+        statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
+
+        const quality = parseFloat(rangeInput.value) / 100;
+        const img = await loadImageFromFile(file);
+
+        // Cria o canvas com as dimensões originais da imagem
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+
+        const ctx = canvas.getContext('2d');
+
+        // Define fundo branco caso a imagem original possua transparência (PNG/WEBP)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+
+        // Para compressão com qualidade ajustável, usamos JPEG ou WEBP
+        const mimeType = file.type === 'image/webp' ? 'image/webp' : 'image/jpeg';
+        const extension = mimeType === 'image/webp' ? '.webp' : '.jpg';
+
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                statusEl.innerText = '❌ Falha ao processar a compressão da imagem.';
+                statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
+                return;
+            }
+
+            const originalName = file.name.substring(0, file.name.lastIndexOf('.')) || 'imagem';
+            const newFileName = `${originalName}_comprimida${extension}`;
+
+            downloadFile(blob, newFileName);
+
+            const origSize = formatFileSize(file.size);
+            const newSize = formatFileSize(blob.size);
+            const reduction = (((file.size - blob.size) / file.size) * 100).toFixed(1);
+
+            if (blob.size < file.size) {
+                statusEl.innerText = `✅ Concluído! ${origSize} ➔ ${newSize} (${reduction}% menor)`;
+                statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
+            } else {
+                statusEl.innerText = `✅ Concluído! (${newSize}). A imagem já estava bastante otimizada.`;
+                statusEl.className = 'text-xs text-center text-yellow-400 mt-3 min-h-[1rem]';
+            }
+        }, mimeType, quality);
+
+    } catch (err) {
+        statusEl.innerText = `❌ ${err.message}`;
+        statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
+    }
+}
+
+
+// ==========================================
+// 2. CONVERSOR DE IMAGENS & DRAG AND DROP
+// ==========================================
+
+let convertSelectedFile = null;
+
+// Atualiza a interface quando um arquivo é selecionado ou solto
+function updateConvertDropZoneUI(file) {
+    const textEl = document.getElementById('drop-zone-img-text');
+    if (file) {
+        convertSelectedFile = file;
+        textEl.innerHTML = `<span class="font-semibold text-emerald-400">${file.name}</span> (${formatFileSize(file.size)})`;
+    } else {
+        convertSelectedFile = null;
+        textEl.innerHTML = `<span class="font-semibold text-emerald-400">Clique</span> ou arraste a imagem`;
+    }
+}
+
+// Disparado ao selecionar o arquivo via <input type="file">
+function handleImgConvertSelect() {
+    const fileInput = document.getElementById('img-convert-file');
+    if (fileInput.files && fileInput.files[0]) {
+        updateConvertDropZoneUI(fileInput.files[0]);
+    }
+}
+
+// Configuração dos Eventos de Drag & Drop
+document.addEventListener('DOMContentLoaded', () => {
+    const dropZone = document.getElementById('drop-zone-img-convert');
+    const fileInput = document.getElementById('img-convert-file');
+
+    if (!dropZone) return;
+
+    // Impede comportamentos padrão do navegador (ex: abrir a imagem diretamente na aba)
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    // Efeitos visuais ao arrastar sobre a zona
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.add('border-emerald-500', 'bg-gray-700');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.remove('border-emerald-500', 'bg-gray-700');
+        }, false);
+    });
+
+    // Quando o arquivo é solto na área
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files && files.length > 0) {
+            fileInput.files = files; // Sincroniza com o input
+            updateConvertDropZoneUI(files[0]);
+        }
+    });
+});
+
+// Executa a conversão do formato
+async function convertImage() {
+    const targetFormat = document.getElementById('img-target-format').value;
+    const statusEl = document.getElementById('img-convert-status');
+
+    if (!convertSelectedFile) {
+        statusEl.innerText = '❌ Por favor, selecione ou arraste uma imagem primeiro.';
+        statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
+        return;
+    }
+
+    try {
+        statusEl.innerText = '⏳ Convertendo imagem...';
+        statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
+
+        const img = await loadImageFromFile(convertSelectedFile);
+
+        // Mapeamento de formatos para MIME Types do navegador
+        const mimeTypes = {
+            jpg: 'image/jpeg',
+            png: 'image/png',
+            webp: 'image/webp',
+            gif: 'image/gif',
+            bmp: 'image/bmp',
+            tiff: 'image/tiff',
+            svg: 'image/svg+xml'
+        };
+
+        const targetMime = mimeTypes[targetFormat] || 'image/jpeg';
+
+        // --- Caso Especial: Conversão para SVG Vetorial Básica ---
+        if (targetFormat === 'svg') {
+            const width = img.naturalWidth || img.width;
+            const height = img.naturalHeight || img.height;
+            const dataUrl = img.src;
+
+            const svgContent = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    <image href="${dataUrl}" width="${width}" height="${height}" />
+</svg>`;
+
+            const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+            const originalName = convertSelectedFile.name.substring(0, convertSelectedFile.name.lastIndexOf('.')) || 'imagem';
+
+            downloadFile(blob, `${originalName}.svg`);
+
+            statusEl.innerText = '✅ Convertido para SVG com sucesso!';
+            statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
+            return;
+        }
+
+        // --- Processamento padrão em Canvas para Formatos Raster ---
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+
+        const ctx = canvas.getContext('2d');
+
+        // Se o formato de saída não suporta transparência (ex: JPG, BMP), preenche com fundo branco
+        if (['jpg', 'bmp'].includes(targetFormat)) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                statusEl.innerText = `❌ O navegador não suporta a exportação direta para o formato .${targetFormat.toUpperCase()}.`;
+                statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
+                return;
+            }
+
+            const originalName = convertSelectedFile.name.substring(0, convertSelectedFile.name.lastIndexOf('.')) || 'imagem';
+            const newFileName = `${originalName}.${targetFormat}`;
+
+            downloadFile(blob, newFileName);
+
+            statusEl.innerText = `✅ Imagem convertida para ${targetFormat.toUpperCase()} (${formatFileSize(blob.size)})!`;
+            statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
+        }, targetMime, 0.92);
+
+    } catch (err) {
+        statusEl.innerText = `❌ ${err.message}`;
+        statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
     }
 }
