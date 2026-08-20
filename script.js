@@ -1572,3 +1572,125 @@ async function convertImage() {
         statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
     }
 }
+
+// ==========================================
+// UNIFICADOR DE PDF (MERGE)
+// ==========================================
+
+function handleMergeFileSelect() {
+    const fileInput = document.getElementById('file-input-merge');
+    const dropZoneText = document.getElementById('drop-zone-merge-text');
+
+    if (fileInput.files.length > 0) {
+        dropZoneText.innerHTML = `📄 <strong class="text-emerald-400">${fileInput.files.length} arquivos PDF selecionados</strong>`;
+    } else {
+        dropZoneText.innerHTML = `<span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste os PDFs aqui`;
+    }
+}
+
+async function mergePDFs() {
+    const fileInput = document.getElementById('file-input-merge');
+    const statusEl = document.getElementById('status-merge');
+
+    if (!fileInput.files || fileInput.files.length < 2) {
+        alert('Por favor, selecione pelo menos 2 arquivos PDF para unir.');
+        return;
+    }
+
+    updateStatus(statusEl, "⏳ Unindo arquivos PDF...", true);
+
+    try {
+        const mergedPdf = await PDFLib.PDFDocument.create();
+
+        for (let i = 0; i < fileInput.files.length; i++) {
+            const file = fileInput.files[i];
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+            const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+            copiedPages.forEach((page) => mergedPdf.addPage(page));
+        }
+
+        const mergedPdfBytes = await mergedPdf.save();
+        const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+
+        downloadFile(blob, 'documento_unido.pdf');
+        updateStatus(statusEl, "✅ PDFs unidos com sucesso!");
+    } catch (error) {
+        console.error(error);
+        updateStatus(statusEl, "❌ Erro ao unir os PDFs.", false, true);
+    }
+}
+
+// ==========================================
+// DIVISOR DE PDF (SPLIT)
+// ==========================================
+
+function handleSplitFileSelect() {
+    const fileInput = document.getElementById('file-input-split');
+    const dropZoneText = document.getElementById('drop-zone-split-text');
+
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        dropZoneText.innerHTML = `📄 Selecionado: <strong class="text-emerald-400">${escapeHtml(file.name)}</strong>`;
+    }
+}
+
+async function splitPDF() {
+    const fileInput = document.getElementById('file-input-split');
+    const rangeInput = document.getElementById('split-range').value.trim();
+    const statusEl = document.getElementById('status-split');
+
+    if (!fileInput.files.length) {
+        alert('Por favor, selecione um arquivo PDF primeiro.');
+        return;
+    }
+
+    if (!rangeInput) {
+        alert('Informe as páginas que deseja extrair (ex: 1-3, 5).');
+        return;
+    }
+
+    updateStatus(statusEl, "⏳ Dividindo e extraindo páginas...", true);
+
+    try {
+        const file = fileInput.files[0];
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+        const subPdf = await PDFLib.PDFDocument.create();
+
+        let pagesToExtract = [];
+        const totalPages = pdf.getPageCount();
+
+        // Interpretador de intervalos (ex: "1-3, 5, 7-9")
+        rangeInput.split(',').forEach(part => {
+            part = part.trim();
+            if (part.includes('-')) {
+                let [start, end] = part.split('-').map(n => parseInt(n.trim()) - 1);
+                for (let i = start; i <= end; i++) {
+                    if (i >= 0 && i < totalPages) pagesToExtract.push(i);
+                }
+            } else {
+                let p = parseInt(part) - 1;
+                if (p >= 0 && p < totalPages) pagesToExtract.push(p);
+            }
+        });
+
+        if (pagesToExtract.length === 0) {
+            throw new Error("Nenhuma página válida foi informada.");
+        }
+
+        const copiedPages = await subPdf.copyPages(pdf, pagesToExtract);
+        copiedPages.forEach(page => subPdf.addPage(page));
+
+        const subPdfBytes = await subPdf.save();
+        const blob = new Blob([subPdfBytes], { type: 'application/pdf' });
+
+        const originalName = getBaseFileName(file.name);
+        downloadFile(blob, `${originalName}_dividido.pdf`);
+
+        updateStatus(statusEl, "✅ Páginas extraídas e salvas com sucesso!");
+    } catch (error) {
+        console.error(error);
+        updateStatus(statusEl, "❌ Erro ao dividir PDF: " + (error.message || "Verifique as páginas informadas."), false, true);
+    }
+}

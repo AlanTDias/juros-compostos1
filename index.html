@@ -374,8 +374,9 @@
         <section id="tab-conversores" class="tab-content hidden space-y-6">
             <div class="space-y-2">
                 <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Central de Conversores de Arquivos</h2>
-                <p class="text-sm text-gray-400">Selecione o arquivo e escolha o formato desejado para a conversão rápida.</p>
+                <p class="text-sm text-gray-400">Selecione o arquivo e escolha o formato desejado para a conversão rápida ou manipulação de PDFs.</p>
             </div>
+
             <!-- Conversor Universal -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto">
                 <div class="space-y-4">
@@ -398,18 +399,19 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">2. Selecione o Formato de Saída</label>
                         <select id="conversion-target-format" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="" disabled selected>Selecione um arquivo primeiro...</option>
-                </select>
+                            <option value="" disabled selected>Selecione um arquivo primeiro...</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="pt-2">
                     <button onclick="convertFile()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm">
-                Converter Arquivo
-            </button>
+                        Converter Arquivo
+                    </button>
                     <p id="status-universal" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
                 </div>
             </div>
+
             <!-- COMPRESSOR DE PDF -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto mt-8">
                 <h2 class="text-lg font-bold text-gray-100 border-b border-gray-700 pb-2">🗜️ Compressor de PDF</h2>
@@ -433,78 +435,151 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">2. Nível de Compressão</label>
                         <select id="compression-level" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="0.5">Média (Recomendado - Boa qualidade e boa redução)</option>
-                <option value="0.3">Alta (Menor tamanho de arquivo, qualidade inferior)</option>
-                <option value="0.7">Baixa (Melhor qualidade, menor redução)</option>
-            </select>
+                            <option value="0.5">Média (Recomendado - Boa qualidade e boa redução)</option>
+                            <option value="0.3">Alta (Menor tamanho de arquivo, qualidade inferior)</option>
+                            <option value="0.7">Baixa (Melhor qualidade, menor redução)</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="pt-2">
                     <button onclick="compressPDF()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm flex items-center justify-center gap-2">
-            Comprimir PDF
-        </button>
+                        Comprimir PDF
+                    </button>
                     <p id="status-compress" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
                 </div>
             </div>
-            <!-- 🗂️ COMO FUNCIONAM OS CONVERSORES E COMPRESSOR DE ARQUIVOS -->
+
+            <!-- UNIFICADOR DE PDF (MERGE) -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto mt-8">
+                <h2 class="text-lg font-bold text-gray-100 border-b border-gray-700 pb-2">🔗 Unificar vários PDFs (Juntar)</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione os arquivos PDF (múltiplos)</label>
+                        <div id="drop-zone-merge" onclick="document.getElementById('file-input-merge').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">📚</span>
+                            <p id="drop-zone-merge-text" class="text-sm text-gray-300">
+                                <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste os PDFs aqui
+                            </p>
+                            <p class="text-[11px] text-gray-400">Selecione dois ou mais arquivos .PDF</p>
+                        </div>
+                        <input type="file" id="file-input-merge" accept=".pdf" multiple onchange="handleMergeFileSelect()" class="hidden">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="mergePDFs()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                        Unificar PDFs
+                    </button>
+                    <p id="status-merge" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+
+            <!-- DIVISOR DE PDF (SPLIT) -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto mt-8">
+                <h2 class="text-lg font-bold text-gray-100 border-b border-gray-700 pb-2">✂️ Dividir PDF (Extrair Páginas)</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione o PDF</label>
+                        <div id="drop-zone-split" onclick="document.getElementById('file-input-split').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">✂️</span>
+                            <p id="drop-zone-split-text" class="text-sm text-gray-300">
+                                <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste o PDF aqui
+                            </p>
+                            <p class="text-[11px] text-gray-400">Apenas um arquivo .PDF</p>
+                        </div>
+                        <input type="file" id="file-input-split" accept=".pdf" onchange="handleSplitFileSelect()" class="hidden">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">2. Informe as páginas (Ex: 1-3, 5, 8-10)</label>
+                        <input type="text" id="split-range" placeholder="Ex: 1-3, 5" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="splitPDF()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                        Extrair e Salvar Páginas
+                    </button>
+                    <p id="status-split" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+
+            <!-- 🗂️ COMO FUNCIONAM OS CONVERSORES E FERRAMENTAS DE PDF -->
             <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
                 <div class="border-b border-gray-700 pb-3 mb-4">
                     <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-                        <span>⚙️</span> Como Funciona a Central de Conversores?
+                        <span>⚙️</span> Como Funciona a Central de Conversores e PDFs?
                     </h3>
                     <p class="text-xs text-gray-400 mt-1">
-                        Entenda o fluxo de processamento de arquivos, conversão universal e compressão de documentos PDF.
+                        Entenda o fluxo de processamento de arquivos, conversões universais, compressão, unificação e divisão de documentos.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
-                    <!-- Card 1: Upload e Seleção -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs text-gray-300">
+                    <!-- Card 1: Upload e Conversão -->
                     <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Upload Inteligente</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Passo 1</span>
+                                <span class="font-bold text-white text-sm">Conversão Universal</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Formatos</span>
                             </div>
                             <p class="text-gray-400 leading-relaxed">
-                                Você pode arrastar o documento para a área <strong class="text-gray-200">Drag & Drop</strong> ou clicar para abrir o seletor. O sistema detecta automaticamente a extensão do arquivo e prepara as opções compatíveis.
+                                Detecta automaticamente a extensão do documento enviado e disponibiliza as opções de conversão cruzada compatíveis direto no navegador[cite: 6].
                             </p>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
-                            📌 <strong class="text-gray-200">Formatos:</strong> Suporta DOCX, XLSX, PPTX, PDF, CSV, TXT e mais.
+                            📌 <strong class="text-gray-200">Formatos:</strong> DOCX, XLSX, PDF, CSV, TXT e JSON[cite: 6].
                         </div>
                     </div>
 
-                    <!-- Card 2: Conversão de Formato -->
+                    <!-- Card 2: Compressor -->
                     <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Conversão Múltipla</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Passo 2</span>
+                                <span class="font-bold text-white text-sm">Compressor de PDF</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Otimização</span>
                             </div>
                             <p class="text-gray-400 leading-relaxed">
-                                Ao selecionar um arquivo, o menu de destino exibe apenas as extensões válidas para a transformação. O processamento é acionado via script sem recarregar a página.
+                                Reduz o tamanho de arquivos pesados ajustando a qualidade de renderização das páginas e reamostrando imagens internas.
                             </p>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
-                            📌 <strong class="text-gray-200">Exemplo:</strong> Transforme relatórios PDF em tabelas CSV ou documentos DOCX.
+                            📌 <strong class="text-gray-200">Níveis:</strong> Escolha entre compressão média, alta ou baixa conforme a necessidade.
                         </div>
                     </div>
 
-                    <!-- Card 3: Compressão de PDF -->
+                    <!-- Card 3: Unificador (Merge) -->
                     <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Compressão de PDF</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Ajuste</span>
+                                <span class="font-bold text-white text-sm">Unificar PDFs</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Juntar</span>
                             </div>
                             <p class="text-gray-400 leading-relaxed">
-                                O compressor reamostra imagens e reduz dados do PDF. É possível escolher entre três níveis: <strong class="text-gray-200">Baixa</strong> (preserva qualidade), <strong class="text-gray-200">Média</strong> (equilibrada) ou
-                                <strong class="text-gray-200">Alta</strong> (máxima redução).
+                                Permite selecionar múltiplos arquivos PDF de uma só vez para combiná-los sequencialmente em um único documento final coeso.
                             </p>
                         </div>
                         <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
-                            📌 <strong class="text-gray-200">Resultado:</strong> Arquivos mais leves para envio por e-mail ou upload rápido.
+                            📌 <strong class="text-gray-200">Praticidade:</strong> Agrupe relatórios e comprovantes rapidamente sem instalar softwares.
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Divisor (Split) -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Dividir PDF</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 rounded-full font-medium">Extração</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Informe intervalos de páginas específicos (ex: 1-3, 5) para fatiar o documento original e gerar um novo arquivo apenas com o trecho desejado.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Flexibilidade:</strong> Extração cirúrgica de páginas individuais ou blocos de páginas.
                         </div>
                     </div>
                 </div>
