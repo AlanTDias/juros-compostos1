@@ -20,7 +20,21 @@ window.onload = function() {
 
     calculateJC();
     fetchMarketIndicators();
+    updateFooterAndCounter();
 };
+
+// ==========================================
+// FUNÇÃO DE SEGURANÇA CONTRA XSS (ATUALIZADA)
+// ==========================================
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 // Função auxiliar para ler e limpar valores monetários formatados
 function getVal(id) {
@@ -39,8 +53,10 @@ function switchTab(tabId) {
 
     document.getElementById(`tab-${tabId}`).classList.remove('hidden');
     let activeBtn = document.getElementById(`btn-${tabId}`);
-    activeBtn.classList.remove('text-gray-300', 'hover:bg-gray-700');
-    activeBtn.classList.add('bg-emerald-500', 'text-gray-950', 'font-bold');
+    if (activeBtn) {
+        activeBtn.classList.remove('text-gray-300', 'hover:bg-gray-700');
+        activeBtn.classList.add('bg-emerald-500', 'text-gray-950', 'font-bold');
+    }
 
     if (tabId === 'juros-compostos') calculateJC();
     if (tabId === 'reserva') calculateReserva();
@@ -49,7 +65,6 @@ function switchTab(tabId) {
     if (tabId === 'veiculos') calculateVeiculo();
     if (tabId === 'amortizacao') calculateAmortizacao();
     if (tabId === 'alugar-comprar') calculateAlugarComprar();
-    if (tabId === 'inflacao') calculateInflacao();
     if (tabId === 'comparador') calculateComparador();
     if (tabId === 'fgts') calculateFGTS();
     if (tabId === 'rescisao-clt') calculateRescisaoCLT();
@@ -64,7 +79,7 @@ async function fetchMarketIndicators() {
     const dolarEl = document.getElementById('ind-dolar');
     const poupancaEl = document.getElementById('ind-poupanca');
 
-    // valores padrão (usados só se a busca em tempo real falhar)
+    // valores padrão
     selicEl.innerText = "14.00% a.a.";
     cdiEl.innerText = "13.90% a.a.";
     ipcaEl.innerText = "4.44% a.a.";
@@ -79,10 +94,9 @@ async function fetchMarketIndicators() {
             dolarEl.innerText = dolarValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
     } catch (error) {
-        console.warn("Aviso: Não foi possível atualizar o dólar em tempo real, mantendo padrão.", error);
+        console.warn("Aviso: Não foi possível atualizar o dólar em tempo real.");
     }
 
-    //  Selic — série SGS 432 (Meta Selic definida pelo Copom)
     try {
         let resSelic = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json');
         let dataSelic = await resSelic.json();
@@ -90,10 +104,9 @@ async function fetchMarketIndicators() {
             selicEl.innerText = `${parseFloat(dataSelic[0].valor).toFixed(2)}% a.a.`;
         }
     } catch (error) {
-        console.warn("Aviso: Não foi possível atualizar a Selic em tempo real, mantendo padrão.", error);
+        console.warn("Aviso: Não foi possível atualizar a Selic.");
     }
 
-    //  CDI — série SGS 4389 (CDI anualizada base 252)
     try {
         let resCdi = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json');
         let dataCdi = await resCdi.json();
@@ -101,10 +114,9 @@ async function fetchMarketIndicators() {
             cdiEl.innerText = `${parseFloat(dataCdi[0].valor).toFixed(2)}% a.a.`;
         }
     } catch (error) {
-        console.warn("Aviso: Não foi possível atualizar o CDI em tempo real, mantendo padrão.", error);
+        console.warn("Aviso: Não foi possível atualizar o CDI.");
     }
 
-    //  IPCA — série SGS 13522 (acumulado 12 meses)
     try {
         let resIpca = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.13522/dados/ultimos/1?formato=json');
         let dataIpca = await resIpca.json();
@@ -112,10 +124,9 @@ async function fetchMarketIndicators() {
             ipcaEl.innerText = `${parseFloat(dataIpca[0].valor).toFixed(2)}% a.a.`;
         }
     } catch (error) {
-        console.warn("Aviso: Não foi possível atualizar o IPCA em tempo real, mantendo padrão.", error);
+        console.warn("Aviso: Não foi possível atualizar o IPCA.");
     }
 
-    //  Poupança — série SGS 195 (rentabilidade mensal, já com TR embutida)
     try {
         let resPoupanca = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.195/dados/ultimos/1?formato=json');
         let dataPoupanca = await resPoupanca.json();
@@ -125,12 +136,13 @@ async function fetchMarketIndicators() {
             poupancaEl.innerText = `${anual.toFixed(2)}% a.a.`;
         }
     } catch (error) {
-        console.warn("Aviso: Não foi possível atualizar a poupança em tempo real, mantendo padrão.", error);
+        console.warn("Aviso: Não foi possível atualizar a poupança.");
     }
 
     let hoje = new Date();
     dateSpan.innerText = `Atualizado em: ${hoje.toLocaleDateString('pt-BR')} às ${hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
+
 // 1. Juros Compostos
 function calculateJC() {
     let p = getVal('jc-initial');
@@ -446,8 +458,9 @@ function removeOrcamentoItem(button) {
 // Atualiza a prévia conforme os dados do documento ativo
 function updateDocumentPreview() {
     if (activeDocType === 'orcamento') {
-        document.getElementById('preview-orc-emissor').innerText = document.getElementById('orc-emissor').value || 'Sua Empresa';
-        document.getElementById('preview-orc-cliente').innerText = document.getElementById('orc-cliente').value || 'Cliente Não Informado';
+        // Correção de segurança: escapeHtml em todos os valores que vão para a tela!
+        document.getElementById('preview-orc-emissor').innerHTML = escapeHtml(document.getElementById('orc-emissor').value) || 'Sua Empresa';
+        document.getElementById('preview-orc-cliente').innerHTML = escapeHtml(document.getElementById('orc-cliente').value) || 'Cliente Não Informado';
         document.getElementById('preview-orc-data').innerText = `Data: ${new Date().toLocaleDateString('pt-BR')}`;
 
         const items = document.querySelectorAll('.orc-item');
@@ -465,8 +478,9 @@ function updateDocumentPreview() {
 
             const tr = document.createElement('tr');
             tr.className = 'border-b border-gray-100';
+            // Correção de segurança: escapeHtml(desc)
             tr.innerHTML = `
-                <td class="py-2 text-gray-800">${desc}</td>
+                <td class="py-2 text-gray-800">${escapeHtml(desc)}</td>
                 <td class="py-2 text-center text-gray-600">${qtd}</td>
                 <td class="py-2 text-right text-gray-600">${valorUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
                 <td class="py-2 text-right font-medium text-gray-800">${subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
@@ -632,12 +646,9 @@ function calculateRescisaoCLT() {
     document.getElementById('clt-res-total').innerText = formatBRL(totalBruto);
 }
 
-
-
 // ==========================================
 // CENTRAL DE CONVERSÃO DE DOCUMENTOS
 // ==========================================
-// Mapeamento global de conversões permitidas entre formatos
 const CONVERSION_MATRIX = {
     'docx': [
         { value: 'pdf', label: 'PDF (.pdf)' },
@@ -682,7 +693,6 @@ const CONVERSION_MATRIX = {
     ]
 };
 
-// Atualiza as opções do <select> dinamicamente
 function updateTargetFormats() {
     const fileInput = document.getElementById('file-input-universal');
     const selectFormat = document.getElementById('conversion-target-format');
@@ -716,7 +726,6 @@ function updateTargetFormats() {
     });
 }
 
-// Executa a conversão baseada nas escolhas do usuário
 async function convertFile() {
     const fileInput = document.getElementById('file-input-universal');
     const targetFormatSelect = document.getElementById('conversion-target-format');
@@ -739,7 +748,6 @@ async function convertFile() {
     updateStatus(statusEl, "⏳ Processando arquivo...", true);
 
     try {
-        // Roteamento de conversão
         if (ext === 'docx') {
             if (targetFormat === 'pdf') await convertDocxToPdf(file, statusEl);
             else if (targetFormat === 'txt') await convertDocxToTxt(file, statusEl);
@@ -782,7 +790,6 @@ async function convertFile() {
 // FUNÇÕES INDIVIDUAIS DE CONVERSÃO
 // ==========================================
 
-// --- DOCX CONVERSIONS ---
 async function convertDocxToPdf(file, statusEl) {
     const buffer = await readFileAsArrayBuffer(file);
     const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
@@ -805,7 +812,6 @@ async function convertDocxToJson(file, statusEl) {
     updateStatus(statusEl, "✅ Conversão para JSON concluída!");
 }
 
-// --- EXCEL (XLSX/XLS) CONVERSIONS ---
 async function convertExcelToCsv(file, statusEl) {
     const workbook = await readExcelWorkbook(file);
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -837,7 +843,6 @@ async function convertExcelToPdf(file, statusEl) {
     await exportHtmlToPdf(htmlTable, file.name, statusEl);
 }
 
-// --- PDF CONVERSIONS ---
 async function convertPdfToText(file, statusEl) {
     const pages = await extractPdfPagesText(file);
     const fullText = pages.map(p => `--- Página ${p.pageNumber} ---\n${p.content}`).join('\n\n');
@@ -878,7 +883,6 @@ async function convertPdfToDocx(file, statusEl) {
     updateStatus(statusEl, "✅ Conversão para Word (.docx) concluída!");
 }
 
-// --- CSV CONVERSIONS ---
 async function convertCsvToJson(file, statusEl) {
     const workbook = await readExcelWorkbook(file);
     const jsonOutput = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
@@ -911,7 +915,6 @@ async function convertCsvToDocx(file, statusEl) {
     updateStatus(statusEl, "✅ CSV convertido para DOCX com sucesso!");
 }
 
-// --- JSON CONVERSIONS ---
 async function convertJsonToCsv(file, statusEl) {
     const jsonData = await parseJsonFile(file);
     const worksheet = XLSX.utils.json_to_sheet(Array.isArray(jsonData) ? jsonData : [jsonData]);
@@ -937,6 +940,7 @@ async function convertJsonToTxt(file, statusEl) {
     updateStatus(statusEl, "✅ JSON convertido para TXT com sucesso!");
 }
 
+// CORREÇÃO DE SEGURANÇA: Aqui o escapeHtml protege a conversão de JSON malicioso para PDF
 async function convertJsonToPdf(file, statusEl) {
     const jsonData = await parseJsonFile(file);
     const htmlContent = `<pre style="font-family: monospace; padding: 20px;">${escapeHtml(JSON.stringify(jsonData, null, 2))}</pre>`;
@@ -950,7 +954,6 @@ async function convertJsonToDocx(file, statusEl) {
     updateStatus(statusEl, "✅ JSON convertido para DOCX com sucesso!");
 }
 
-// --- TXT CONVERSIONS ---
 async function convertTxtToDocx(file, statusEl) {
     const text = await readFileAsText(file);
     await exportTextToDocx(text, file.name);
@@ -959,6 +962,7 @@ async function convertTxtToDocx(file, statusEl) {
 
 async function convertTxtToPdf(file, statusEl) {
     const text = await readFileAsText(file);
+    // Correção: Uso de escapeHtml ao renderizar texto
     const htmlContent = `<div style="font-family: monospace; white-space: pre-wrap; padding: 20px;">${escapeHtml(text)}</div>`;
     await exportHtmlToPdf(htmlContent, file.name, statusEl);
 }
@@ -981,10 +985,6 @@ function getFileExtension(filename) {
 
 function getBaseFileName(filename) {
     return filename.replace(/\.[^/.]+$/, "");
-}
-
-function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function updateStatus(element, message, isAnimating = false, isError = false) {
@@ -1027,7 +1027,6 @@ async function readExcelWorkbook(file) {
 
 async function extractPdfPagesText(file) {
     const buffer = await readFileAsArrayBuffer(file);
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument(new Uint8Array(buffer)).promise;
 
     const pages = [];
@@ -1086,7 +1085,6 @@ async function exportTextToDocx(text, originalFileName) {
     await exportParagraphsToDocx(paragraphs, originalFileName);
 }
 
-// ÚNICA FUNÇÃO GLOBAL DE DOWNLOAD DE BLOB
 function downloadBlob(content, filename, contentType) {
     let blob = content instanceof Blob ? content : new Blob([content], { type: contentType });
     const url = URL.createObjectURL(blob);
@@ -1152,7 +1150,8 @@ function handleFileSelect() {
     if (fileInput.files.length) {
         const file = fileInput.files[0];
         const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-        dropZoneText.innerHTML = `📄 Arquivo selecionado: <strong class="text-emerald-400">${file.name}</strong> (${fileSizeMB} MB)`;
+        // CORREÇÃO: Usando escapeHtml para nome do arquivo proveniente de uplaod do usuário
+        dropZoneText.innerHTML = `📄 Arquivo selecionado: <strong class="text-emerald-400">${escapeHtml(file.name)}</strong> (${fileSizeMB} MB)`;
     } else {
         dropZoneText.innerHTML = `<span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste e solte o arquivo aqui`;
     }
@@ -1199,6 +1198,17 @@ if (dropZoneCompress) {
     });
 }
 
+function handleCompressFileSelect() {
+    const fileInput = document.getElementById('file-input-compress');
+    const dropZoneText = document.getElementById('drop-zone-compress-text');
+
+    if (fileInput.files.length) {
+        const file = fileInput.files[0];
+        // CORREÇÃO: Usando escapeHtml aqui também
+        dropZoneText.innerHTML = `📄 Selecionado: <strong class="text-emerald-400">${escapeHtml(file.name)}</strong>`;
+    }
+}
+
 // Função principal para comprimir o PDF
 async function compressPDF() {
     const input = document.getElementById('file-input-compress');
@@ -1225,9 +1235,8 @@ async function compressPDF() {
             statusEl.innerText = `⏳ Processando página ${i} de ${pdfDoc.numPages}...`;
 
             const page = await pdfDoc.getPage(i);
-            const viewport = page.getViewport({ scale: 1.5 }); // Escala balanceada de resolução
+            const viewport = page.getViewport({ scale: 1.5 });
 
-            // Renderiza a página em um canvas
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.height = viewport.height;
@@ -1235,10 +1244,8 @@ async function compressPDF() {
 
             await page.render({ canvasContext: context, viewport: viewport }).promise;
 
-            // Converte o canvas para imagem JPEG com a qualidade escolhida
             const imgDataUrl = canvas.toDataURL('image/jpeg', quality);
 
-            // Incorpora a imagem no novo PDF
             const jpegImage = await newPdfDoc.embedJpg(imgDataUrl);
             const newPage = newPdfDoc.addPage([viewport.width, viewport.height]);
             newPage.drawImage(jpegImage, {
@@ -1249,17 +1256,14 @@ async function compressPDF() {
             });
         }
 
-        // Salva o novo arquivo PDF comprimido
         const compressedBytes = await newPdfDoc.save();
         const finalBlob = new Blob([compressedBytes], { type: 'application/pdf' });
         const finalSize = finalBlob.size;
 
-        // Calcula redução de tamanho
         const savedPercent = (((initialSize - finalSize) / initialSize) * 100).toFixed(1);
         const originalMB = (initialSize / (1024 * 1024)).toFixed(2);
         const finalMB = (finalSize / (1024 * 1024)).toFixed(2);
 
-        // Download do arquivo
         const downloadUrl = URL.createObjectURL(finalBlob);
         const a = document.createElement('a');
         a.href = downloadUrl;
@@ -1279,11 +1283,7 @@ async function compressPDF() {
     }
 }
 
-
-
-// Atualiza o ano dinamicamente no Rodapé
 function updateFooterAndCounter() {
-    // Atualiza o ano dinamicamente no Rodapé
     const yearEl = document.getElementById('footer-year');
     if (yearEl) {
         yearEl.innerText = new Date().getFullYear();
@@ -1331,11 +1331,12 @@ function generateQRCode() {
             downloadBtn.classList.remove('hidden');
         }
     }, 300);
-} // ==========================================
-// UTILITÁRIOS
+}
+
+// ==========================================
+// UTILITÁRIOS E IMAGENS
 // ==========================================
 
-// Formata tamanhos em bytes para KB ou MB
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -1344,7 +1345,6 @@ function formatFileSize(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Dispara o download automático do arquivo gerado
 function downloadFile(blob, fileName) {
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -1355,25 +1355,19 @@ function downloadFile(blob, fileName) {
     URL.revokeObjectURL(link.href);
 }
 
-// Carrega um arquivo de imagem em um elemento <img> nativo do JS
 function loadImageFromFile(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => resolve(img);
-            img.onerror = () => reject(new Error('Erro ao carregar a imagem. O arquivo pode estar corrompido ou o formato não é suportado pelo navegador.'));
+            img.onerror = () => reject(new Error('Erro ao carregar a imagem.'));
             img.src = e.target.result;
         };
         reader.onerror = () => reject(new Error('Erro ao ler o arquivo.'));
         reader.readAsDataURL(file);
     });
 }
-
-
-// ==========================================
-// 1. COMPRESSOR DE IMAGEM
-// ==========================================
 
 async function compressImage() {
     const fileInput = document.getElementById('img-compress-file');
@@ -1395,25 +1389,21 @@ async function compressImage() {
         const quality = parseFloat(rangeInput.value) / 100;
         const img = await loadImageFromFile(file);
 
-        // Cria o canvas com as dimensões originais da imagem
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth || img.width;
         canvas.height = img.naturalHeight || img.height;
 
         const ctx = canvas.getContext('2d');
-
-        // Define fundo branco caso a imagem original possua transparência (PNG/WEBP)
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
 
-        // Para compressão com qualidade ajustável, usamos JPEG ou WEBP
         const mimeType = file.type === 'image/webp' ? 'image/webp' : 'image/jpeg';
         const extension = mimeType === 'image/webp' ? '.webp' : '.jpg';
 
         canvas.toBlob((blob) => {
             if (!blob) {
-                statusEl.innerText = '❌ Falha ao processar a compressão da imagem.';
+                statusEl.innerText = '❌ Falha ao processar a compressão.';
                 statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
                 return;
             }
@@ -1431,7 +1421,7 @@ async function compressImage() {
                 statusEl.innerText = `✅ Concluído! ${origSize} ➔ ${newSize} (${reduction}% menor)`;
                 statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
             } else {
-                statusEl.innerText = `✅ Concluído! (${newSize}). A imagem já estava bastante otimizada.`;
+                statusEl.innerText = `✅ Concluído! (${newSize}). Imagem já estava otimizada.`;
                 statusEl.className = 'text-xs text-center text-yellow-400 mt-3 min-h-[1rem]';
             }
         }, mimeType, quality);
@@ -1442,26 +1432,24 @@ async function compressImage() {
     }
 }
 
-
 // ==========================================
 // 2. CONVERSOR DE IMAGENS & DRAG AND DROP
 // ==========================================
 
 let convertSelectedFile = null;
 
-// Atualiza a interface quando um arquivo é selecionado ou solto
 function updateConvertDropZoneUI(file) {
     const textEl = document.getElementById('drop-zone-img-text');
     if (file) {
         convertSelectedFile = file;
-        textEl.innerHTML = `<span class="font-semibold text-emerald-400">${file.name}</span> (${formatFileSize(file.size)})`;
+        // CORREÇÃO DE SEGURANÇA NA INTERPOLAÇÃO DE NOME DE ARQUIVO
+        textEl.innerHTML = `<span class="font-semibold text-emerald-400">${escapeHtml(file.name)}</span> (${formatFileSize(file.size)})`;
     } else {
         convertSelectedFile = null;
         textEl.innerHTML = `<span class="font-semibold text-emerald-400">Clique</span> ou arraste a imagem`;
     }
 }
 
-// Disparado ao selecionar o arquivo via <input type="file">
 function handleImgConvertSelect() {
     const fileInput = document.getElementById('img-convert-file');
     if (fileInput.files && fileInput.files[0]) {
@@ -1469,14 +1457,12 @@ function handleImgConvertSelect() {
     }
 }
 
-// Configuração dos Eventos de Drag & Drop
 document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone-img-convert');
     const fileInput = document.getElementById('img-convert-file');
 
     if (!dropZone) return;
 
-    // Impede comportamentos padrão do navegador (ex: abrir a imagem diretamente na aba)
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, (e) => {
             e.preventDefault();
@@ -1484,7 +1470,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, false);
     });
 
-    // Efeitos visuais ao arrastar sobre a zona
     ['dragenter', 'dragover'].forEach(eventName => {
         dropZone.addEventListener(eventName, () => {
             dropZone.classList.add('border-emerald-500', 'bg-gray-700');
@@ -1497,25 +1482,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }, false);
     });
 
-    // Quando o arquivo é solto na área
     dropZone.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
         const files = dt.files;
-
         if (files && files.length > 0) {
-            fileInput.files = files; // Sincroniza com o input
+            fileInput.files = files;
             updateConvertDropZoneUI(files[0]);
         }
     });
 });
 
-// Executa a conversão do formato
 async function convertImage() {
     const targetFormat = document.getElementById('img-target-format').value;
     const statusEl = document.getElementById('img-convert-status');
 
     if (!convertSelectedFile) {
-        statusEl.innerText = '❌ Por favor, selecione ou arraste uma imagem primeiro.';
+        statusEl.innerText = '❌ Selecione ou arraste uma imagem primeiro.';
         statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
         return;
     }
@@ -1525,8 +1507,6 @@ async function convertImage() {
         statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
 
         const img = await loadImageFromFile(convertSelectedFile);
-
-        // Mapeamento de formatos para MIME Types do navegador
         const mimeTypes = {
             jpg: 'image/jpeg',
             png: 'image/png',
@@ -1539,7 +1519,6 @@ async function convertImage() {
 
         const targetMime = mimeTypes[targetFormat] || 'image/jpeg';
 
-        // --- Caso Especial: Conversão para SVG Vetorial Básica ---
         if (targetFormat === 'svg') {
             const width = img.naturalWidth || img.width;
             const height = img.naturalHeight || img.height;
@@ -1552,7 +1531,6 @@ async function convertImage() {
 
             const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
             const originalName = convertSelectedFile.name.substring(0, convertSelectedFile.name.lastIndexOf('.')) || 'imagem';
-
             downloadFile(blob, `${originalName}.svg`);
 
             statusEl.innerText = '✅ Convertido para SVG com sucesso!';
@@ -1560,14 +1538,12 @@ async function convertImage() {
             return;
         }
 
-        // --- Processamento padrão em Canvas para Formatos Raster ---
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth || img.width;
         canvas.height = img.naturalHeight || img.height;
 
         const ctx = canvas.getContext('2d');
 
-        // Se o formato de saída não suporta transparência (ex: JPG, BMP), preenche com fundo branco
         if (['jpg', 'bmp'].includes(targetFormat)) {
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1577,7 +1553,7 @@ async function convertImage() {
 
         canvas.toBlob((blob) => {
             if (!blob) {
-                statusEl.innerText = `❌ O navegador não suporta a exportação direta para o formato .${targetFormat.toUpperCase()}.`;
+                statusEl.innerText = `❌ Navegador não suporta exportar para .${targetFormat.toUpperCase()}.`;
                 statusEl.className = 'text-xs text-center text-red-400 mt-3 min-h-[1rem]';
                 return;
             }
@@ -1587,7 +1563,7 @@ async function convertImage() {
 
             downloadFile(blob, newFileName);
 
-            statusEl.innerText = `✅ Imagem convertida para ${targetFormat.toUpperCase()} (${formatFileSize(blob.size)})!`;
+            statusEl.innerText = `✅ Convertida para ${targetFormat.toUpperCase()} (${formatFileSize(blob.size)})!`;
             statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
         }, targetMime, 0.92);
 
