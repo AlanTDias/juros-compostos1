@@ -1694,3 +1694,91 @@ async function splitPDF() {
         updateStatus(statusEl, "❌ Erro ao dividir PDF: " + (error.message || "Verifique as páginas informadas."), false, true);
     }
 }
+
+// ==========================================
+// ⬇️ BAIXADOR DE VÍDEOS (Cobalt + CORS Proxy)
+// ==========================================
+
+async function processVideoRequest() {
+    const urlInput = document.getElementById('video-url').value.trim();
+    const format = document.getElementById('video-format').value; // mp4 ou mp3
+
+    const placeholder = document.getElementById('video-placeholder');
+    const loading = document.getElementById('video-loading');
+    const resultPanel = document.getElementById('video-result');
+
+    // Validação básica
+    if (!urlInput) {
+        alert("Por favor, cole a URL do vídeo.");
+        return;
+    }
+
+    if (!urlInput.includes('http')) {
+        alert("URL inválida. Certifique-se de copiar o link completo (começando com http:// ou https://).");
+        return;
+    }
+
+    // Alternar interface para "Carregando"
+    placeholder.classList.add('hidden');
+    resultPanel.classList.add('hidden');
+    loading.classList.remove('hidden');
+
+    try {
+        const isAudio = format === 'mp3';
+
+        // ⚠️ ADICIONADO CORS PROXY: Ele atua como uma ponte para evitar o erro "Failed to fetch"
+        const targetUrl = 'https://api.cobalt.tools/api/json';
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+
+        const response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                url: urlInput,
+                isAudioOnly: isAudio,
+                aFormat: "mp3",
+                vQuality: "720"
+            })
+        });
+
+        // Se o proxy falhar ou a API bloquear, cairá aqui
+        if (!response.ok) {
+            throw new Error(`Erro na comunicação com o servidor (Status: ${response.status}). O serviço pode estar temporariamente indisponível.`);
+        }
+
+        const data = await response.json();
+
+        if (data.status === 'error' || !data.url) {
+            throw new Error(data.text || "Não foi possível processar este vídeo. Verifique se o link é público ou tente outro.");
+        }
+
+        // Populando a tela
+        document.getElementById('video-thumbnail').src = "https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80";
+        document.getElementById('video-title').innerText = "✅ Arquivo processado com sucesso!";
+
+        const downloadBtn = document.getElementById('video-download-btn');
+        downloadBtn.href = data.url;
+        downloadBtn.onclick = null;
+
+        downloadBtn.innerHTML = isAudio ? "<span>🎵</span> Baixar Áudio (MP3)" : "<span>⬇️</span> Baixar Vídeo (MP4)";
+
+        loading.classList.add('hidden');
+        resultPanel.classList.remove('hidden');
+
+    } catch (error) {
+        console.error("Detalhes do erro:", error);
+
+        // Mensagem de erro mais amigável
+        if (error.message.includes("Failed to fetch")) {
+            alert("Bloqueio de rede ou CORS. O servidor de download está bloqueando a requisição no momento.");
+        } else {
+            alert(error.message);
+        }
+
+        loading.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+    }
+}
