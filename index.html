@@ -41,18 +41,9 @@
                     <span class="text-base">🔄</span>
                     <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Conversores</span>
                 </button>
-                <!-- Botão Baixador de Vídeos -->
-                <button onclick="switchTab('downloader')" id="btn-downloader" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Baixador de Vídeos">
-                    <span class="text-base">⬇️</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Baixar Vídeo</span>
-                </button>
-                <button onclick="switchTab('documentos')" id="btn-documentos" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Gerador de Documentos">
-                    <span class="text-base">📄</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Gerador Documentos</span>
-                </button>
-                <button onclick="switchTab('imagens')" id="btn-imagens" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Ferramentas de Imagem">
-                   <span class="text-base">🖼️</span>
-                   <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Imagens</span>
+                <button onclick="switchTab('foto-video')" id="btn-foto-video" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Foto & Vídeo">
+                    <span class="text-base">🖼️🎬</span>
+                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Foto & Vídeo</span>
                 </button>
                 <button onclick="switchTab('reserva')" id="btn-reserva" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Reserva de Emergência">
                     <span class="text-base">🛡️</span>
@@ -593,242 +584,180 @@
                 </div>
             </section>
         </section>
-        <!-- ---------------- TAB 13: BAIXADOR DE VÍDEOS ---------------- -->
-        <section id="tab-downloader" class="tab-content hidden space-y-6">
+
+        <!-- ---------------- TAB: FOTO & VÍDEO ---------------- -->
+        <section id="tab-foto-video" class="tab-content hidden space-y-8">
             <div class="space-y-2">
-                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">
-                    Baixador de Vídeos (YouTube, Instagram, TikTok) <span class="text-red-500">(Em Breve)</span>
-                </h2>
-            </div>
-            <p class="text-sm text-gray-400">Cole o link do vídeo abaixo para extrair e baixar o arquivo em MP4 ou MP3.</p>
+                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Central de Foto & Vídeo</h2>
+                <p class="text-sm text-gray-400">Comprima, converta imagens instantaneamente ou baixe conteúdos de redes sociais através de links.</p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Painel de Entrada (Esquerda) -->
-                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300">URL do Vídeo</label>
-                        <input type="text" id="video-url" placeholder="Ex: https://www.youtube.com/watch?v=..." class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300">Formato Desejado</label>
-                        <select id="video-format" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none text-white">
-                            <option value="mp4" selected>Vídeo (MP4 - Alta Qualidade)</option>
-                            <option value="mp3">Áudio (MP3 - Apenas Música)</option>
-                        </select>
-                    </div>
-                    <button onclick="processVideoRequest()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition flex items-center justify-center gap-2">
-                        <span>🔍</span> Buscar Vídeo
-                    </button>
-                </div>
-
-                <!-- Painel de Resultado (Direita) -->
-                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg lg:col-span-2 flex flex-col items-center justify-center min-h-[260px] space-y-4 relative">
-                    <!-- Estado Inicial -->
-                    <div id="video-placeholder" class="text-center">
-                        <span class="text-4xl">🎬</span>
-                        <p class="text-gray-400 text-sm mt-2">Cole o link ao lado e clique em "Buscar Vídeo".</p>
-                    </div>
-
-                    <!-- Estado de Carregamento -->
-                    <div id="video-loading" class="hidden text-center space-y-3">
-                        <div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                        <p class="text-emerald-400 text-sm animate-pulse">Processando link e buscando arquivo...</p>
-                        <p class="text-[10px] text-gray-500">Isso pode levar alguns segundos dependendo da plataforma.</p>
-                    </div>
-
-                    <!-- Estado Final (Sucesso) -->
-                    <div id="video-result" class="hidden w-full flex flex-col items-center space-y-4">
-                        <img id="video-thumbnail" src="" alt="Capa do Vídeo" class="w-full max-w-sm rounded-lg shadow-md border border-gray-700">
-                        <h3 id="video-title" class="text-white font-semibold text-center text-sm md:text-base line-clamp-2">Título do Vídeo</h3>
-
-                        <div class="w-full max-w-sm">
-                            <a id="video-download-btn" href="#" target="_blank" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded transition flex items-center justify-center gap-2">
-                                <span>⬇️</span> Fazer Download Agora
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 📥 COMO FUNCIONA O BAIXADOR -->
-            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
-                <div class="border-b border-gray-700 pb-3 mb-4">
-                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-                        <span>📥</span> Como Funciona o Baixador de Vídeos?
+            <!-- BLOCO 1: FERRAMENTAS DE IMAGEM -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6">
+                <div class="border-b border-gray-700 pb-3">
+                    <h3 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
+                        <span>🖼️</span> Ferramentas de Imagem (Compressão e Conversão)
                     </h3>
-                    <p class="text-xs text-gray-400 mt-1">
-                        Entenda como o sistema extrai a mídia das principais redes sociais para o seu dispositivo.
-                    </p>
+                    <p class="text-xs text-gray-400 mt-1">Comprima ou altere os formatos das suas fotos instantaneamente no navegador.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
-                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Plataformas Aceitas</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Suporte</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <!-- Compressor de Imagem -->
+                    <div class="bg-gray-700/40 p-5 rounded-xl border border-gray-700/60 space-y-4 h-full flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <h4 class="text-sm font-bold text-emerald-400">📉 Compressor de Imagem</h4>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-300 mb-2">Selecione a Imagem</label>
+                                <input type="file" id="img-compress-file" accept="image/*" class="w-full bg-gray-700 text-xs rounded p-2.5 outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
                             </div>
-                            <p class="text-gray-400 leading-relaxed">
-                                O sistema é projetado para ler URLs do <strong class="text-gray-200">YouTube, Instagram (Reels) e TikTok</strong>. Certifique-se de copiar o link completo da postagem.
-                            </p>
+                            <div>
+                                <div class="flex justify-between text-xs text-gray-300 mb-1">
+                                    <label>Qualidade desejada:</label>
+                                    <span id="compress-val-label">80%</span>
+                                </div>
+                                <input type="range" id="img-compress-range" min="10" max="100" value="80" class="w-full accent-emerald-500" oninput="document.getElementById('compress-val-label').innerText = this.value + '%'">
+                            </div>
+                        </div>
+                        <div class="pt-2">
+                            <button onclick="compressImage()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded-lg transition text-xs">
+                                Comprimir Imagem
+                            </button>
+                            <p id="compress-status" class="text-xs text-center text-gray-400 mt-2 min-h-[1rem]"></p>
                         </div>
                     </div>
 
-                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Conversão de Formato</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">MP4 / MP3</span>
+                    <!-- Conversor de Imagens -->
+                    <div class="bg-gray-700/40 p-5 rounded-xl border border-gray-700/60 space-y-4 h-full flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <h4 class="text-sm font-bold text-emerald-400">🔄 Conversor de Formatos</h4>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-300 mb-1.5">1. Selecione a Imagem</label>
+                                <div id="drop-zone-img-convert" onclick="document.getElementById('img-convert-file').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 p-3 rounded-xl text-center cursor-pointer transition flex flex-col items-center justify-center gap-1">
+                                    <span class="text-xl">🖼️</span>
+                                    <p id="drop-zone-img-text" class="text-xs text-gray-300">
+                                        <span class="font-semibold text-emerald-400">Clique</span> ou arraste a imagem
+                                    </p>
+                                </div>
+                                <input type="file" id="img-convert-file" accept="image/*, .tiff, .bmp, .svg" onchange="handleImgConvertSelect()" class="hidden">
                             </div>
-                            <p class="text-gray-400 leading-relaxed">
-                                Você pode optar por baixar o vídeo completo com imagem e som (MP4) ou extrair apenas a faixa de áudio (MP3), ideal para podcasts e músicas musicais.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">Processamento em Nuvem</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">API</span>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-300 mb-1.5">2. Formato de Saída</label>
+                                <select id="img-target-format" class="w-full bg-gray-700 text-xs text-gray-100 rounded p-2.5 outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="jpg">JPG / JPEG</option>
+                                    <option value="png">PNG (Transparente)</option>
+                                    <option value="webp">WEBP (Otimizado)</option>
+                                    <option value="gif">GIF</option>
+                                    <option value="bmp">BMP</option>
+                                    <option value="tiff">TIFF</option>
+                                    <option value="svg">SVG</option>
+                                </select>
                             </div>
-                            <p class="text-gray-400 leading-relaxed">
-                                O link é enviado para um servidor que decodifica o arquivo original da rede social e gera um link direto de download seguro para o seu aparelho.
-                            </p>
                         </div>
-                    </div>
-                </div>
-            </section>
-        </section>
-
-        <!-- ---------------- FERRAMENTAS DE IMAGEM ---------------- -->
-        <section id="tab-imagens" class="tab-content hidden space-y-6">
-            <div class="space-y-2">
-                <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Ferramentas de Imagem</h2>
-                <p class="text-sm text-gray-400">Comprima ou converta os formatos das suas imagens diretamente no navegador.</p>
-            </div>
-
-            <!-- Ferramentas Principais (Compressor e Conversor Lado a Lado) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
-                <!-- Compressor de Imagem -->
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4 h-full flex flex-col justify-between">
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold text-emerald-300">📉 Compressor de Imagem</h3>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Selecione a Imagem</label>
-                            <input type="file" id="img-compress-file" accept="image/*" class="w-full bg-gray-700 text-sm rounded p-3 outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                        <div class="pt-2">
+                            <button onclick="convertImage()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded-lg transition text-xs">
+                                Converter Imagem
+                            </button>
+                            <p id="img-convert-status" class="text-xs text-center text-gray-400 mt-2 min-h-[1rem]"></p>
                         </div>
-                        <div>
-                            <div class="flex justify-between text-sm text-gray-300 mb-2">
-                                <label>Qualidade desejada:</label>
-                                <span id="compress-val-label">80%</span>
-                            </div>
-                            <input type="range" id="img-compress-range" min="10" max="100" value="80" class="w-full accent-emerald-500" oninput="document.getElementById('compress-val-label').innerText = this.value + '%'">
-                        </div>
-                    </div>
-                    <div>
-                        <button onclick="compressImage()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm">
-                    Comprimir Imagem
-                </button>
-                        <p id="compress-status" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
                     </div>
                 </div>
 
-                <!-- CONVERSOR DE IMAGENS -->
-                <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4 h-full flex flex-col justify-between">
-                    <div class="space-y-4">
-                        <div class="border-b border-gray-700 pb-2">
-                            <h3 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
-                                <span>🔄</span> Conversor de Imagens
-                            </h3>
-                            <p class="text-xs text-gray-400 mt-1">Converta entre JPG, PNG, WEBP, GIF, BMP, TIFF, SVG e RAW.</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione a Imagem</label>
-                            <!-- ÁREA DE DRAG AND DROP -->
-                            <div id="drop-zone-img-convert" onclick="document.getElementById('img-convert-file').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-4 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-1">
-                                <span class="text-2xl">🖼️</span>
-                                <p id="drop-zone-img-text" class="text-xs text-gray-300">
-                                    <span class="font-semibold text-emerald-400">Clique</span> ou arraste a imagem
-                                </p>
-                            </div>
-                            <input type="file" id="img-convert-file" accept="image/*, .tiff, .bmp, .svg, .raw, .cr2, .nef, .arw, .dng" onchange="handleImgConvertSelect()" class="hidden">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">2. Formato de Saída</label>
-                            <select id="img-target-format" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
-                        <option value="jpg">JPG / JPEG (Padrão para Fotos)</option>
-                        <option value="png">PNG (Fundo Transparente)</option>
-                        <option value="webp">WEBP (Otimizado para Web)</option>
-                        <option value="gif">GIF (Animação / Gráficos)</option>
-                        <option value="bmp">BMP (Sem Compressão)</option>
-                        <option value="tiff">TIFF (Alta Qualidade de Impressão)</option>
-                        <option value="svg">SVG (Vetor)</option>
-                    </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <button onclick="convertImage()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm">
-                    Converter Imagem
-                </button>
-                        <p id="img-convert-status" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- COMO FUNCIONAM AS FERRAMENTAS DE IMAGEM -->
-            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
-                <div class="border-b border-gray-700 pb-3 mb-4">
-                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                <!-- Explicação / Guia das Ferramentas de Imagem -->
+                <div class="bg-gray-700/30 border border-gray-700/50 rounded-xl p-4 mt-4">
+                    <h4 class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <span>🖼️</span> Como Funcionam as Ferramentas de Imagem?
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-300">
+                        <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60">
+                            <span class="font-bold text-white block mb-1">📉 Compressor de Imagem</span>
+                            <p class="text-gray-400">Reduz o tamanho em KB/MB ajustando a taxa de qualidade via controle deslizante, preservando o aspecto visual ideal para web.</p>
+                        </div>
+                        <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60">
+                            <span class="font-bold text-white block mb-1">🔄 Conversor de Formatos</span>
+                            <p class="text-gray-400">Reescreve os pixels da foto para extensões compatíveis (como WEBP, PNG, JPG, SVG), garantindo versatilidade.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOCO 2: BAIXADOR DE VÍDEOS -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6">
+                <div class="border-b border-gray-700 pb-3">
+                    <h3 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
+                        <span>⬇️</span> Baixador de Vídeos (YouTube, Instagram, TikTok) <span style="color: red;">Em Breve</span> </p>
                     </h3>
-                    <p class="text-xs text-gray-400 mt-1">
-                        Entenda como funciona a otimização e conversão de formatos das suas imagens.
-                    </p>
+                    <p class="text-xs text-gray-400 mt-1">Cole o link do vídeo abaixo para extrair e baixar o arquivo em MP4 ou MP3.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-300">
-                    <!-- Card 1: Compressor de Imagem -->
-                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Painel de Entrada (Esquerda) -->
+                    <div class="bg-gray-700/40 p-4 rounded-xl border border-gray-700/60 space-y-4">
                         <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">📉 Compressor</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Otimização</span>
-                            </div>
-                            <p class="text-gray-400 leading-relaxed">
-                                Ajusta a taxa de compressão do arquivo via controle deslizante (10% a 100%), reduzindo o tamanho em MB/KB e preservando a qualidade visual ideal para a web.
-                            </p>
+                            <label class="block text-sm font-medium text-gray-300">URL do Vídeo</label>
+                            <input type="text" id="video-url" placeholder="Ex: https://www.youtube.com/watch?v=..." class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500 text-white text-sm">
                         </div>
-                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
-                            📌 <strong class="text-gray-200">Como usar:</strong> Envie a foto, defina a qualidade (recomendado: 80%) e clique em "Comprimir Imagem".
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300">Formato Desejado</label>
+                            <select id="video-format" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none text-white text-sm">
+                                <option value="mp4" selected>Vídeo (MP4 - Alta Qualidade)</option>
+                                <option value="mp3">Áudio (MP3 - Apenas Música)</option>
+                            </select>
                         </div>
+                        <button onclick="processVideoRequest()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition flex items-center justify-center gap-2 text-sm">
+                            <span>🔍</span> Buscar Vídeo
+                        </button>
                     </div>
 
-                    <!-- Card 2: Conversor de Imagens -->
-                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-white text-sm">🔄 Conversor</span>
-                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Formatos</span>
-                            </div>
-                            <p class="text-gray-400 leading-relaxed">
-                                Reescreve a estrutura de pixels da imagem original para o novo formato escolhido (como WEBP, PNG, JPG, BMP ou SVG), permitindo compatibilidade com sistemas diferentes.
-                            </p>
+                    <!-- Painel de Resultado (Direita) -->
+                    <div class="bg-gray-700/40 p-4 rounded-xl border border-gray-700/60 lg:col-span-2 flex flex-col items-center justify-center min-h-[220px] space-y-4 relative">
+                        <!-- Estado Inicial -->
+                        <div id="video-placeholder" class="text-center">
+                            <span class="text-4xl">🎬</span>
+                            <p class="text-gray-400 text-sm mt-2">Cole o link ao lado e clique em "Buscar Vídeo".</p>
                         </div>
-                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
-                            📌 <strong class="text-gray-200">Formatos:</strong> Suporta JPG, PNG, WEBP, GIF, BMP, TIFF, SVG e RAW (CR2, NEF, ARW, DNG).
+
+                        <!-- Estado de Carregamento -->
+                        <div id="video-loading" class="hidden text-center space-y-3">
+                            <div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                            <p class="text-emerald-400 text-sm animate-pulse">Processando link e buscando arquivo...</p>
+                        </div>
+
+                        <!-- Estado Final (Sucesso) -->
+                        <div id="video-result" class="hidden w-full flex flex-col items-center space-y-4">
+                            <img id="video-thumbnail" src="" alt="Capa do Vídeo" class="w-full max-w-sm rounded-lg shadow-md border border-gray-700 max-h-40 object-cover">
+                            <h3 id="video-title" class="text-white font-semibold text-center text-sm md:text-base line-clamp-2">Título do Vídeo</h3>
+
+                            <div class="w-full max-w-sm">
+                                <a id="video-download-btn" href="#" target="_blank" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded transition flex items-center justify-center gap-2 text-sm">
+                                    <span>⬇️</span> Fazer Download Agora
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </section>
+
+                <!-- Explicação / Guia do Baixador de Vídeos -->
+                <div class="bg-gray-700/30 border border-gray-700/50 rounded-xl p-4 mt-4">
+                    <h4 class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <span>📥</span> Como Funciona o Baixador de Vídeos?
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-gray-300">
+                        <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60">
+                            <span class="font-bold text-white block mb-1">Plataformas Aceitas</span>
+                            <p class="text-gray-400">Compatível com URLs públicas do YouTube, Instagram e TikTok copiadas diretamente.</p>
+                        </div>
+                        <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60">
+                            <span class="font-bold text-white block mb-1">MP4 ou MP3</span>
+                            <p class="text-gray-400">Escolha entre baixar o arquivo completo de vídeo ou extrair apenas a faixa de áudio.</p>
+                        </div>
+                        <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60">
+                            <span class="font-bold text-white block mb-1">Processamento Rápido</span>
+                            <p class="text-gray-400">O link é processado por servidores de apoio para entregar um arquivo direto e seguro.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
-
         <!-- ---------------- TAB 2: RESERVA DE EMERGÊNCIA ---------------- -->
         <section id="tab-reserva" class="tab-content hidden space-y-6">
             <h2 class="text-xl md:text-2xl font-bold text-emerald-400">Simulador de Reserva de Emergência</h2>
