@@ -1,15 +1,210 @@
-/* Estilo base da página */
+/* ==========================================================
+   ExCalc — Sistema visual "painel técnico"
+   Paleta de cores (gray/emerald) é redefinida via tailwind.config
+   no <head> do index.html. Este arquivo cuida de tipografia,
+   textura de fundo, brilho de acento e pequenos componentes
+   que o Tailwind puro não cobre.
+   ========================================================== */
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #5f76db 0%, #47147a 100%);
-    background-attachment: fixed;
-    min-height: 100vh;
-    margin: 0;
+:root {
+    --accent: #22D3EE;
+    --accent-soft: rgba(34, 211, 238, 0.35);
+    --accent-glow: rgba(34, 211, 238, 0.18);
+    --grid-line: rgba(148, 163, 184, 0.06);
 }
 
 
-/* Oculta setas de input tipo number no Chrome, Edge, Safari e Opera */
+/* ---------- Tipografia ---------- */
+
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    position: relative;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+
+/* Valores numéricos/financeiros (resultados de cálculo) ganham fonte
+   monoespaçada — alinhamento de dígitos como em painel financeiro real,
+   não é decoração: só atinge spans com id (saídas dinâmicas de JS). */
+
+span[id][class*="font-bold"],
+span[id][class*="font-extrabold"] {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+}
+
+
+/* ---------- Textura de fundo: grade sutil (papel milimetrado) ---------- */
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+
+/* ---------- Marca no cabeçalho ---------- */
+
+.brand-mark {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent), #7C6CF6);
+    box-shadow: 0 0 12px var(--accent-glow);
+    flex-shrink: 0;
+    animation: brand-pulse 3s ease-in-out infinite;
+}
+
+@keyframes brand-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 10px var(--accent-glow);
+    }
+    50% {
+        box-shadow: 0 0 18px var(--accent-soft);
+    }
+}
+
+header {
+    position: relative;
+}
+
+
+/* Linha de acento no rodapé do header, com uma luz que desliza devagar (efeito "scanner") */
+
+header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+    background-size: 50% 100%;
+    animation: scan-line 6s linear infinite;
+}
+
+@keyframes scan-line {
+    0% {
+        background-position: -50% 0;
+    }
+    100% {
+        background-position: 150% 0;
+    }
+}
+
+
+/* ---------- Hero da aba Início ---------- */
+
+.hero-panel {
+    position: relative;
+    padding: 1.75rem 1.5rem;
+    border-radius: 16px;
+    background: radial-gradient(120% 160% at 0% 0%, rgba(34, 211, 238, 0.10), transparent 55%), #121B2E;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    overflow: hidden;
+}
+
+.hero-panel::before {
+    content: "";
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+    pointer-events: none;
+}
+
+
+/* ---------- Elevação com leve brilho ciano (substitui sombra genérica) ---------- */
+
+.shadow-lg,
+.shadow-md {
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.06) inset !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+
+/* Leve elevação ao passar o mouse nos cards principais — feedback tátil, não decoração automática */
+
+.shadow-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--accent-soft) inset !important;
+}
+
+
+/* Botão/pílula ativa (nav e ações primárias) ganham um brilho de acento sutil */
+
+.bg-emerald-500 {
+    box-shadow: 0 0 18px var(--accent-glow);
+}
+
+.hover\:bg-emerald-600:hover {
+    box-shadow: 0 0 22px var(--accent-soft);
+}
+
+
+/* ---------- Foco acessível, no tom do acento ---------- */
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+
+/* ---------- Scrollbar discreta e coerente com o tema ---------- */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.25);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.4);
+}
+
+* {
+    scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+    scrollbar-width: thin;
+}
+
+::selection {
+    background: var(--accent-soft);
+    color: #05070E;
+}
+
+
+/* ---------- Removidos os spinners nativos dos inputs numéricos ---------- */
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -18,8 +213,12 @@ input::-webkit-inner-spin-button {
 }
 
 
-/* Oculta setas de input tipo number no Firefox */
+/* Respeita preferência do usuário por menos movimento */
 
-input[type=number] {
-    -moz-appearance: textfield;
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
 }
