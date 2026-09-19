@@ -1,3 +1,5 @@
+/* Estilo base da página */
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #5f76db 0%, #47147a 100%);
@@ -6,8 +8,18 @@ body {
     margin: 0;
 }
 
+
+/* Oculta setas de input tipo number no Chrome, Edge, Safari e Opera */
+
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+
+/* Oculta setas de input tipo number no Firefox */
+
+input[type=number] {
+    -moz-appearance: textfield;
 }
