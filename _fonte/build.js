@@ -131,9 +131,13 @@ for (const p of paginas) {
     if (!fs.existsSync(arqConteudo)) { problemas.push(`Falta _fonte/conteudo/${p.id}.html`); continue; }
     let conteudo = lerArq(arqConteudo).trimEnd();
 
-    // texto de apresentação logo abaixo do <h1> (ajuda quem chega pelo Google), se a página ainda não tiver
-    if (p.intro && !/<\/h1>\s*<p class="text-sm text-gray-400 -mt-3">/.test(conteudo)) {
-        conteudo = conteudo.replace(/(<\/h1>)/, `$1\n            <p class="text-sm text-gray-400 -mt-3">${esc(p.intro)}</p>`);
+    // texto de apresentação (ajuda quem chega pelo Google): vai no marcador <!--INTRO--> se o conteúdo tiver um
+    // (útil quando o <h1> está dentro de uma linha flex); senão, logo abaixo do <h1>, se a página ainda não tiver
+    const paragrafoIntro = p.intro ? `<p class="text-sm text-gray-400 -mt-3">${esc(p.intro)}</p>` : '';
+    if (conteudo.includes('<!--INTRO-->')) {
+        conteudo = conteudo.replace('<!--INTRO-->', () => paragrafoIntro);
+    } else if (p.intro && !/<\/h1>\s*<p class="text-sm text-gray-400 -mt-3">/.test(conteudo)) {
+        conteudo = conteudo.replace(/(<\/h1>)/, () => `</h1>\n            ${paragrafoIntro}`);
     }
     if (p.id === 'home') conteudo = conteudo.replace(/\s*<\/section>\s*$/, `\n${cartoesHome}</section>`);
 

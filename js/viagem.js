@@ -1,7 +1,7 @@
 // MODO VIAGEM: efeitos psicodélicos (carregado só quando a pessoa clica no botão flutuante)
 // (Gerado na divisão do script.js único; agora este arquivo é editado diretamente.)
 
-// MODO VIAGEM: efeitos psicodélicos que reagem ao mouse/toque (caleidoscópio, rede neural e nuvens)
+// MODO VIAGEM: efeitos psicodélicos que reagem ao mouse/toque (caleidoscópio e rede neural)
 // Tudo dentro de uma IIFE; só abrirViagem() e fecharViagem() ficam globais (usadas pelo HTML).
 // ==========================================
 (function () {
@@ -11,10 +11,7 @@
     const ctx = canvas.getContext('2d');
     const bar = document.getElementById('viagem-bar');
     const dica = document.getElementById('viagem-dica');
-    const nuvemEl = document.getElementById('viagem-nuvem');
     const DICA_PADRAO = dica.innerText;
-    // Nas nuvens o clique não gera onda de choque (o Vanta cuida do mouse), então a dica muda
-    const DICA_NUVEM = 'Mova o mouse para mudar o céu · teclas 1, 2, 3 trocam o efeito · Esc sai';
     const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const velocidadeGlobal = reduzMovimento ? 0.4 : 1; // quem pede menos movimento recebe tudo mais devagar
     const FUNDO = '#05030f'; // mesmo valor de --viagem-bg no style.css
@@ -160,47 +157,6 @@
         }
     }
 
-    // ---------- Efeito 2: nuvens realistas (Vanta.js "clouds") ----------
-    // Não usa o canvas 2D: o Vanta cria o próprio canvas WebGL dentro de #viagem-nuvem.
-    let nuvemEfeito = null;
-
-    async function iniciarNuvem() {
-        if (nuvemEfeito || !nuvemEl) return;
-        dica.innerText = '☁️ Carregando as nuvens...';
-        dica.classList.remove('oculta');
-        try {
-            await carregarLibs('three', 'vantaclouds');
-            if (!rodando || modo !== 'nuvem' || nuvemEfeito) return; // o usuário já trocou de efeito
-            nuvemEfeito = VANTA.CLOUDS({
-                el: nuvemEl,
-                mouseControls: true,
-                touchControls: true,
-                gyroControls: false,
-                minHeight: 200,
-                minWidth: 200,
-                speed: reduzMovimento ? 0.4 : 1.2,
-                skyColor: 0x0c3271,         // céu azul-navy (20% mais claro que o original 0x0a2a5e)
-                cloudColor: 0x92aedb,       // nuvens 15% mais translúcidas: 15% da cor do céu misturado em 0xa9c4ee
-                cloudShadowColor: 0x0b162c, // sombras no navy do site (mesma mistura de 15% com o céu)
-                sunColor: 0x22d3ee,         // "sol" ciano (cor de destaque do site)
-                sunGlareColor: 0x0e7490,
-                sunlightColor: 0x67e8f9
-            });
-            dica.innerText = DICA_NUVEM;
-        } catch (erro) {
-            console.warn('Nuvens indisponíveis:', erro && erro.message);
-            dica.innerText = 'Não foi possível carregar as nuvens. Verifique a conexão e tente de novo.';
-        }
-        setTimeout(() => dica.classList.add('oculta'), 5000);
-    }
-
-    function pararNuvem() {
-        if (nuvemEfeito) {
-            nuvemEfeito.destroy();
-            nuvemEfeito = null;
-        }
-    }
-
     // ---------- Efeito 3: caleidoscópio (padrão) ----------
     const caleido = { x: 0, y: 0, px: 0, py: 0, ok: false };
     const SEGMENTOS = 8;
@@ -249,7 +205,6 @@
         t += 0.016 * velocidadeGlobal;
         pilotoAutomatico(agora);
 
-        if (modo === 'nuvem') return; // o Vanta anima sozinho, num canvas WebGL próprio
         if (modo === 'neural') desenharNeural();
         else desenharCaleido();
 
@@ -276,19 +231,11 @@
     function trocarModo(novo) {
         modo = novo;
         caleido.ok = false;
-        const ehNuvem = novo === 'nuvem';
-        dica.innerText = ehNuvem ? DICA_NUVEM : DICA_PADRAO;
-        canvas.style.display = ehNuvem ? 'none' : 'block';
-        if (nuvemEl) nuvemEl.style.display = ehNuvem ? 'block' : 'none';
-        if (ehNuvem) {
-            iniciarNuvem();
-        } else {
-            pararNuvem();
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = FUNDO;
-            ctx.fillRect(0, 0, W, H);
-            if (novo === 'neural') iniciarNeural();
-        }
+        dica.innerText = DICA_PADRAO;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = FUNDO;
+        ctx.fillRect(0, 0, W, H);
+        if (novo === 'neural') iniciarNeural();
         overlay.querySelectorAll('[data-viagem-modo]').forEach(b => b.classList.toggle('ativo', b.dataset.viagemModo === novo));
     }
 
@@ -319,7 +266,6 @@
     // ---------- Abrir / fechar ----------
     window.abrirViagem = function () {
         if (rodando) return;
-        pararFog();
         overlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         rodando = true;
@@ -341,11 +287,9 @@
         rodando = false;
         cancelAnimationFrame(rafId);
         clearTimeout(timerBarra);
-        pararNuvem();
         if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
         overlay.classList.add('hidden');
         document.body.style.overflow = '';
-        iniciarFog();
     };
 
     // ---------- Entradas ----------
@@ -357,7 +301,6 @@
         if (!rodando) return;
         if (e.key === '1') trocarModo('caleido');
         else if (e.key === '2') trocarModo('neural');
-        else if (e.key === '3') trocarModo('nuvem');
         else if (e.key.toLowerCase() === 'f') alternarTelaCheia();
         else if (e.key === 'Escape' && !document.fullscreenElement) window.fecharViagem();
     });

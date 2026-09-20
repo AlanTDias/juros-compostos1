@@ -28,11 +28,7 @@ const LIBS_SOB_DEMANDA = {
     xlsx: { src: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js', pronta: () => window.XLSX },
     mammoth: { src: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js', pronta: () => window.mammoth },
     html2pdf: { src: 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', pronta: () => window.html2pdf },
-    vantaclouds: { src: 'https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.clouds.min.js', pronta: () => window.VANTA && window.VANTA.CLOUDS },
     qrcode: { src: 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', pronta: () => window.QRCode },
-    // Fundo animado (Vanta.js "fog"): o Vanta precisa do three.js (r134) já carregado
-    three: { src: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js', pronta: () => window.THREE },
-    vantafog: { src: 'https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js', pronta: () => window.VANTA && window.VANTA.FOG }
 };
 const libsEmCarga = {};
 
@@ -64,62 +60,9 @@ function carregarLibs(...nomes) {
     return Promise.all(nomes.map(carregarLib));
 }
 
-// ==========================================
-// FUNDO ANIMADO: névoa (Vanta.js "fog") nas cores navy + ciano do site
-// ==========================================
-// Carrega depois do site já estar utilizável e falha em silêncio (sem WebGL/CDN o site segue
-// com o fundo normal). Fica no <div id="fundo-fog"> (fixo, atrás de tudo). O Modo Viagem
-// pausa o efeito enquanto está aberto para não gastar GPU à toa.
-let fogEfeito = null;
+// (O fundo da página é uma aurora boreal ESTÁTICA feita só em CSS — ver ody no style.css. A antiga névoa animada
+// do Vanta.js foi removida: deixava as páginas mais pesadas e não é mais usada.)
 
-// Cores da névoa por tema (o Vanta exige números hexadecimais)
-function coresDaNevoa() {
-    const tema = document.documentElement.getAttribute('data-tema');
-    if (tema === 'claro') {
-        return { highlightColor: 0x9adcec, midtoneColor: 0xbfe6f2, lowlightColor: 0xdbeafe, baseColor: 0xf1f5f9 };
-    }
-    if (tema === 'neon') {
-        return { highlightColor: 0xa3145f, midtoneColor: 0x3a1266, lowlightColor: 0x1a0b3b, baseColor: 0x0d0221 };
-    }
-    return { highlightColor: 0x0e7490, midtoneColor: 0x123a63, lowlightColor: 0x0b1120, baseColor: 0x05070e };
-}
-async function iniciarFog() {
-    const el = document.getElementById('fundo-fog');
-    if (!el || fogEfeito) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; // respeita quem pede menos movimento
-    if (navigator.connection && navigator.connection.saveData) return;         // respeita o modo "economia de dados"
-    if (document.documentElement.getAttribute('data-tema') === 'vidro') return; // o tema vidro tem fundo próprio (aurora em CSS), sem névoa
-    try {
-        await carregarLib('three');
-        await carregarLib('vantafog');
-        if (fogEfeito) return; // outra chamada já criou enquanto carregava
-        // o tema pode ter mudado durante o download das bibliotecas: confere de novo antes de criar
-        if (document.documentElement.getAttribute('data-tema') === 'vidro') return;
-        fogEfeito = VANTA.FOG({
-            el,
-            mouseControls: false,
-            touchControls: false,
-            gyroControls: false,
-            minHeight: 200,
-            minWidth: 200,
-            ...coresDaNevoa(),
-            blurFactor: 0.3,          // "blur em 30%": névoa mais definida que o padrão do Vanta (0.6)
-            speed: 1.0,
-            zoom: 1.0
-        });
-    } catch (erro) {
-        console.warn('Fundo animado indisponível:', erro && erro.message);
-    }
-}
-
-function pararFog() {
-    if (fogEfeito) {
-        fogEfeito.destroy();
-        fogEfeito = null;
-    }
-}
-
-window.addEventListener('load', () => setTimeout(iniciarFog, 400));
 
 // ==========================================
 
@@ -228,18 +171,28 @@ function closeMobileMenu() {
     drawer.classList.add('hidden');
 }
 
-// Botão flutuante "não clique": a legenda muda a cada passada do mouse (a "trolagem")
+// Botão flutuante "não clique": a legenda só muda ao CLICAR; na última mensagem o Modo Viagem abre
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('troll-btn');
     const label = document.getElementById('troll-label');
     if (!btn || !label) return;
 
-    const frases = ['não clique', 'sério, não clique', 'você foi avisado', 'último aviso...', 'ok, você pediu 🌀'];
+    const inicial = label.innerText;
+    const frases = ['sério, não clique', 'você foi avisado', 'último aviso...', 'ok, você pediu 🌀'];
     let i = 0;
-    const proxima = () => { label.innerText = frases[Math.min(i, frases.length - 1)]; i++; };
-    btn.addEventListener('mouseenter', proxima);
-    btn.addEventListener('focus', proxima);
-
+    let timerLegenda = null;
+    btn.addEventListener('click', () => {
+        label.innerText = frases[i];
+        label.classList.add('mostrar');
+        clearTimeout(timerLegenda);
+        if (i < frases.length - 1) {
+            i++;
+            timerLegenda = setTimeout(() => { label.classList.remove('mostrar'); label.innerText = inicial; i = 0; }, 3500);
+        } else {
+            i = 0;
+            timerLegenda = setTimeout(() => { label.classList.remove('mostrar'); label.innerText = inicial; abrirViagem(); }, 900);
+        }
+    });
     // Botão iridescente: o brilho, o filme colorido e o ícone acompanham o ponteiro (ou a inclinação do celular).
     // --px e --py vão de -1 a 1 e o CSS (.troll-btn) faz o resto. Sem "reduzir movimento", o botão fica parado.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -328,16 +281,13 @@ function aplicarTema(tema, salvar) {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', corDoNavegadorPorTema(tema));
 
-    // gráfico e névoa dependem do tema: refaz os dois
+    // o gráfico depende do tema: refaz
     if (typeof calculateJC === 'function' && document.getElementById('growthChart')) {
         const antes = calculoAutomatico;
         calculoAutomatico = true;
         calculateJC();
         calculoAutomatico = antes;
     }
-    // névoa: reinicia com as cores do tema (ou não roda, no tema vidro)
-    pararFog();
-    iniciarFog();
 }
 
 // Ciclo do botão flutuante: escuro -> claro -> vidro -> escuro (o tema secreto "neon" volta para o escuro)
@@ -353,10 +303,10 @@ function alternarTema() {
 }
 
 function corDoNavegadorPorTema(tema) {
-    if (tema === 'claro') return '#EEF2FB';
+    if (tema === 'claro') return '#FFFFFF';
     if (tema === 'neon') return '#0D0221';
-    if (tema === 'vidro') return document.documentElement.getAttribute('data-vidro-cor') === 'ciano' ? '#0B1120' : '#1B123A';
-    return '#0B1120';
+    if (tema === 'vidro') return '#1B123A';
+    return '#060607';
 }
 
 // Seletor de tema em "vidro líquido" (3 opções): marca a opção certa e move a peça de vidro até ela.
@@ -383,14 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target && e.target.name === 'tema') aplicarTema(e.target.value, true);
     });
 });
-
-// Cor do tema "vidro": 'roxo' (padrão) ou 'ciano'. Fica salva no navegador.
-function definirCorVidro(cor) {
-    if (cor !== 'roxo' && cor !== 'ciano') return;
-    document.documentElement.setAttribute('data-vidro-cor', cor);
-    try { localStorage.setItem('excalc_vidro_cor', cor); } catch (e) { /* tudo bem */ }
-    aplicarTema(temaAtual(), false); // refaz névoa e gráfico com a nova cor
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     atualizarBotaoDeTema();
@@ -547,6 +489,57 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// TOASTY!! (Mortal Kombat): digitar um código famoso, fora de campos de texto, faz o personagem surgir no canto
+const CODIGOS_TOASTY = ['abacabb', 'toasty']; // "ABACABB" = código do sangue no Mega Drive
+let teclasDigitadas = '';
+let toastyOcupado = false;
+
+// Som: se existir toasty.mp3 na raiz do site ele toca; senão o navegador "fala" TOASTY com voz grave (sem arquivo)
+function falarToasty() {
+    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
+    const fala = new SpeechSynthesisUtterance('Toasty!');
+    fala.lang = 'en-US';
+    fala.pitch = 0.1;
+    fala.rate = 0.9;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(fala);
+}
+
+function tocarToasty() {
+    try {
+        const som = new Audio('toasty.mp3');
+        som.addEventListener('error', falarToasty, { once: true });
+        const p = som.play();
+        if (p && p.catch) p.catch(() => {});
+    } catch (e) { falarToasty(); }
+}
+
+function mostrarToasty() {
+    if (toastyOcupado) return;
+    toastyOcupado = true;
+    const img = document.createElement('img');
+    img.src = 'toasty.png';
+    img.alt = 'Toasty!';
+    img.className = 'toasty';
+    img.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(img);
+    tocarToasty();
+    requestAnimationFrame(() => requestAnimationFrame(() => img.classList.add('toasty-in')));
+    setTimeout(() => img.classList.remove('toasty-in'), 1600);
+    setTimeout(() => { img.remove(); toastyOcupado = false; }, 2300);
+}
+
+document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+    const alvo = e.target;
+    if (alvo && (alvo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(alvo.tagName))) return;
+    teclasDigitadas = (teclasDigitadas + e.key.toLowerCase()).slice(-12);
+    if (CODIGOS_TOASTY.some(c => teclasDigitadas.endsWith(c))) {
+        teclasDigitadas = '';
+        mostrarToasty();
+    }
+});
+
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         fecharSalaSecreta();
@@ -594,7 +587,7 @@ function lancarConfete(duracaoMs = 3800) {
     canvas.width = W * dpr; canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const cores = ['#22D3EE', '#818CF8', '#FBBF24', '#F472B6', '#34D399', '#F87171'];
+    const cores = ['#8FA3FB', '#818CF8', '#FBBF24', '#F472B6', '#34D399', '#F87171'];
     const pecas = Array.from({ length: 170 }, () => ({
         x: Math.random() * W, y: -20 - Math.random() * H * 0.5,
         vx: (Math.random() - 0.5) * 4, vy: 2 + Math.random() * 4,

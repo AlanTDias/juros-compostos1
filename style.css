@@ -12,74 +12,88 @@
    ========================================================== */
 
 :root {
-    --gray-50: 238 242 251;
-    --gray-100: 220 228 245;
-    --gray-200: 199 210 238;
-    --gray-300: 169 182 218;
-    --gray-400: 127 140 176;
-    --gray-500: 92 103 144;
-    --gray-600: 51 64 95;
-    --gray-700: 28 42 71;
-    --gray-800: 18 27 46;
-    --gray-900: 11 17 32;
-    --gray-950: 5 7 14;
-    --emerald-50: 236 254 255;
-    --emerald-100: 207 250 254;
-    --emerald-200: 165 243 252;
-    --emerald-300: 103 232 249;
-    --emerald-400: 34 211 238;
-    --emerald-500: 34 211 238;
-    --emerald-600: 14 165 199;
-    --emerald-700: 12 122 148;
-    --emerald-800: 11 92 112;
-    --emerald-900: 10 70 87;
-    --emerald-950: 6 32 39;
-    --accent: #22D3EE;
-    --accent-soft: rgba(34, 211, 238, 0.35);
-    --accent-glow: rgba(34, 211, 238, 0.18);
+    --gray-50: 244 244 241;
+    --gray-100: 236 236 232;
+    --gray-200: 212 212 209;
+    --gray-300: 176 176 175;
+    --gray-400: 140 140 142;
+    --gray-500: 98 98 102;
+    --gray-600: 58 58 62;
+    --gray-700: 36 36 40;
+    --gray-800: 18 18 20;
+    --gray-900: 6 6 7;
+    --gray-950: 0 0 0;
+    --emerald-50: 238 241 255;
+    --emerald-100: 224 230 254;
+    --emerald-200: 199 210 253;
+    --emerald-300: 171 187 252;
+    --emerald-400: 143 163 251;
+    --emerald-500: 143 163 251;
+    --emerald-600: 99 118 240;
+    --emerald-700: 74 90 205;
+    --emerald-800: 58 70 160;
+    --emerald-900: 46 55 120;
+    --emerald-950: 28 32 70;
+    --accent: #8FA3FB;
+    --accent-soft: rgba(143, 163, 251, 0.35);
+    --accent-glow: rgba(143, 163, 251, 0.18);
     --grid-line: rgba(148, 163, 184, 0.06);
-    --border-card: rgba(34, 211, 238, 0.15);
-    --border-card-hover: rgba(34, 211, 238, 0.45);
-    --border-tile: rgba(34, 211, 238, 0.1);
-    --border-divider: rgba(34, 211, 238, 0.09);
+    --border-card: rgba(143, 163, 251, 0.15);
+    --border-card-hover: rgba(143, 163, 251, 0.45);
+    --border-tile: rgba(143, 163, 251, 0.1);
+    --border-divider: rgba(143, 163, 251, 0.09);
     --sombra-card: rgba(0, 0, 0, 0.55);
-    --texto-grafico: #E5E7EB;
+    --aurora-1: rgba(139, 92, 246, 0.2);            /* aurora boreal: violeta */
+    --aurora-2: rgba(143, 163, 251, 0.2);            /* azul-lavanda */
+    --aurora-3: rgba(217, 70, 239, 0.12);           /* magenta suave */
+    --vidro-fundo: rgb(var(--gray-800) / 0.5);      /* cor do painel de vidro */
+    --vidro-desfoque: 18px;                         /* força do desfoque */
+    --vidro-linha: rgba(255, 255, 255, 0.07);       /* linhas finas (divisórias, bordas comuns) */
+    --vidro-luz: rgba(255, 255, 255, 0.28);         /* reflexo de luz na quina de cima */
+    --vidro-sombra-int: rgba(0, 0, 0, 0.4);         /* sombra interna dos campos afundados */
+    --texto-grafico: #ECECE8;
     --grade-grafico: rgba(148, 163, 184, 0.15);
 }
 
 html[data-tema="claro"] {
-    --gray-50: 5 7 14;
-    --gray-100: 11 17 32;
-    --gray-200: 28 42 71;
-    --gray-300: 51 64 95;
-    --gray-400: 92 103 144;
-    --gray-500: 127 140 176;
-    --gray-600: 199 210 238;
-    --gray-700: 226 232 246;
+    --gray-50: 10 10 12;
+    --gray-100: 18 18 21;
+    --gray-200: 34 34 38;
+    --gray-300: 58 58 64;
+    --gray-400: 100 100 108;
+    --gray-500: 140 140 148;
+    --gray-600: 208 208 214;
+    --gray-700: 230 230 235;
     --gray-800: 255 255 255;
-    --gray-900: 238 242 251;
-    --gray-950: 220 228 245;
-    --emerald-50: 6 32 39;
-    --emerald-100: 10 70 87;
-    --emerald-200: 11 92 112;
-    --emerald-300: 21 94 117;
-    --emerald-400: 14 116 144;
-    --emerald-500: 8 145 178;
-    --emerald-600: 14 116 144;
-    --emerald-700: 21 94 117;
-    --emerald-800: 165 243 252;
-    --emerald-900: 207 250 254;
-    --emerald-950: 236 254 255;
-    --accent: #0891B2;
-    --accent-soft: rgba(8, 145, 178, 0.35);
-    --accent-glow: rgba(8, 145, 178, 0.14);
+    --gray-900: 255 255 255;
+    --gray-950: 244 244 247;    --emerald-50: 28 32 70;
+    --emerald-100: 46 55 120;
+    --emerald-200: 58 70 160;
+    --emerald-300: 68 84 190;
+    --emerald-400: 72 88 205;
+    --emerald-500: 99 118 240;
+    --emerald-600: 72 88 205;
+    --emerald-700: 68 84 190;
+    --emerald-800: 199 210 253;
+    --emerald-900: 224 230 254;
+    --emerald-950: 238 241 255;
+    --accent: #6376F0;
+    --accent-soft: rgba(99, 118, 240, 0.35);
+    --accent-glow: rgba(99, 118, 240, 0.14);
     --grid-line: rgba(15, 23, 42, 0.05);
-    --border-card: rgba(8, 145, 178, 0.32);
-    --border-card-hover: rgba(8, 145, 178, 0.6);
-    --border-tile: rgba(8, 145, 178, 0.28);
-    --border-divider: rgba(8, 145, 178, 0.2);
+    --border-card: rgba(99, 118, 240, 0.16);
+    --border-card-hover: rgba(99, 118, 240, 0.5);
+    --border-tile: rgba(99, 118, 240, 0.1);
+    --border-divider: rgba(99, 118, 240, 0.12);
     --sombra-card: rgba(15, 23, 42, 0.16);
-    --texto-grafico: #33405F;
+    --aurora-1: rgba(167, 139, 250, 0.34);
+    --aurora-2: rgba(143, 163, 251, 0.34);
+    --aurora-3: rgba(232, 121, 249, 0.2);
+    --vidro-fundo: rgb(var(--gray-800) / 0.55);
+    --vidro-linha: rgba(15, 23, 42, 0.08);
+    --vidro-luz: rgba(255, 255, 255, 0.95);
+    --vidro-sombra-int: rgba(15, 23, 42, 0.13);
+    --texto-grafico: #3A3A40;
     --grade-grafico: rgba(15, 23, 42, 0.1);
 }
 
@@ -113,6 +127,9 @@ html[data-tema="neon"] {
     --border-card-hover: rgba(255, 46, 151, 0.7);
     --border-tile: rgba(255, 46, 151, 0.35);
     --border-divider: rgba(255, 46, 151, 0.22);
+    --aurora-1: rgba(255, 46, 151, 0.28);
+    --aurora-2: rgba(139, 92, 246, 0.26);
+    --aurora-3: rgba(143, 163, 251, 0.16);
 }
 
 /* Tema secreto: brilho retrô nos títulos */
@@ -123,9 +140,7 @@ html[data-tema="neon"] h3 {
     text-shadow: 0 0 14px rgba(255, 46, 151, 0.6);
 }
 
-/* Tema VIDRO (glassmorphism): painéis translúcidos com desfoque e bordas luminosas sobre um fundo de "aurora".
-   Duas cores prontas: roxo (padrão) e ciano. Para escolher, no console do navegador: definirCorVidro('roxo') ou
-   definirCorVidro('ciano'); para fixar uma delas de vez, troque o padrão aqui (bloco roxo) pelo conjunto desejado. */
+/* Tema VIDRO (glassmorphism): painéis translúcidos com desfoque e bordas luminosas sobre um fundo de "aurora" roxa. */
 
 html[data-tema="vidro"] {
     --gray-50: 245 243 255;
@@ -162,40 +177,8 @@ html[data-tema="vidro"] {
     --vidro-fundo: rgb(27 18 58 / 0.34);
     --vidro-desfoque: 22px;
     --aurora-1: rgba(168, 85, 247, 0.55);
-    --aurora-2: rgba(56, 189, 248, 0.32);
+    --aurora-2: rgba(129, 90, 250, 0.4);
     --aurora-3: rgba(217, 70, 239, 0.38);
-}
-
-html[data-tema="vidro"][data-vidro-cor="ciano"] {
-    --gray-50: 238 242 251;
-    --gray-100: 220 228 245;
-    --gray-200: 199 210 238;
-    --gray-300: 169 182 218;
-    --gray-400: 127 140 176;
-    --gray-500: 92 103 144;
-    --gray-600: 51 64 95;
-    --gray-700: 28 42 71;
-    --gray-800: 18 27 46;
-    --gray-900: 11 17 32;
-    --gray-950: 5 7 14;
-    --emerald-50: 236 254 255;
-    --emerald-100: 207 250 254;
-    --emerald-200: 165 243 252;
-    --emerald-300: 103 232 249;
-    --emerald-400: 34 211 238;
-    --emerald-500: 34 211 238;
-    --emerald-600: 14 165 199;
-    --emerald-700: 12 122 148;
-    --emerald-800: 11 92 112;
-    --emerald-900: 10 70 87;
-    --emerald-950: 6 32 39;
-    --accent: #22D3EE;
-    --accent-soft: rgba(34, 211, 238, 0.45);
-    --accent-glow: rgba(34, 211, 238, 0.26);
-    --vidro-fundo: rgb(18 27 46 / 0.34);
-    --aurora-1: rgba(34, 211, 238, 0.42);
-    --aurora-2: rgba(99, 102, 241, 0.4);
-    --aurora-3: rgba(20, 184, 166, 0.3);
 }
 /* A prévia de documentos é papel branco para impressão: sempre a paleta escura, em qualquer tema */
 
@@ -256,16 +239,6 @@ body::before {
     background-size: 32px 32px;
     -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
     mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
-}
-
-
-/* ---------- Fundo animado (névoa Vanta.js), atrás da grade e de todo o conteúdo ---------- */
-
-#fundo-fog {
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
 }
 
 
@@ -355,9 +328,16 @@ header::after {
 
 /* Leve elevação ao passar o mouse nos cards principais — feedback tátil, não decoração automática */
 
-.shadow-lg:hover {
-    transform: translateY(-2px);
+/* Caixas comuns não são clicáveis: ficam com o neon SEMPRE aceso e não se mexem. Só links/botões reagem ao mouse. */
+
+.shadow-lg,
+.shadow-md {
     box-shadow: 0 14px 34px -12px var(--sombra-card), 0 0 28px -6px var(--accent-soft), 0 0 0 1px var(--accent-soft) inset !important;
+}
+
+a.shadow-lg:hover,
+button.shadow-lg:hover {
+    transform: translateY(-2px);
 }
 
 
@@ -371,18 +351,12 @@ header::after {
     border-color: var(--border-card);
 }
 
-.bg-gray-800.border-gray-700.shadow-lg:hover {
+.bg-gray-800.border-gray-700.shadow-lg {
     border-color: var(--border-card-hover);
 }
 
 .border-gray-700\/60,
 .border-gray-700\/50 {
-    border-color: var(--border-tile);
-    box-shadow: 0 0 14px -6px var(--accent-glow);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.border-gray-700\/60:hover {
     border-color: var(--accent-soft);
     box-shadow: 0 0 18px -3px var(--accent-soft);
 }
@@ -907,8 +881,8 @@ html.sem-blur .tema-thumb {
     left: 14px;
     bottom: 14px;
     z-index: 30;
-    width: 54px;
-    height: 54px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     padding: 0;
     border: 0;
@@ -927,7 +901,8 @@ html.sem-blur .tema-thumb {
         inset 0 1px 1px rgba(255, 255, 255, 0.55),
         inset 0 -8px 14px rgba(0, 0, 0, 0.4),
         0 0 24px -4px rgba(140, 100, 255, 0.6);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    opacity: 0.65; /* 35% transparente; fica opaco ao passar o mouse */
+    transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
 }
 
 .troll-btn::before {
@@ -969,6 +944,11 @@ html.sem-blur .tema-thumb {
     filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 6px rgba(190, 160, 255, 0.8));
 }
 
+.iri-icone svg {
+    width: 17px;
+    height: 17px;
+}
+
 .iri-brilho {
     position: absolute;
     left: 15%;
@@ -985,6 +965,7 @@ html.sem-blur .tema-thumb {
 
 .troll-btn:hover,
 .troll-btn:focus-visible {
+    opacity: 1;
     transform: scale(1.1);
     box-shadow:
         0 10px 26px -8px rgba(0, 0, 0, 0.75),
@@ -1013,7 +994,7 @@ html.sem-blur .tema-thumb {
 
 .troll-label {
     position: absolute;
-    left: 62px;
+    left: 43px;
     padding: 3px 8px;
     border-radius: 6px;
     white-space: nowrap;
@@ -1026,6 +1007,7 @@ html.sem-blur .tema-thumb {
     transition: opacity 0.15s ease;
 }
 
+.troll-label.mostrar,
 .troll-btn:hover .troll-label,
 .troll-btn:focus-visible .troll-label {
     opacity: 1;
@@ -1056,13 +1038,6 @@ html.sem-blur .tema-thumb {
     z-index: 200;
     background: var(--viagem-bg);
     overflow: hidden;
-}
-
-/* Contêiner do efeito de nuvens (Vanta cria o canvas WebGL aqui dentro) */
-
-.viagem-nuvem {
-    position: absolute;
-    inset: 0;
 }
 
 #viagem-canvas {
@@ -1103,7 +1078,7 @@ html.sem-blur .tema-thumb {
     padding: 0.4rem 0.75rem;
     border-radius: 0.6rem;
     border: 1px solid var(--border-card);
-    background: rgba(34, 211, 238, 0.14);
+    background: rgba(143, 163, 251, 0.14);
     color: var(--accent);
     font-size: 0.8rem;
     font-weight: 600;
@@ -1113,12 +1088,12 @@ html.sem-blur .tema-thumb {
 
 .viagem-btn:hover,
 .viagem-btn:focus-visible {
-    background: rgba(34, 211, 238, 0.25);
+    background: rgba(143, 163, 251, 0.25);
     box-shadow: 0 0 16px -2px var(--accent);
 }
 
 .viagem-btn.ativo {
-    background: rgba(34, 211, 238, 0.3);
+    background: rgba(143, 163, 251, 0.3);
     box-shadow: 0 0 14px -2px var(--accent);
 }
 
@@ -1188,16 +1163,15 @@ html.sem-blur .tema-thumb {
 }
 
 
-/* ---------- Tema VIDRO: superfícies ---------- */
+/* ---------- VIDRO (glassmorphism): superfícies ----------`r`n   Valem para TODOS os temas (escuro, claro e vidro): as cores vêm das variáveis --vidro-* de cada tema.`r`n   Só o fundo "aurora" é exclusivo do tema vidro. */
 
-/* Fundo "aurora": manchas de cor fixas; é o que os painéis de vidro desfocam. Sem névoa animada neste tema. */
+/* Fundo "aurora": manchas de cor fixas; é o que os painéis de vidro desfocam. */
 
-html[data-tema="vidro"] {
-    background-color: rgb(var(--gray-950)); /* evita o branco do navegador aparecer atrás do vidro */
-}
+/* Fundo de todos os temas: AURORA BOREAL estática (só CSS, sem animação e sem bibliotecas). As três cores vêm de
+   --aurora-1/2/3, definidas por tema; o vidro dos painéis desfoca essas manchas. O fundo do <body> vira o fundo
+   da página inteira (o grid do body::before aparece por cima dele). */
 
-html[data-tema="vidro"] body {
-    background-color: rgb(var(--gray-950));
+body {
     background-image:
         radial-gradient(60% 55% at 12% 8%, var(--aurora-1), transparent 70%),
         radial-gradient(50% 50% at 92% 18%, var(--aurora-2), transparent 70%),
@@ -1205,95 +1179,92 @@ html[data-tema="vidro"] body {
     background-attachment: fixed;
 }
 
+html[data-tema="vidro"] body {
+    background-color: rgb(var(--gray-950));
+}
+
 /* Painéis: translúcidos + desfoque + brilho na borda de cima + reflexo diagonal */
 
-html[data-tema="vidro"] .bg-gray-800,
-html[data-tema="vidro"] .hero-panel {
+html .bg-gray-800,
+html .hero-panel {
     background-color: var(--vidro-fundo);
     background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.02) 42%, rgba(255, 255, 255, 0) 70%);
     -webkit-backdrop-filter: blur(var(--vidro-desfoque)) saturate(175%) brightness(1.06);
     backdrop-filter: blur(var(--vidro-desfoque)) saturate(175%) brightness(1.06);
 }
 
-html[data-tema="vidro"] .shadow-lg,
-html[data-tema="vidro"] .shadow-md {
+html .shadow-lg,
+html .shadow-md {
     box-shadow:
         0 14px 40px -14px var(--sombra-card),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 1px 0 var(--vidro-luz),
         inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 0 32px -14px var(--accent-soft) !important;
-}
-
-html[data-tema="vidro"] .shadow-lg:hover {
-    box-shadow:
-        0 18px 46px -14px var(--sombra-card),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
         0 0 40px -10px var(--accent-soft) !important;
 }
 
+
 /* Campos e tiles: vidro mais escuro por dentro (sem desfoque extra, para não pesar) */
 
-html[data-tema="vidro"] input,
-html[data-tema="vidro"] select,
-html[data-tema="vidro"] textarea {
+html input,
+html select,
+html textarea {
     background-color: rgb(var(--gray-950) / 0.45);
     border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-html[data-tema="vidro"] input:focus,
-html[data-tema="vidro"] select:focus,
-html[data-tema="vidro"] textarea:focus {
+html input:focus,
+html select:focus,
+html textarea:focus {
     border-color: var(--accent);
 }
 
-html[data-tema="vidro"] .bg-gray-700\/40,
-html[data-tema="vidro"] .bg-gray-700\/50,
-html[data-tema="vidro"] .bg-gray-900:not(body) {
+html .bg-gray-700\/40,
+html .bg-gray-700\/50,
+html .bg-gray-900:not(body) {
     background-color: rgb(var(--gray-950) / 0.32);
 }
 
 /* Botões de ação: gradiente com brilho, como uma gema */
 
-html[data-tema="vidro"] .bg-emerald-500 {
+html .bg-emerald-500 {
     background-image: linear-gradient(135deg, rgb(var(--emerald-300)), rgb(var(--emerald-500)) 55%, rgb(var(--emerald-600)));
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 22px -8px var(--accent-soft);
 }
 
 /* Abas do menu em vidro */
 
-html[data-tema="vidro"] .tab-btn:not(.text-gray-950) {
-    background-color: rgba(255, 255, 255, 0.05);
+html .tab-btn:not(.text-gray-950) {
+    background-color: rgb(var(--gray-100) / 0.05);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
 }
 
 /* Modais e caixas flutuantes também viram vidro */
 
-html[data-tema="vidro"] .sala-secreta-card {
+html .sala-secreta-card {
     background: rgb(var(--gray-800) / 0.55);
     -webkit-backdrop-filter: blur(22px) saturate(150%);
     backdrop-filter: blur(22px) saturate(150%);
     border-color: var(--border-card);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 50px -12px var(--accent-soft);
+    box-shadow: inset 0 1px 0 var(--vidro-luz), 0 0 50px -12px var(--accent-soft);
 }
 
 /* Aparelho fraco, economia de dados ou "reduzir transparência": mantém o vidro, sem desfoque (bem mais leve) */
 
-html.sem-blur[data-tema="vidro"] .bg-gray-800,
-html.sem-blur[data-tema="vidro"] .hero-panel,
-html.sem-blur[data-tema="vidro"] .sala-secreta-card,
-html.sem-blur[data-tema="vidro"] .tab-btn {
+html.sem-blur .bg-gray-800,
+html.sem-blur .hero-panel,
+html.sem-blur .sala-secreta-card,
+html.sem-blur .tab-btn {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     background-color: rgb(var(--gray-800) / 0.8);
 }
 
 @media (prefers-reduced-transparency: reduce) {
-    html[data-tema="vidro"] .bg-gray-800,
-    html[data-tema="vidro"] .hero-panel,
-    html[data-tema="vidro"] .sala-secreta-card,
-    html[data-tema="vidro"] .tab-btn {
+    html .bg-gray-800,
+    html .hero-panel,
+    html .sala-secreta-card,
+    html .tab-btn {
         -webkit-backdrop-filter: none;
         backdrop-filter: none;
         background-color: rgb(var(--gray-800) / 0.92);
@@ -1301,8 +1272,8 @@ html.sem-blur[data-tema="vidro"] .tab-btn {
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    html[data-tema="vidro"] .bg-gray-800,
-    html[data-tema="vidro"] .hero-panel {
+    html .bg-gray-800,
+    html .hero-panel {
         background-color: rgb(var(--gray-800) / 0.88);
     }
 }
@@ -1329,78 +1300,78 @@ html.sem-blur[data-tema="vidro"] .tab-btn {
 }
 
 
-/* ---------- Tema VIDRO: menos bordas sólidas, mais luz ----------
+/* ---------- VIDRO: menos bordas sólidas, mais luz (todos os temas) ----------
    O vidro de verdade quase não tem contorno: o que "desenha" a peça é o reflexo na quina e o brilho em volta.
    Por isso aqui as bordas comuns ficam quase invisíveis e o volume vem de sombras internas e do halo. */
 
-html[data-tema="vidro"] [class*="border-gray-"]:not(.border-dashed) {
-    border-color: rgba(255, 255, 255, 0.07);
+html [class*="border-gray-"]:not(.border-dashed):not(#doc-printable-area *) {
+    border-color: var(--vidro-linha);
 }
 
-html[data-tema="vidro"] .bg-gray-800[class*="border-gray-"] {
+html .bg-gray-800[class*="border-gray-"] {
     border-color: var(--border-card);
 }
 
-html[data-tema="vidro"] .rounded-xl,
-html[data-tema="vidro"] .hero-panel {
+html .rounded-xl,
+html .hero-panel {
     border-radius: 1.25rem;
 }
 
-html[data-tema="vidro"] .rounded-lg {
+html .rounded-lg {
     border-radius: 0.9rem;
 }
 
 /* Tiles internos: sem contorno, só um vidro mais escuro e a luz da quina */
 
-html[data-tema="vidro"] .bg-gray-700\/40,
-html[data-tema="vidro"] .bg-gray-700\/30,
-html[data-tema="vidro"] .bg-gray-700\/50 {
+html .bg-gray-700\/40,
+html .bg-gray-700\/30,
+html .bg-gray-700\/50 {
     border-color: transparent;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -10px 24px -12px rgba(0, 0, 0, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -10px 24px -12px var(--vidro-sombra-int);
 }
 
 /* Campos: fundo fundo (afundado), sem linha; o foco acende um halo */
 
-html[data-tema="vidro"] input,
-html[data-tema="vidro"] select,
-html[data-tema="vidro"] textarea {
+html input,
+html select,
+html textarea {
     border-color: transparent;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 2px 6px var(--vidro-sombra-int), inset 0 0 0 1px var(--vidro-linha);
 }
 
-html[data-tema="vidro"] input:focus,
-html[data-tema="vidro"] select:focus,
-html[data-tema="vidro"] textarea:focus {
+html input:focus,
+html select:focus,
+html textarea:focus {
     border-color: transparent;
     box-shadow: 0 0 0 2px var(--accent-soft), 0 0 22px -4px var(--accent-soft);
 }
 
 /* Menu: abas em vidro, sem contorno colorido; a ativa vira uma "gema" */
 
-html[data-tema="vidro"] .tab-btn:not(.text-gray-950) {
-    border-color: rgba(255, 255, 255, 0.08);
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+html .tab-btn:not(.text-gray-950) {
+    border-color: var(--vidro-linha);
+    background-image: linear-gradient(180deg, var(--vidro-luz), rgba(255, 255, 255, 0));
+    box-shadow: inset 0 1px 0 var(--vidro-luz), 0 4px 10px -8px var(--sombra-card);
 }
 
-html[data-tema="vidro"] .tab-btn.text-gray-950 {
+html .tab-btn.text-gray-950 {
     background-image: linear-gradient(135deg, rgb(var(--emerald-300)), rgb(var(--emerald-500)) 55%, rgb(var(--emerald-600)));
 }
 
 /* Cabeçalho e rodapé: uma faixa de vidro com uma linha de luz, não uma borda dura */
 
-html[data-tema="vidro"] header,
-html[data-tema="vidro"] footer {
-    border-color: rgba(255, 255, 255, 0.06);
+html header,
+html footer {
+    border-color: var(--vidro-linha);
 }
 
 /* Tabelas: linhas de separação bem sutis */
 
-html[data-tema="vidro"] .divide-y > :not([hidden]) ~ :not([hidden]) {
-    border-color: rgba(255, 255, 255, 0.06);
+html .divide-y > :not([hidden]) ~ :not([hidden]):not(#doc-printable-area *) {
+    border-color: var(--vidro-linha);
 }
 
-html[data-tema="vidro"] thead {
+html thead:not(#doc-printable-area *) {
     background-color: rgb(var(--gray-950) / 0.35);
 }
 
@@ -1430,6 +1401,15 @@ html[data-tema="vidro"] thead {
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     transition: box-shadow 0.35s ease, transform 0.35s ease;
+}
+
+/* quando o botão é um <button> (e não um link) */
+
+button.start-btn {
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
 }
 
 .start-btn .text {
@@ -1517,5 +1497,29 @@ html[data-tema="vidro"] thead {
     .start-btn .svg,
     .start-btn .circle-overlay {
         transition-duration: 0.01ms;
+    }
+}
+
+/* TOASTY!! (easter egg do Mortal Kombat): sobe do canto inferior direito e volta */
+
+.toasty {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: min(200px, 42vw);
+    height: auto;
+    z-index: 400;
+    pointer-events: none;
+    transform: translateX(100%);
+    transition: transform 0.25s ease-out;
+}
+
+.toasty.toasty-in {
+    transform: translateX(0);
+}
+
+@media print {
+    .toasty {
+        display: none;
     }
 }
