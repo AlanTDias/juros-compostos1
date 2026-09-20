@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0B1120">
+    <meta name="sugestoes-key" content="">
+    <script>
+        // Tema salvo (escuro/claro/vidro): aplicado antes da primeira pintura para não piscar. O tema secreto nunca é salvo.
+        try {
+            var r = document.documentElement, t = localStorage.getItem('excalc_tema'), c = localStorage.getItem('excalc_vidro_cor');
+            if (t === 'claro' || t === 'vidro') r.setAttribute('data-tema', t);
+            if (c === 'roxo' || c === 'ciano') r.setAttribute('data-vidro-cor', c);
+        } catch (e) { }
+        // Chrome/Edge (Chromium) aceitam filtro SVG dentro do backdrop-filter: liga a refração do vidro líquido
+        try { var u = navigator.userAgentData; if (u && u.brands && u.brands.some(function (b) { return /Chromium/.test(b.brand); })) document.documentElement.classList.add('refracao'); } catch (e) { }
+        // Economia de dados ou aparelho fraco: o vidro fica sem desfoque (mais leve), só translúcido
+        try {
+            var n = navigator;
+            if ((n.connection && n.connection.saveData) || (n.deviceMemory && n.deviceMemory <= 2) || (n.hardwareConcurrency && n.hardwareConcurrency <= 2)) document.documentElement.classList.add('sem-blur');
+        } catch (e) { }
+    </script>
+    <!-- Favicon (PNG com fundo transparente); ?v=3 força o navegador a trocar o ícone antigo -->
+    <link rel="icon" type="image/png" sizes="256x256" href="favicon.png?v=3">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+    <!-- Ajuste de segurança HTTPS para forçar requisições seguras -->
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://pagead2.googlesyndication.com https://cdnjs.cloudflare.com https://unpkg.com https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    img-src 'self' data: blob: https:;
+    font-src 'self' https://fonts.gstatic.com;
+    connect-src 'self' https://economia.awesomeapi.com.br https://api.bcb.gov.br https://api.web3forms.com;
+">
+    <title>Conversor de Arquivos e Ferramentas de PDF Grátis | ExCalc</title>
+    <meta name="description" content="Converta Word, Excel, CSV, JSON e TXT, una, divida e comprima PDF, escreva e assine em PDF e extraia texto. Tudo no navegador, sem enviar arquivos.">
+    <link rel="canonical" href="https://www.excalc.com.br/conversor-de-arquivos.html">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="ExCalc">
+    <meta property="og:title" content="Conversor de Arquivos e Ferramentas de PDF Grátis | ExCalc">
+    <meta property="og:description" content="Converta Word, Excel, CSV, JSON e TXT, una, divida e comprima PDF, escreva e assine em PDF e extraia texto. Tudo no navegador, sem enviar arquivos.">
+    <meta property="og:url" content="https://www.excalc.com.br/conversor-de-arquivos.html">
+    <meta property="og:image" content="https://www.excalc.com.br/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Conversor de Arquivos e Ferramentas de PDF Grátis | ExCalc">
+    <meta name="twitter:description" content="Converta Word, Excel, CSV, JSON e TXT, una, divida e comprima PDF, escreva e assine em PDF e extraia texto. Tudo no navegador, sem enviar arquivos.">
+    <meta name="twitter:image" content="https://www.excalc.com.br/og-image.png">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Conversor de Arquivos e Ferramentas de PDF Grátis","url":"https://www.excalc.com.br/conversor-de-arquivos.html","description":"Converta Word, Excel, CSV, JSON e TXT, una, divida e comprima PDF, escreva e assine em PDF e extraia texto. Tudo no navegador, sem enviar arquivos.","applicationCategory":"UtilitiesApplication","operatingSystem":"Qualquer","inLanguage":"pt-BR","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"isPartOf":{"@type":"WebSite","name":"ExCalc","url":"https://www.excalc.com.br/"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Início","item":"https://www.excalc.com.br/"},{"@type":"ListItem","position":2,"name":"Conversor de Arquivos e Ferramentas de PDF Grátis","item":"https://www.excalc.com.br/conversor-de-arquivos.html"}]}]}</script>
+    <!-- Tipografia: Space Grotesk (títulos/display), Inter (corpo), JetBrains Mono (valores numéricos) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Paleta reconfigurada: cinza vira "navy" técnico, emerald vira ciano elétrico.
+        // Qualquer classe já usada no HTML (bg-gray-800, text-emerald-400, focus:ring-emerald-500...)
+        // passa a herdar essas cores automaticamente, sem precisar editar cada elemento.
+        // Cores por variável CSS (definidas no style.css): o mesmo HTML troca entre tema escuro, claro
+        // e o tema secreto só mudando o atributo data-tema no <html>. Formato "R G B" + <alpha-value>
+        // mantém funcionando as classes com transparência (bg-gray-700/40, border-gray-700/60...).
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            50: 'rgb(var(--gray-50) / <alpha-value>)',
+                            100: 'rgb(var(--gray-100) / <alpha-value>)',
+                            200: 'rgb(var(--gray-200) / <alpha-value>)',
+                            300: 'rgb(var(--gray-300) / <alpha-value>)',
+                            400: 'rgb(var(--gray-400) / <alpha-value>)',
+                            500: 'rgb(var(--gray-500) / <alpha-value>)',
+                            600: 'rgb(var(--gray-600) / <alpha-value>)',
+                            700: 'rgb(var(--gray-700) / <alpha-value>)',
+                            800: 'rgb(var(--gray-800) / <alpha-value>)',
+                            900: 'rgb(var(--gray-900) / <alpha-value>)',
+                            950: 'rgb(var(--gray-950) / <alpha-value>)'
+                        },
+                        emerald: {
+                            50: 'rgb(var(--emerald-50) / <alpha-value>)',
+                            100: 'rgb(var(--emerald-100) / <alpha-value>)',
+                            200: 'rgb(var(--emerald-200) / <alpha-value>)',
+                            300: 'rgb(var(--emerald-300) / <alpha-value>)',
+                            400: 'rgb(var(--emerald-400) / <alpha-value>)',
+                            500: 'rgb(var(--emerald-500) / <alpha-value>)',
+                            600: 'rgb(var(--emerald-600) / <alpha-value>)',
+                            700: 'rgb(var(--emerald-700) / <alpha-value>)',
+                            800: 'rgb(var(--emerald-800) / <alpha-value>)',
+                            900: 'rgb(var(--emerald-900) / <alpha-value>)',
+                            950: 'rgb(var(--emerald-950) / <alpha-value>)'
+                        }
+                    }
+                }
+            }
+        }    </script>
+    <link rel="stylesheet" href="style.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7396895814435111" crossorigin="anonymous"></script>
+</head>
+
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col" data-aba="conversores">
+    <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+    <!-- Filtro de refração do vidro líquido (usado só em Chrome/Edge; nos demais o vidro fica comum) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="vidro-liquido" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.015 0.03" numOctaves="2" seed="7" result="ruido"/><feGaussianBlur in="ruido" stdDeviation="1.5" result="ruidoSuave"/><feDisplacementMap in="SourceGraphic" in2="ruidoSuave" scale="14" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+    <!-- Fundo animado (névoa Vanta.js), criado por iniciarFog() no script.js -->
+    <div id="fundo-fog" aria-hidden="true"></div>
+
+    <!-- 🆕 POP-UP DE NOVIDADES (some sozinho após a data definida em NOVIDADES_EXPIRA_EM) -->
+    <div id="novidades-overlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-950/70 backdrop-blur-sm" onclick="if(event.target===this) fecharNovidades()">
+        <div class="relative w-full max-w-md bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-6 novidades-pop">
+            <button onclick="fecharNovidades()" aria-label="Fechar" class="absolute top-3 right-3 text-gray-400 hover:text-gray-100 transition text-lg leading-none">✕</button>
+
+            <span class="inline-block text-[11px] font-semibold text-emerald-400 tracking-wide mb-2">✨ NOVIDADES NO EXCALC</span>
+            <h3 class="font-display text-xl font-bold text-gray-50 mb-3">O que mudou por aqui</h3>
+
+            <ul class="space-y-3 text-sm text-gray-300 mb-5">
+                <li class="flex gap-2"><span class="text-emerald-400">✍️</span> <span><strong class="text-gray-100">Escrever no PDF:</strong> clique em qualquer ponto de qualquer página do PDF e adicione texto ali — sem precisar de campo de formulário.</span></li>
+                <li class="flex gap-2"><span class="text-emerald-400">🎨</span> <span><strong class="text-gray-100">Visual novo:</strong> o site inteiro ganhou uma identidade mais técnica, com valores numéricos em fonte monoespaçada.</span></li>
+                <li class="flex gap-2"><span class="text-emerald-400">🔒</span> <span><strong class="text-gray-100">Mais segurança:</strong> correções na conversão de Excel/CSV para PDF.</span></li>
+            </ul>
+
+            <button onclick="fecharNovidades()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded-lg transition text-sm">
+                Entendi, começar a usar
+            </button>
+        </div>
+    </div>
+
+    <!-- 📱 MENU SUPERIOR RESPONSIVO -->
+    <header class="w-full bg-gray-800 border-b border-gray-700 relative z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 pt-3">
+            <div class="flex items-center justify-end gap-2 pb-2 mb-1 border-b border-gray-700/60">
+                <!-- Seletor de tema em "vidro líquido" (escuro, claro, vidro): no topo, à direita -->
+                <div id="tema-switch" class="tema-switch" role="radiogroup" aria-label="Tema do site" data-ativo="escuro">
+                    <span class="tema-thumb" aria-hidden="true"></span>
+                    <label class="tema-op" title="Tema escuro">
+                        <input type="radio" name="tema" value="escuro" checked>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                        <span class="sr-only">Tema escuro</span>
+                    </label>
+                    <label class="tema-op" title="Tema claro">
+                        <input type="radio" name="tema" value="claro">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                        <span class="sr-only">Tema claro</span>
+                    </label>
+                    <label class="tema-op" title="Tema vidro">
+                        <input type="radio" name="tema" value="vidro">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M12 21L8 9l4-6 4 6z"/></svg>
+                        <span class="sr-only">Tema vidro</span>
+                    </label>
+                </div>
+                <!-- Botão hambúrguer (só mobile) -->
+                <button id="menu-toggle" onclick="toggleMobileMenu()" class="lg:hidden text-gray-300 hover:text-emerald-400 transition text-2xl leading-none p-1">
+                    ☰
+                </button>
+            </div>
+
+            <!-- Menu de abas (desktop normal, mobile = drawer) -->
+            <nav id="menu-nav" class="hidden lg:grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-center lg:justify-center gap-2 w-full pb-3">
+            </nav>
+        </div>
+
+        <!-- Drawer mobile (abre/fecha com hambúrguer) -->
+        <div id="mobile-drawer" class="hidden fixed inset-0 z-40 lg:hidden">
+            <div class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm" onclick="closeMobileMenu()"></div>
+            <nav id="drawer-nav" class="absolute top-0 left-0 h-full w-72 bg-gray-800 border-r border-gray-700 overflow-y-auto space-y-2 p-4 flex flex-col">
+                <button onclick="closeMobileMenu()" class="self-end text-gray-400 hover:text-gray-100 text-2xl leading-none mb-4">✕</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 💻 CONTEÚDO PRINCIPAL -->
+    <main id="conteudo" tabindex="-1" class="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
+
+        <!-- Anúncio Superior -->
+        <!--<div class="w-full bg-gray-800 border border-dashed border-gray-700 rounded-lg p-6 text-center flex flex-col items-center justify-center min-h-[100px] md:min-h-[120px]">
+            <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Espaço Publicitário (Banner Superior)</span>
+            <span class="text-[10px] text-gray-600 mt-1">Recomendado: 728x90 ou Responsivo</span>
+            </div>
+        -->
+        <section id="tab-conversores" class="tab-content space-y-6">
+            <div class="space-y-2">
+                <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Central de Conversores de Arquivos</h1>
+                <p class="text-sm text-gray-400">Selecione o arquivo e escolha o formato desejado para a conversão rápida ou manipulação de PDFs.</p>
+            </div>
+
+            <!-- Conversor Universal -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione ou Arraste o Arquivo</label>
+
+                        <!-- ÁREA DE DRAG AND DROP -->
+                        <div id="drop-zone" onclick="document.getElementById('file-input-universal').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">📁</span>
+                            <p id="drop-zone-text" class="text-sm text-gray-300">
+                                <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste e solte o arquivo aqui
+                            </p>
+                            <p class="text-[11px] text-gray-400">Suporta DOCX, XLSX, XLS, PPTX, PPT, PDF, CSV e TXT</p>
+                        </div>
+
+                        <!-- Input oculto manipulado pela caixa acima -->
+                        <input type="file" id="file-input-universal" accept=".docx, .xlsx, .xls, .pptx, .ppt, .pdf, .csv, .txt" onchange="handleFileSelect()" class="hidden">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">2. Selecione o Formato de Saída</label>
+                        <select id="conversion-target-format" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="" disabled selected>Selecione um arquivo primeiro...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="convertFile()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm">
+                        Converter Arquivo
+                    </button>
+                    <p id="status-universal" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+
+            <!-- COMPRESSOR DE PDF -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto mt-8">
+                <h2 class="text-lg font-bold text-gray-100 border-b border-gray-700 pb-2">🗜️ Compressor de PDF</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione o PDF para Comprimir</label>
+
+                        <!-- ÁREA DE DRAG AND DROP -->
+                        <div id="drop-zone-compress" onclick="document.getElementById('file-input-compress').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">📄</span>
+                            <p id="drop-zone-compress-text" class="text-sm text-gray-300">
+                                <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste o PDF aqui
+                            </p>
+                            <p class="text-[11px] text-gray-400">Suporta apenas arquivos .PDF</p>
+                        </div>
+
+                        <input type="file" id="file-input-compress" accept=".pdf" onchange="handleCompressFileSelect()" class="hidden">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">2. Nível de Compressão</label>
+                        <select id="compression-level" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="0.5">Média (Recomendado - Boa qualidade e boa redução)</option>
+                            <option value="0.3">Alta (Menor tamanho de arquivo, qualidade inferior)</option>
+                            <option value="0.7">Baixa (Melhor qualidade, menor redução)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="compressPDF()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                        Comprimir PDF
+                    </button>
+                    <p id="status-compress" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+
+            <!-- UNIFICADOR DE PDF (MERGE) -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto mt-8">
+                <h2 class="text-lg font-bold text-gray-100 border-b border-gray-700 pb-2">🔗 Unificar vários PDFs (Juntar)</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione os arquivos PDF (múltiplos)</label>
+                        <div id="drop-zone-merge" onclick="document.getElementById('file-input-merge').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">📚</span>
+                            <p id="drop-zone-merge-text" class="text-sm text-gray-300">
+                                <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste os PDFs aqui
+                            </p>
+                            <p class="text-[11px] text-gray-400">Selecione dois ou mais arquivos .PDF</p>
+                        </div>
+                        <input type="file" id="file-input-merge" accept=".pdf" multiple onchange="handleMergeFileSelect()" class="hidden">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="mergePDFs()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                        Unificar PDFs
+                    </button>
+                    <p id="status-merge" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+
+            <!-- DIVISOR DE PDF (SPLIT) -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto mt-8">
+                <h2 class="text-lg font-bold text-gray-100 border-b border-gray-700 pb-2">✂️ Dividir PDF (Extrair Páginas)</h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione o PDF</label>
+                        <div id="drop-zone-split" onclick="document.getElementById('file-input-split').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">✂️</span>
+                            <p id="drop-zone-split-text" class="text-sm text-gray-300">
+                                <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste o PDF aqui
+                            </p>
+                            <p class="text-[11px] text-gray-400">Apenas um arquivo .PDF</p>
+                        </div>
+                        <input type="file" id="file-input-split" accept=".pdf" onchange="handleSplitFileSelect()" class="hidden">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">2. Informe as páginas (Ex: 1-3, 5, 8-10)</label>
+                        <input type="text" id="split-range" placeholder="Ex: 1-3, 5" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="splitPDF()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                        Extrair e Salvar Páginas
+                    </button>
+                    <p id="status-split" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+
+            <!-- ESCREVER LIVREMENTE SOBRE O PDF -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6 max-w-3xl mx-auto mt-8">
+                <h2 class="text-lg font-bold text-gray-100 border-b border-gray-700 pb-2">✍️ Escrever no PDF (em qualquer ponto da página)</h2>
+                <p class="text-xs text-gray-400 -mt-2">Clique em qualquer lugar da página — mesmo que não seja um campo editável — para adicionar um texto ali.</p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">1. Selecione o PDF</label>
+                        <div id="drop-zone-pdfedit" onclick="document.getElementById('file-input-pdfedit').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                            <span class="text-3xl">✍️</span>
+                            <p id="drop-zone-pdfedit-text" class="text-sm text-gray-300">
+                                <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste o PDF aqui
+                            </p>
+                            <p class="text-[11px] text-gray-400">Apenas um arquivo .PDF</p>
+                        </div>
+                        <input type="file" id="file-input-pdfedit" accept=".pdf" onchange="handlePdfEditFileSelect()" class="hidden">
+                    </div>
+
+                    <div id="pdfedit-workspace" class="hidden space-y-3">
+                        <div class="flex flex-wrap items-center gap-3 bg-gray-700/40 p-3 rounded-lg text-xs">
+                            <button onclick="pdfEditPrevPage()" class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded">◀ Anterior</button>
+                            <span class="text-gray-300">Página <span id="pdfedit-page-num">1</span> de <span id="pdfedit-page-total">1</span></span>
+                            <button onclick="pdfEditNextPage()" class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-1.5 rounded">Próxima ▶</button>
+
+                            <span class="border-l border-gray-600 h-5 mx-1"></span>
+
+                            <label class="text-gray-300">Tam. fonte:
+                                <select id="pdfedit-fontsize" class="bg-gray-700 text-gray-100 rounded px-2 py-1 ml-1">
+                                    <option value="10">10</option>
+                                    <option value="12" selected>12</option>
+                                    <option value="14">14</option>
+                                    <option value="18">18</option>
+                                    <option value="24">24</option>
+                                </select>
+                            </label>
+
+                            <label class="text-gray-300 flex items-center gap-1">Cor:
+                                <input type="color" id="pdfedit-color" value="#111111" class="w-7 h-7 rounded bg-transparent border-0 cursor-pointer">
+                            </label>
+
+                            <button type="button" id="pdfedit-sign-btn" onclick="abrirAssinatura()" class="ml-auto bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-3 py-1.5 rounded">🖋️ Assinar</button>
+                            <button id="pdfedit-fs-btn" onclick="togglePdfEditFullscreen()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded">⛶ Tela cheia</button>
+                            <button id="pdfedit-fs-download" onclick="downloadEditedPdf()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold px-3 py-1.5 rounded">⬇️ Baixar PDF</button>
+                            <button onclick="pdfEditClearPage()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded">🗑️ Limpar página</button>
+                        </div>
+
+                        <p class="text-[11px] text-gray-400">Clique em qualquer ponto da página abaixo para inserir um texto. Clique no "✕" de um texto já colocado para removê-lo.</p>
+
+                        <div id="pdfedit-canvas-wrapper" class="relative inline-block border border-gray-600 rounded-lg overflow-auto max-h-[70vh] bg-white">
+                            <canvas id="pdfedit-canvas"></canvas>
+                            <!-- Textos posicionados e caixa de digitação são injetados aqui via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button id="btn-pdfedit-download" onclick="downloadEditedPdf()" class="hidden w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3.5 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                        Baixar PDF com as Anotações
+                    </button>
+                    <p id="status-pdfedit" class="text-xs text-center text-gray-400 mt-3 min-h-[1rem]"></p>
+                </div>
+            </div>
+
+            <!-- EXTRAIR TEXTO DE PDF -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-4 max-w-3xl mx-auto mt-8">
+                <h2 class="text-lg font-bold text-gray-100 border-b border-gray-700 pb-2">📝 Extrair texto de PDF</h2>
+                <p class="text-xs text-gray-400 -mt-2">Tira o texto de um PDF para você copiar ou baixar como .txt. Funciona em PDFs com texto selecionável; PDFs digitalizados (só imagem) não têm texto para extrair.</p>
+                <div id="drop-zone-pdftexto" onclick="document.getElementById('file-input-pdftexto').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 hover:bg-gray-700 p-6 rounded-xl text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-2">
+                    <span class="text-3xl">📝</span>
+                    <p id="drop-zone-pdftexto-text" class="text-sm text-gray-300"><span class="font-semibold text-emerald-400">Clique para selecionar</span> o PDF</p>
+                    <p class="text-[11px] text-gray-400">O arquivo é lido no seu navegador e não é enviado a lugar nenhum</p>
+                </div>
+                <input type="file" id="file-input-pdftexto" accept=".pdf" onchange="handlePdfTextoSelect()" class="hidden">
+                <textarea id="pdftexto-saida" readonly rows="10" aria-label="Texto extraído do PDF" placeholder="O texto extraído aparece aqui..." class="w-full bg-gray-700/50 border border-gray-700 rounded-lg p-3 text-sm outline-none"></textarea>
+                <div id="pdftexto-acoes" class="hidden flex flex-wrap gap-2">
+                    <button type="button" onclick="copiarTextoPdf()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold p-2.5 rounded transition text-sm">📋 Copiar texto</button>
+                    <button type="button" onclick="baixarTextoPdf()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-2.5 rounded transition text-sm">⬇️ Baixar .txt</button>
+                </div>
+                <p id="status-pdftexto" class="text-xs text-center text-gray-400 min-h-[1rem]"></p>
+            </div>
+            <!-- 🗂️ COMO FUNCIONAM OS CONVERSORES E FERRAMENTAS DE PDF -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
+                <div class="border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>⚙️</span> Como Funciona a Central de Conversores e PDFs?
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Entenda o fluxo de processamento de arquivos, conversões universais, compressão, unificação e divisão de documentos.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs text-gray-300">
+                    <!-- Card 1: Upload e Conversão -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Conversão Universal</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Formatos</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Detecta automaticamente a extensão do documento enviado e disponibiliza as opções de conversão cruzada compatíveis direto no navegador[cite: 6].
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Formatos:</strong> DOCX, XLSX, PDF, CSV, TXT e JSON[cite: 6].
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Compressor -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Compressor de PDF</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Otimização</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Reduz o tamanho de arquivos pesados ajustando a qualidade de renderização das páginas e reamostrando imagens internas.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Níveis:</strong> Escolha entre compressão média, alta ou baixa conforme a necessidade.
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Unificador (Merge) -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Unificar PDFs</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Juntar</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Permite selecionar múltiplos arquivos PDF de uma só vez para combiná-los sequencialmente em um único documento final coeso.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Praticidade:</strong> Agrupe relatórios e comprovantes rapidamente sem instalar softwares.
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Divisor (Split) -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Dividir PDF</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 rounded-full font-medium">Extração</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Informe intervalos de páginas específicos (ex: 1-3, 5) para fatiar o documento original e gerar um novo arquivo apenas com o trecho desejado.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Flexibilidade:</strong> Extração cirúrgica de páginas individuais ou blocos de páginas.
+                        </div>
+                    </div>
+                    <!-- Card 5: Escrever no PDF -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Escrever no PDF</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-rose-500/20 text-rose-400 rounded-full font-medium">Anotação livre</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Clique em qualquer ponto de qualquer página — tenha campo editável ou não — e adicione um texto exatamente naquele lugar, como uma caneta digital.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">100% local:</strong> a página é renderizada e editada no navegador, o PDF não sai do seu computador.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+    <!-- 🖋️ Caixa para desenhar a assinatura (editor de PDF) -->
+    <div id="assinatura-modal" class="sala-secreta hidden" role="dialog" aria-modal="true" aria-labelledby="assinatura-titulo">
+        <div class="sala-secreta-card">
+            <h2 id="assinatura-titulo" class="text-lg font-bold text-emerald-400">🖋️ Desenhe sua assinatura</h2>
+            <p class="mt-1 text-xs text-gray-400">Use o mouse ou o dedo. O fundo fica transparente no PDF.</p>
+            <canvas id="assinatura-canvas" width="600" height="220" class="mt-3 w-full rounded-lg border border-gray-600 bg-white" style="touch-action:none; cursor: crosshair" aria-label="Área para desenhar a assinatura"></canvas>
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
+                <button type="button" onclick="limparPadAssinatura()" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-3 py-2 rounded-lg text-sm transition">Limpar</button>
+                <button type="button" id="assinatura-anterior" onclick="usarAssinatura(true)" class="hidden bg-gray-700 hover:bg-gray-600 text-gray-100 px-3 py-2 rounded-lg text-sm transition">Usar a anterior</button>
+                <button type="button" onclick="fecharAssinatura()" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-3 py-2 rounded-lg text-sm transition">Cancelar</button>
+                <button type="button" onclick="usarAssinatura(false)" class="bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">Usar assinatura</button>
+            </div>
+        </div>
+    </div>
+        
+
+        
+
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+        
+
+        <!-- Anúncio Inferior 
+        <div class="w-full bg-gray-800 border border-dashed border-gray-700 rounded-lg p-6 text-center flex flex-col items-center justify-center min-h-[100px] md:min-h-[120px]">
+            <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Espaço Publicitário (Banner Inferior)</span>
+            <span class="text-[10px] text-gray-600 mt-1">Recomendado: 728x90 ou Responsivo</span>
+        </div>
+        -->
+
+        
+
+        
+
+        
+
+        
+
+        
+
+    </main>
+    <!-- 📄 RODAPÉ COM DIREITOS RESERVADOS E CONTADOR -->
+    <footer class="w-full bg-gray-800 border-t border-gray-700 py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400">
+            <nav aria-label="Todas as ferramentas" class="mb-4">
+                <ul class="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                    <li><a href="juros-compostos.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Simule juros compostos com aportes mensais</a></li>
+                    <li><a href="reserva-de-emergencia.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Calcule o valor ideal da sua reserva de emergência</a></li>
+                    <li><a href="rumo-ao-milhao.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Em quanto tempo você chega ao primeiro milhão</a></li>
+                    <li><a href="financiamento-imobiliario.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Compare financiamento imobiliário SAC e Price</a></li>
+                    <li><a href="financiamento-de-veiculos.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Simule a parcela do financiamento do seu veículo</a></li>
+                    <li><a href="amortizacao-extra.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Quanto você economiza amortizando o financiamento</a></li>
+                    <li><a href="alugar-ou-comprar.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Compare alugar e comprar um imóvel</a></li>
+                    <li><a href="a-vista-ou-parcelado.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Vale mais pagar à vista ou parcelar?</a></li>
+                    <li><a href="comparador-de-investimentos.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Compare CDB, LCI/LCA, Tesouro Selic e poupança</a></li>
+                    <li><a href="calculadora-fgts.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Saldo, multa de 40% e aviso prévio do FGTS</a></li>
+                    <li><a href="rescisao-clt.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Estime o valor da sua rescisão trabalhista</a></li>
+                    <li><a href="salario-liquido.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Salário líquido 2026 com INSS e IRRF</a></li>
+                    <li><a href="gerador-de-documentos.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Currículo, contrato e orçamento em PDF</a></li>
+                    <li><a href="conversor-de-arquivos.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Converta arquivos e edite PDF sem enviar nada</a></li>
+                    <li><a href="ferramentas-de-imagem.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Comprima, redimensione e converta imagens; fotos em PDF</a></li>
+                    <li><a href="gerador-de-qr-code.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Crie um QR Code e baixe em PNG</a></li>
+                    <li><a href="gerador-de-senha.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Crie senhas fortes e aleatórias</a></li>
+                    <li><a href="calculadora-de-porcentagem.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Cinco cálculos de porcentagem na hora</a></li>
+                    <li><a href="conversor-de-unidades.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Converta comprimento, massa, temperatura e mais</a></li>
+                </ul>
+            </nav>
+            <button type="button" id="marca-secreta" class="marca-secreta" aria-label="ExCalc">
+                <img src="favicon.png?v=3" alt="" width="18" height="18">
+                <span>ExCalc</span>
+            </button>
+            <p class="mb-2">
+                <button type="button" onclick="abrirSugestao()" class="link-sugestao">💬 Enviar uma sugestão</button>
+            </p>
+            <p>
+                © <span id="footer-year">2026</span> ExCalc Finanças e Conversores. Todos os direitos reservados.
+            </p>
+        </div>
+    </footer>
+
+    <!-- 💬 Caixa de sugestões (envia por e-mail via Web3Forms; a chave fica em _fonte/paginas.json) -->
+    <div id="sugestao-modal" class="sala-secreta hidden" role="dialog" aria-modal="true" aria-labelledby="sugestao-titulo">
+        <form id="sugestao-form" class="sala-secreta-card text-left" onsubmit="enviarSugestao(event)" novalidate>
+            <h2 id="sugestao-titulo" class="text-lg font-bold text-emerald-400">💬 Enviar uma sugestão</h2>
+            <p class="mt-1 text-xs text-gray-400">Achou um erro, quer uma ferramenta nova ou tem uma ideia? Conta pra gente. Nome e e-mail são opcionais; o e-mail só é usado se você quiser uma resposta.</p>
+            <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label for="sugestao-nome" class="block text-xs font-medium text-gray-300">Nome (opcional)</label>
+                    <input type="text" id="sugestao-nome" maxlength="80" autocomplete="name" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+                <div>
+                    <label for="sugestao-email" class="block text-xs font-medium text-gray-300">E-mail (opcional)</label>
+                    <input type="email" id="sugestao-email" maxlength="120" autocomplete="email" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                </div>
+            </div>
+            <div class="mt-3">
+                <label for="sugestao-mensagem" class="block text-xs font-medium text-gray-300">Sua sugestão</label>
+                <textarea id="sugestao-mensagem" rows="5" maxlength="1500" required class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500 text-sm" placeholder="Escreva aqui..."></textarea>
+            </div>
+            <!-- isca contra robôs: pessoas não veem nem preenchem este campo -->
+            <input type="checkbox" id="sugestao-botcheck" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0">
+            <p id="sugestao-status" class="mt-2 text-xs min-h-[1rem]" role="status" aria-live="polite"></p>
+            <div class="mt-3 flex flex-wrap justify-end gap-2">
+                <button type="button" onclick="fecharSugestao()" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-4 py-2 rounded-lg text-sm transition">Cancelar</button>
+                <button type="submit" id="sugestao-enviar" class="bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">Enviar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 🤫 Sala Secreta (easter egg: 7 cliques na marca do rodapé) -->
+    <div id="sala-secreta" class="sala-secreta hidden" role="dialog" aria-modal="true" aria-labelledby="sala-secreta-titulo">
+        <div class="sala-secreta-card">
+            <h2 id="sala-secreta-titulo" class="text-2xl font-bold text-emerald-400">🤫 Sala Secreta</h2>
+            <p id="sala-secreta-frase" class="mt-3 text-sm text-gray-300"></p>
+            <div class="mt-5 flex flex-wrap justify-center gap-2">
+                <button type="button" onclick="fecharSalaSecreta(); abrirViagem();" class="bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold px-4 py-2 rounded-lg text-sm transition">🌀 Entrar no Modo Viagem</button>
+                <button type="button" onclick="fecharSalaSecreta()" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-4 py-2 rounded-lg text-sm transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 🌀 Botão flutuante "não clique" -> abre a camada psicodélica (tela cheia, tudo neste arquivo) -->
+    <button type="button" id="troll-btn" onclick="abrirViagem()" class="troll-btn" aria-label="Não clique neste botão">
+        <span class="iri-filme" aria-hidden="true"></span>
+        <span class="iri-icone" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0"/><path d="M12 12c0-2.2 1.8-4 4-4s4 1.8 4 4"/><path d="M12 12c0 3.3-2.7 6-6 6s-6-2.7-6-6c0-4.4 3.6-8 8-8"/></svg>
+        </span>
+        <span class="iri-brilho" aria-hidden="true"></span>
+        <span id="troll-label" class="troll-label">não clique</span>
+    </button>
+
+    <div id="viagem" class="viagem hidden" role="dialog" aria-modal="true" aria-label="Modo Viagem">
+        <div id="viagem-nuvem" class="viagem-nuvem" style="display:none"></div>
+        <canvas id="viagem-canvas"></canvas>
+        <div id="viagem-dica" class="viagem-dica">Mova o mouse · clique para uma onda de choque · teclas 1, 2, 3 trocam o efeito · Esc sai</div>
+        <div id="viagem-bar" class="viagem-bar" role="toolbar" aria-label="Controles do Modo Viagem">
+            <button type="button" class="viagem-btn" data-viagem-modo="caleido">🔮 Caleidoscópio</button>
+            <button type="button" class="viagem-btn" data-viagem-modo="neural">🕸️ Neural</button>
+            <button type="button" class="viagem-btn" data-viagem-modo="nuvem">☁️ Nuvens</button>
+            <button type="button" class="viagem-btn" id="viagem-tela">⛶ Tela cheia</button>
+            <button type="button" class="viagem-btn viagem-sair" onclick="fecharViagem()">✕ Sair</button>
+        </div>
+    </div>
+    <!-- Scripts: só o que esta página usa. O núcleo (core.js) vem primeiro. -->
+    <script src="js/core.js?v=0c88e64f"></script>
+    <script src="js/arquivos.js?v=0c88e64f"></script>
+</body>
+
+</html>

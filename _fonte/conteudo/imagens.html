@@ -1,0 +1,192 @@
+<section id="tab-imagens" class="tab-content space-y-8">
+            <div class="space-y-2">
+                <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Ferramentas de Imagem</h1>
+                <p class="text-sm text-gray-400">Comprima, converta, redimensione e gire suas imagens, coloque marca d'água e junte fotos em um PDF. Tudo é feito no seu navegador: as imagens não são enviadas a lugar nenhum.</p>
+            </div>
+
+            <!-- BLOCO 1: COMPRESSOR E CONVERSOR -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6">
+                <div class="border-b border-gray-700 pb-3">
+                    <h2 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
+                        <span>🖼️</span> Compressão e Conversão
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-1">Comprima ou altere os formatos das suas fotos instantaneamente no navegador.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <!-- Compressor de Imagem -->
+                    <div class="bg-gray-700/40 p-5 rounded-xl border border-gray-700/60 space-y-4 h-full flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-bold text-emerald-400">📉 Compressor de Imagem</h3>
+                            <div>
+                                <label for="img-compress-file" class="block text-xs font-medium text-gray-300 mb-2">Selecione a Imagem</label>
+                                <input type="file" id="img-compress-file" accept="image/*" class="w-full bg-gray-700 text-xs rounded p-2.5 outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs text-gray-300 mb-1">
+                                    <label for="img-compress-range">Qualidade desejada:</label>
+                                    <span id="compress-val-label">80%</span>
+                                </div>
+                                <input type="range" id="img-compress-range" min="10" max="100" value="80" class="w-full accent-emerald-500" oninput="document.getElementById('compress-val-label').innerText = this.value + '%'">
+                            </div>
+                        </div>
+                        <div class="pt-2">
+                            <button onclick="compressImage()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded-lg transition text-xs">
+                                Comprimir Imagem
+                            </button>
+                            <p id="compress-status" class="text-xs text-center text-gray-400 mt-2 min-h-[1rem]"></p>
+                        </div>
+                    </div>
+
+                    <!-- Conversor de Imagens -->
+                    <div class="bg-gray-700/40 p-5 rounded-xl border border-gray-700/60 space-y-4 h-full flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <h3 class="text-sm font-bold text-emerald-400">🔄 Conversor de Formatos</h3>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-300 mb-1.5">1. Selecione a Imagem</label>
+                                <div id="drop-zone-img-convert" onclick="document.getElementById('img-convert-file').click()" class="border-2 border-dashed border-gray-600 hover:border-emerald-500 bg-gray-700/50 p-3 rounded-xl text-center cursor-pointer transition flex flex-col items-center justify-center gap-1">
+                                    <span class="text-xl">🖼️</span>
+                                    <p id="drop-zone-img-text" class="text-xs text-gray-300">
+                                        <span class="font-semibold text-emerald-400">Clique</span> ou arraste a imagem
+                                    </p>
+                                </div>
+                                <input type="file" id="img-convert-file" accept="image/*, .tiff, .bmp, .svg" onchange="handleImgConvertSelect()" class="hidden">
+                            </div>
+                            <div>
+                                <label for="img-target-format" class="block text-xs font-medium text-gray-300 mb-1.5">2. Formato de Saída</label>
+                                <select id="img-target-format" class="w-full bg-gray-700 text-xs text-gray-100 rounded p-2.5 outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="jpg">JPG / JPEG</option>
+                                    <option value="png">PNG (Transparente)</option>
+                                    <option value="webp">WEBP (Otimizado)</option>
+                                    <option value="gif">GIF</option>
+                                    <option value="bmp">BMP</option>
+                                    <option value="tiff">TIFF</option>
+                                    <option value="svg">SVG</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="pt-2">
+                            <button onclick="convertImage()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded-lg transition text-xs">
+                                Converter Imagem
+                            </button>
+                            <p id="img-convert-status" class="text-xs text-center text-gray-400 mt-2 min-h-[1rem]"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOCO 2: EDITOR RÁPIDO -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6">
+                <div class="border-b border-gray-700 pb-3">
+                    <h2 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
+                        <span>✂️</span> Editor Rápido: redimensionar, girar e marca d'água
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-1">Ajuste o tamanho, gire, espelhe e escreva uma marca d'água. Ao exportar, os dados escondidos da foto (como a localização GPS) são removidos.</p>
+                </div>
+
+                <div>
+                    <label for="edit-img-file" class="block text-xs font-medium text-gray-300 mb-2">Selecione a imagem</label>
+                    <input type="file" id="edit-img-file" accept="image/*" onchange="handleEditImgSelect()" class="w-full max-w-md bg-gray-700 text-xs rounded p-2.5 outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                </div>
+
+                <div id="edit-img-painel" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-emerald-400 mb-2">Tamanho (pixels)</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label for="edit-w" class="block text-xs text-gray-400">Largura</label>
+                                    <input type="number" id="edit-w" min="1" max="8000" oninput="edMudouLargura()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                                </div>
+                                <div>
+                                    <label for="edit-h" class="block text-xs text-gray-400">Altura</label>
+                                    <input type="number" id="edit-h" min="1" max="8000" oninput="edMudouAltura()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                                </div>
+                            </div>
+                            <label class="mt-2 flex items-center gap-2 text-xs text-gray-300"><input type="checkbox" id="edit-prop" checked> Manter a proporção</label>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-bold text-emerald-400 mb-2">Girar e espelhar</h3>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                <button type="button" onclick="edGirar(-90)" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-3 py-1.5 rounded">↺ Girar à esquerda</button>
+                                <button type="button" onclick="edGirar(90)" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-3 py-1.5 rounded">↻ Girar à direita</button>
+                                <button type="button" onclick="edEspelhar('h')" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-3 py-1.5 rounded">⇋ Espelhar</button>
+                                <button type="button" onclick="edEspelhar('v')" class="bg-gray-700 hover:bg-gray-600 text-gray-100 px-3 py-1.5 rounded">⇅ Inverter</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-bold text-emerald-400 mb-2">Marca d'água (opcional)</h3>
+                            <input type="text" id="edit-marca" maxlength="60" placeholder="Ex.: © Meu Nome" oninput="edAtualizarPreview()" aria-label="Texto da marca d'água" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                            <div class="mt-2 grid grid-cols-2 gap-2">
+                                <select id="edit-marca-pos" onchange="edAtualizarPreview()" aria-label="Posição da marca d'água" class="bg-gray-700 rounded p-2 outline-none text-xs">
+                                    <option value="br">Canto inferior direito</option>
+                                    <option value="bl">Canto inferior esquerdo</option>
+                                    <option value="tr">Canto superior direito</option>
+                                    <option value="tl">Canto superior esquerdo</option>
+                                    <option value="c">Centro</option>
+                                </select>
+                                <div class="flex items-center gap-2 text-xs text-gray-300">
+                                    <label for="edit-marca-op">Opacidade</label>
+                                    <input type="range" id="edit-marca-op" min="10" max="100" value="70" oninput="edAtualizarPreview()" class="w-full accent-emerald-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-bold text-emerald-400 mb-2">Salvar como</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="edit-formato" aria-label="Formato de saída" class="bg-gray-700 rounded p-2 outline-none text-xs">
+                                    <option value="jpg">JPG</option>
+                                    <option value="png">PNG</option>
+                                    <option value="webp">WEBP</option>
+                                </select>
+                                <div class="flex items-center gap-2 text-xs text-gray-300">
+                                    <label for="edit-qualidade">Qualidade</label>
+                                    <input type="range" id="edit-qualidade" min="30" max="100" value="90" class="w-full accent-emerald-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="edBaixar()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded-lg transition text-sm">⬇️ Baixar imagem editada</button>
+                        <p id="edit-img-status" class="text-xs text-center text-gray-400 min-h-[1rem]" role="status"></p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-bold text-emerald-400 mb-2">Prévia <span id="edit-info" class="font-normal text-xs text-gray-400"></span></h3>
+                        <div class="rounded-lg border border-gray-700 bg-gray-900/40 p-2 overflow-auto" style="max-height: 28rem">
+                            <canvas id="edit-img-canvas" class="max-w-full mx-auto block" aria-label="Prévia da imagem editada"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOCO 3: IMAGENS EM PDF -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg space-y-6">
+                <div class="border-b border-gray-700 pb-3">
+                    <h2 class="text-lg font-bold text-emerald-300 flex items-center gap-2">
+                        <span>📄</span> Imagens em PDF
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-1">Junte várias fotos em um único PDF, na ordem que você escolher. Cada imagem vira uma página.</p>
+                </div>
+
+                <div>
+                    <label for="img2pdf-arquivos" class="block text-xs font-medium text-gray-300 mb-2">Selecione as imagens (pode escolher várias)</label>
+                    <input type="file" id="img2pdf-arquivos" accept="image/*" multiple onchange="handleImg2PdfSelect()" class="w-full max-w-md bg-gray-700 text-xs rounded p-2.5 outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-500 file:text-gray-950 hover:file:bg-emerald-600 transition">
+                </div>
+
+                <ul id="img2pdf-lista" class="space-y-1 text-xs text-gray-300" aria-label="Imagens na ordem do PDF"></ul>
+
+                <div class="flex flex-wrap items-center gap-3 text-xs text-gray-300">
+                    <label for="img2pdf-pagina">Tamanho da página:</label>
+                    <select id="img2pdf-pagina" class="bg-gray-700 rounded p-2 outline-none text-xs">
+                        <option value="a4">A4 (imagem centralizada, com margem)</option>
+                        <option value="imagem">Do tamanho de cada imagem</option>
+                    </select>
+                </div>
+
+                <button type="button" onclick="gerarPdfDeImagens()" class="w-full max-w-md bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded-lg transition text-sm">📄 Criar PDF</button>
+                <p id="img2pdf-status" class="text-xs text-gray-400 min-h-[1rem]" role="status"></p>
+            </div>
+        </section>

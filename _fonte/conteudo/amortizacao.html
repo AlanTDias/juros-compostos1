@@ -1,0 +1,108 @@
+<section id="tab-amortizacao" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Amortização Extra (Antecipação)</h1>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium">Saldo Devedor Atual (R$)</label>
+                        <input type="text" id="amo-saldo" value="200.000" class="input-moeda w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Taxa de Juros Mensal (%)</label>
+                        <input type="number" step="0.01" id="amo-taxa" value="0.80" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Prazo Restante (Meses)</label>
+                        <input type="number" id="amo-meses" value="240" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Valor da Amortização Extra (R$)</label>
+                        <input type="text" id="amo-extra" value="10.000" class="input-moeda w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Objetivo da Amortização</label>
+                        <select id="amo-tipo" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                            <option value="prazo">Reduzir o Prazo (Economiza mais juros)</option>
+                            <option value="prestacao">Reduzir o Valor da Prestação</option>
+                        </select>
+                    </div>
+                    <button onclick="calculateAmortizacao()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Simular Amortização</button>
+                </div>
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg lg:col-span-2 flex flex-col justify-center space-y-4">
+                    <h3 class="text-lg font-semibold text-emerald-300">Impacto da Amortização Extra</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-700 p-4 rounded-lg space-y-2">
+                            <span class="block text-sm font-bold text-gray-300">Situação Atual (Antes)</span>
+                            <p class="text-xs text-gray-300">Prestação Atual: <span id="amo-antiga-parc" class="font-bold text-white">R$ 0,00</span></p>
+                            <p class="text-xs text-gray-300">Prazo Restante: <span id="amo-antigo-prazo" class="font-bold text-white">-</span></p>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg space-y-2">
+                            <span class="block text-sm font-bold text-emerald-400">Nova Situação (Após Amortizar)</span>
+                            <p class="text-xs text-gray-300">Nova Prestação: <span id="amo-nova-parc" class="font-bold text-white">R$ 0,00</span></p>
+                            <p class="text-xs text-gray-300">Novo Prazo: <span id="amo-novo-prazo" class="font-bold text-white">-</span></p>
+                            <p class="text-xs text-gray-300 font-semibold text-emerald-300 mt-2" id="amo-economia"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 💰 COMO FUNCIONA A AMORTIZAÇÃO EXTRA -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
+                <div class="border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>💰</span> Como Funciona a Amortização Extra (Antecipação)?
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Entenda o impacto de antecipar pagamentos no seu financiamento e como escolher a melhor estratégia.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
+                    <!-- Card 1: Saldo Devedor Real -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Amortização Direta</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Abatimento</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                O valor pago na amortização extra vai <strong class="text-gray-200">100% para a redução do principal</strong> (saldo devedor), sem a cobrança de juros sobre essa quantia antecipada.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Efeito:</strong> Como os juros são calculados sobre o saldo devedor, reduzir o principal diminui o juro acumulado até o fim do contrato.
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Opção 1 - Reduzir Prazo -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Reduzir o Prazo</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Economia Máxima</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Mantém a prestação mensal no mesmo valor e <strong class="text-gray-200">elimina meses do contrato</strong> no final da dívida.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Vantagem:</strong> É a opção estatisticamente mais vantajosa para economizar o máximo possível em juros futuros.
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Opção 2 - Reduzir Prestação -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Reduzir Prestação</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Folga Mensal</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Mantém o número de parcelas restante igual, mas <strong class="text-gray-200">diminui o valor cobrado todo mês</strong> até a quitação.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Vantagem:</strong> Ideal para aliviar o orçamento mensal e diminuir o comprometimento de renda.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>

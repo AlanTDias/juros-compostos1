@@ -1,0 +1,47 @@
+<section id="tab-porcentagem" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Porcentagem</h1>
+            <p class="text-sm text-gray-400 -mt-3">Cinco cálculos de porcentagem mais comuns, com o resultado na hora. Aceita vírgula ou ponto nos decimais.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg space-y-2">
+                    <h3 class="text-sm font-semibold text-emerald-400">Quanto é X% de Y?</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="pct1-x" class="block text-xs text-gray-400">X (%)</label><input type="text" inputmode="decimal" id="pct1-x" value="15" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div><label for="pct1-y" class="block text-xs text-gray-400">Y</label><input type="text" inputmode="decimal" id="pct1-y" value="200" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                    </div>
+                    <p class="text-sm">Resultado: <strong id="pct1-res" class="text-emerald-300">—</strong></p>
+                </div>
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg space-y-2">
+                    <h3 class="text-sm font-semibold text-emerald-400">X é quantos % de Y?</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="pct2-x" class="block text-xs text-gray-400">X</label><input type="text" inputmode="decimal" id="pct2-x" value="30" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div><label for="pct2-y" class="block text-xs text-gray-400">Y</label><input type="text" inputmode="decimal" id="pct2-y" value="200" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                    </div>
+                    <p class="text-sm">Resultado: <strong id="pct2-res" class="text-emerald-300">—</strong></p>
+                </div>
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg space-y-2">
+                    <h3 class="text-sm font-semibold text-emerald-400">Aumentar ou diminuir Y em X%</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="pct3-y" class="block text-xs text-gray-400">Y</label><input type="text" inputmode="decimal" id="pct3-y" value="200" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div><label for="pct3-x" class="block text-xs text-gray-400">X (%)</label><input type="text" inputmode="decimal" id="pct3-x" value="10" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                    </div>
+                    <p class="text-sm">Aumentando: <strong id="pct3-mais" class="text-emerald-300">—</strong></p>
+                    <p class="text-sm">Diminuindo: <strong id="pct3-menos" class="text-emerald-300">—</strong></p>
+                </div>
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg space-y-2">
+                    <h3 class="text-sm font-semibold text-emerald-400">Variação percentual de A para B</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="pct4-a" class="block text-xs text-gray-400">A (valor inicial)</label><input type="text" inputmode="decimal" id="pct4-a" value="80" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div><label for="pct4-b" class="block text-xs text-gray-400">B (valor final)</label><input type="text" inputmode="decimal" id="pct4-b" value="100" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                    </div>
+                    <p class="text-sm">Variação: <strong id="pct4-res" class="text-emerald-300">—</strong></p>
+                </div>
+                <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg space-y-2">
+                    <h3 class="text-sm font-semibold text-emerald-400">X é Y% de quanto? (valor total)</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label for="pct5-x" class="block text-xs text-gray-400">X (parte)</label><input type="text" inputmode="decimal" id="pct5-x" value="30" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                        <div><label for="pct5-y" class="block text-xs text-gray-400">Y (%)</label><input type="text" inputmode="decimal" id="pct5-y" value="15" oninput="calcularPorcentagens()" class="w-full bg-gray-700 rounded p-2 outline-none focus:ring-2 focus:ring-emerald-500"></div>
+                    </div>
+                    <p class="text-sm">Valor total: <strong id="pct5-res" class="text-emerald-300">—</strong></p>
+                </div>
+            </div>
+        </section>

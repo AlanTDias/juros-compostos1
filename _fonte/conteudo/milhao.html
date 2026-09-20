@@ -1,0 +1,86 @@
+<section id="tab-milhao" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora: Rumo ao Milhão</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium">Valor Atual (R$)</label>
+                        <input type="text" id="milhao-inicial" value="0" class="input-moeda w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Aporte Mensal (R$)</label>
+                        <input type="text" id="milhao-aporte" value="0" class="input-moeda w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Rentabilidade Anual (%)</label>
+                        <input type="number" step="0.1" id="milhao-taxa" value="10" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <button onclick="calculateMilhao()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Descobrir Tempo</button>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center items-center text-center space-y-3">
+                    <span class="text-gray-400">Você atingirá R$ 1 Milhão em:</span>
+                    <span id="milhao-resultado" class="text-2xl md:text-3xl font-extrabold text-emerald-400">-</span>
+                    <span id="milhao-detalhes" class="text-xs text-gray-400"></span>
+                </div>
+            </div>
+            <!-- 🎯 COMO FUNCIONA A CALCULADORA RUMO AO MILHÃO -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
+                <div class="border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>🎯</span> Como Funciona a Calculadora "Rumo ao Milhão"?
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Entenda como os aportes recorrentes e a taxa de retorno aceleram o caminho até o primeiro milhão.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
+                    <!-- Card 1: Ponto de Partida -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Valor Inicial</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Base</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                É o montante que você já possui investido hoje. Quanto maior o capital de partida, menor é o tempo necessário para que os juros compostos alcancem a meta de R$ 1 milhão.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Dica:</strong> Se estiver começando do zero, basta manter o valor zerado.
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Força dos Aportes -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Aporte Mensal</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Motor</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                A constância de investir todos os meses é o principal motor no início da jornada. No começo, o seu dinheiro depositado representa a maior parte do crescimento do saldo.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Impacto:</strong> Aumentar o aporte reduz exponencialmente os anos de espera.
+                        </div>
+                    </div>
+
+                    <!-- Card 3: O Papel da Taxa -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Rentabilidade Anual</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Multiplicador</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Representa o retorno médio esperado dos seus investimentos ao ano. À medida que o saldo cresce, os juros gerados pela taxa ultrapassam o valor dos seus aportes mensais.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Referência:</strong> Considere uma taxa real (descontada a inflação) para estimar o poder de compra futuro.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>

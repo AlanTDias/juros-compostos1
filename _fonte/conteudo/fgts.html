@@ -1,0 +1,102 @@
+<section id="tab-fgts" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Rescisão e FGTS</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium">Salário Bruto Mensal (R$)</label>
+                        <input type="text" id="fgts-salario" value="0" class="input-moeda w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Saldo Atual na Conta do FGTS (R$)</label>
+                        <input type="text" id="fgts-saldo" value="0" class="input-moeda w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Tempo Trabalhado na Empresa (Meses)</label>
+                        <input type="number" id="fgts-meses" value="24" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <button onclick="calculateFGTS()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Calcular Rescisão e FGTS</button>
+                </div>
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg flex flex-col justify-center space-y-3">
+                    <h3 class="text-lg font-semibold text-emerald-300">Resumo dos Valores Rescisórios</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Saldo Total do FGTS:</span>
+                            <span id="fgts-res-saldo" class="font-bold text-white">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Multa Rescisória (40%):</span>
+                            <span id="fgts-res-multa" class="font-bold text-emerald-400">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Aviso Prévio Indenizado:</span>
+                            <span id="fgts-res-aviso" class="font-bold text-white">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between pt-1">
+                            <span class="text-gray-200 font-bold">Total Estimado a Receber:</span>
+                            <span id="fgts-res-total" class="text-lg md:text-xl font-extrabold text-emerald-300">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 💼 COMO FUNCIONA A CALCULADORA DE RESCISÃO E FGTS -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
+                <div class="border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>💼</span> Como Funciona a Calculadora de Rescisão e FGTS?
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Entenda o cálculo dos depósitos mensais, da multa rescisória e do aviso prévio no desligamento sem justa causa.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
+                    <!-- Card 1: Depósito do FGTS -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Depósito Mensal (8%)</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Encargo do Empregador</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                O empregador deposita mensalmente o valor de <strong class="text-gray-200">8% do seu salário bruto</strong> na conta vinculada do FGTS, sem desconto no contracheque.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Saldo Acumulado:</strong> Corresponde à soma desses depósitos mensais ao longo do tempo trabalhado, acrescida de atualização monetária.
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Multa Rescisória de 40% -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Multa Rescisória (40%)</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Demissão sem Justa Causa</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Em caso de demissão sem justa causa, a empresa paga uma indenização de <strong class="text-gray-200">40% sobre o total depositado</strong> na conta do FGTS durante o contrato.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Base de Cálculo:</strong> A multa é calculada sobre o montante acumulado dos depósitos referentes àquele vínculo empregatício.
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Aviso Prévio Indenizado -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Aviso Prévio Indenizado</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Direito Trabalhista</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Ocorre quando a empresa opta por desligar o funcionário imediatamente. O valor base equivale a <strong class="text-gray-200">pelo menos 1 salário bruto</strong>.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Proporcionalidade:</strong> Pela Lei do Aviso Prévio Proporcional, são somados 3 dias a mais por ano completo trabalhado na empresa.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>

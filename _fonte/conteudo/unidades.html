@@ -1,0 +1,23 @@
+<section id="tab-unidades" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Conversor de Unidades</h1>
+            <p class="text-sm text-gray-400 -mt-3">Converta comprimento, massa, temperatura, volume, área, velocidade, tempo e dados digitais. O resultado aparece enquanto você digita.</p>
+            <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4 max-w-3xl">
+                <div>
+                    <label for="un-categoria" class="block text-sm font-medium">Categoria</label>
+                    <select id="un-categoria" onchange="atualizarUnidades()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-end">
+                    <div>
+                        <label for="un-valor" class="block text-sm font-medium">Valor</label>
+                        <input type="text" inputmode="decimal" id="un-valor" value="1" oninput="converterUnidade()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <select id="un-de" onchange="converterUnidade()" aria-label="Unidade de origem" class="w-full bg-gray-700 rounded p-2 mt-2 outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                    </div>
+                    <button type="button" onclick="inverterUnidades()" aria-label="Inverter unidades" class="bg-gray-700 hover:bg-gray-600 text-emerald-400 rounded p-2 h-10 transition">⇄</button>
+                    <div>
+                        <label for="un-resultado" class="block text-sm font-medium">Resultado</label>
+                        <input type="text" id="un-resultado" readonly class="w-full bg-gray-700/60 rounded p-2 mt-1 outline-none font-bold text-emerald-300" aria-live="polite">
+                        <select id="un-para" onchange="converterUnidade()" aria-label="Unidade de destino" class="w-full bg-gray-700 rounded p-2 mt-2 outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                    </div>
+                </div>
+            </div>
+        </section>

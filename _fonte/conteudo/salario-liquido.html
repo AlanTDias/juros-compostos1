@@ -1,0 +1,48 @@
+<section id="tab-salario-liquido" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Calculadora de Salário Líquido 2026 (INSS e IRRF)</h1>
+            <p class="text-sm text-gray-400 -mt-3">Descubra quanto sobra do seu salário bruto depois do desconto do INSS e do Imposto de Renda na fonte, já com a nova isenção de até R$ 5.000 por mês.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label for="sl-bruto" class="block text-sm font-medium">Salário bruto mensal (R$)</label>
+                        <input type="text" inputmode="decimal" id="sl-bruto" value="5.000,00" oninput="calculateSalarioLiquido()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="sl-dependentes" class="block text-sm font-medium">Dependentes</label>
+                            <input type="number" min="0" max="20" id="sl-dependentes" value="0" oninput="calculateSalarioLiquido()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label for="sl-outros" class="block text-sm font-medium">Outros descontos (R$)</label>
+                            <input type="text" inputmode="decimal" id="sl-outros" value="0,00" oninput="calculateSalarioLiquido()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-gray-400">"Outros descontos" são valores que não mudam o imposto (vale-transporte, plano de saúde, pensão...). O cálculo escolhe sozinho a dedução mais vantajosa: legal (INSS + dependentes) ou o desconto simplificado de R$ 607,20.</p>
+                    <button type="button" onclick="calculateSalarioLiquido(true)" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Calcular salário líquido</button>
+                </div>
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg flex flex-col justify-center space-y-3">
+                    <h3 class="text-lg font-semibold text-emerald-300">Resultado do mês</h3>
+                    <div class="space-y-2 text-sm" aria-live="polite">
+                        <div class="flex justify-between border-b border-gray-700 pb-2"><span class="text-gray-400">Salário bruto:</span><span id="sl-res-bruto" class="font-bold text-white">R$ 0,00</span></div>
+                        <div class="flex justify-between border-b border-gray-700 pb-2"><span class="text-gray-400">(−) INSS:</span><span id="sl-res-inss" class="font-bold text-red-400">R$ 0,00</span></div>
+                        <div class="flex justify-between border-b border-gray-700 pb-2"><span class="text-gray-400">(−) Imposto de Renda (IRRF):</span><span id="sl-res-irrf" class="font-bold text-red-400">R$ 0,00</span></div>
+                        <div class="flex justify-between border-b border-gray-700 pb-2"><span class="text-gray-400">(−) Outros descontos:</span><span id="sl-res-outros" class="font-bold text-red-400">R$ 0,00</span></div>
+                        <div class="flex justify-between pt-1"><span class="text-gray-200 font-bold">Salário líquido:</span><span id="sl-res-liquido" class="text-lg md:text-xl font-extrabold text-emerald-300">R$ 0,00</span></div>
+                    </div>
+                    <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60 text-xs text-gray-300 space-y-1">
+                        <p>Base de cálculo do IR: <strong id="sl-res-base" class="text-gray-100">R$ 0,00</strong> <span id="sl-res-metodo" class="text-gray-400"></span></p>
+                        <p>Redução do IR (Lei 15.270/2025): <strong id="sl-res-reducao" class="text-gray-100">R$ 0,00</strong></p>
+                        <p>Total de descontos sobre o bruto: <strong id="sl-res-efetiva" class="text-gray-100">0,00%</strong></p>
+                    </div>
+                </div>
+            </div>
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
+                <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">Como o cálculo é feito</h3>
+                <ul class="mt-3 space-y-2 text-xs text-gray-300 list-disc pl-5">
+                    <li><strong class="text-gray-100">INSS 2026 (progressivo):</strong> 7,5% até R$ 1.621,00; 9% até R$ 2.902,84; 12% até R$ 4.354,27; 14% até o teto de R$ 8.475,55 (Portaria Interministerial MPS/MF nº 13/2026). Cada faixa paga a sua alíquota só sobre a parte do salário que cai nela.</li>
+                    <li><strong class="text-gray-100">IRRF 2026:</strong> tabela progressiva mensal (isento até R$ 2.428,80 de base; 7,5%, 15%, 22,5% e 27,5% nas faixas seguintes) menos a redução da Lei 15.270/2025: quem ganha até R$ 5.000 fica isento; entre R$ 5.000,01 e R$ 7.350 a redução diminui de forma linear (R$ 978,62 − 0,133145 × rendimento); acima de R$ 7.350 não há redução.</li>
+                    <li><strong class="text-gray-100">Dependentes:</strong> R$ 189,59 de dedução por dependente na base do IR.</li>
+                </ul>
+                <p class="mt-3 text-[11px] text-gray-400">Valores de referência de 2026, conforme a Receita Federal. O resultado é uma estimativa: 13º, férias, horas extras, adicionais e regras de cada empresa podem alterar o holerite real.</p>
+            </section>
+        </section>

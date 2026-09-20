@@ -1,0 +1,220 @@
+{
+  "dominio": "https://www.excalc.com.br",
+  "nomeDoSite": "ExCalc",
+  "sugestoes": { "accessKey": "" },
+  "paginas": [
+    {
+      "id": "home",
+      "arquivo": "index.html",
+      "titulo": "ExCalc | Calculadoras Financeiras e Conversores Grátis",
+      "descricao": "Calculadoras financeiras (juros compostos, salário líquido, financiamento), conversores de arquivos, ferramentas de PDF e utilitários grátis, sem cadastro.",
+      "resumo": "Todas as ferramentas do ExCalc reunidas em um só lugar.",
+      "categoria": "FinanceApplication",
+      "prioridade": "1.0",
+      "scripts": ["indicadores.js"]
+    },
+    {
+      "id": "juros-compostos",
+      "arquivo": "juros-compostos.html",
+      "titulo": "Calculadora de Juros Compostos com Aporte Mensal | ExCalc",
+      "descricao": "Simule o crescimento do seu dinheiro com juros compostos e aportes mensais. Veja o total investido, os juros ganhos, o gráfico e a tabela mês a mês.",
+      "resumo": "Simule juros compostos com aportes mensais.",
+      "intro": "Informe o valor inicial, o aporte mensal, a taxa de juros e o prazo para ver quanto seu dinheiro pode render. O resultado mostra o total investido, o total em juros, um gráfico da evolução e a linha do tempo mês a mês.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.9",
+      "externos": ["https://cdn.jsdelivr.net/npm/chart.js"],
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "reserva",
+      "arquivo": "reserva-de-emergencia.html",
+      "titulo": "Calculadora de Reserva de Emergência | ExCalc",
+      "descricao": "Descubra quanto você precisa guardar de reserva de emergência multiplicando seus gastos mensais pelo número de meses de segurança que deseja ter.",
+      "resumo": "Calcule o valor ideal da sua reserva de emergência.",
+      "intro": "Multiplique seus gastos mensais essenciais pelos meses de segurança que você quer cobrir e veja o valor da reserva de emergência ideal para o seu caso.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.7",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "milhao",
+      "arquivo": "rumo-ao-milhao.html",
+      "titulo": "Quanto Tempo Para Juntar 1 Milhão? Simulador | ExCalc",
+      "descricao": "Simule em quantos anos você chega a R$ 1.000.000 investindo um valor inicial e aportes mensais a uma taxa de juros anual à sua escolha.",
+      "resumo": "Em quanto tempo você chega ao primeiro milhão.",
+      "intro": "Informe quanto você tem hoje, quanto consegue investir por mês e a taxa de juros anual esperada. O simulador calcula em quanto tempo você chega a R$ 1.000.000.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.8",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "financiamento",
+      "arquivo": "financiamento-imobiliario.html",
+      "titulo": "Simulador de Financiamento Imobiliário SAC e Price | ExCalc",
+      "descricao": "Compare o financiamento imobiliário pelas tabelas SAC e Price: valor da primeira e da última parcela e o total pago ao final do contrato.",
+      "resumo": "Compare financiamento imobiliário SAC e Price.",
+      "intro": "Compare os sistemas de amortização SAC e Price para o seu financiamento imobiliário: primeira parcela, última parcela e quanto você paga no total.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.8",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "veiculos",
+      "arquivo": "financiamento-de-veiculos.html",
+      "titulo": "Simulador de Financiamento de Veículos | ExCalc",
+      "descricao": "Simule o financiamento de carro ou moto: informe valor, entrada, taxa de juros mensal e prazo para ver a parcela e o total pago.",
+      "resumo": "Simule a parcela do financiamento do seu veículo.",
+      "intro": "Informe o valor do veículo, a entrada, a taxa de juros mensal e o número de parcelas para ver quanto vai pagar por mês e no total.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.7",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "amortizacao",
+      "arquivo": "amortizacao-extra.html",
+      "titulo": "Simulador de Amortização Extra de Financiamento | ExCalc",
+      "descricao": "Veja quanto você economiza em juros e quanto tempo reduz do financiamento ao fazer uma amortização extra, reduzindo o prazo ou a parcela.",
+      "resumo": "Quanto você economiza amortizando o financiamento.",
+      "intro": "Descubra o efeito de um pagamento extra no seu financiamento: quanto de juros você economiza e quanto o prazo ou a parcela diminuem.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.7",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "alugar-comprar",
+      "arquivo": "alugar-ou-comprar.html",
+      "titulo": "Alugar ou Comprar Imóvel? Calculadora Comparativa | ExCalc",
+      "descricao": "Compare o custo de alugar e investir a diferença com o custo de financiar e comprar um imóvel, considerando juros, valorização e rendimentos.",
+      "resumo": "Compare alugar e comprar um imóvel.",
+      "intro": "Compare os dois caminhos ao longo dos anos: financiar e comprar o imóvel ou alugar e investir a diferença, considerando juros, valorização do imóvel e rendimento dos investimentos.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.7",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "comparador",
+      "arquivo": "a-vista-ou-parcelado.html",
+      "titulo": "À Vista ou Parcelado? Calculadora de Desconto | ExCalc",
+      "descricao": "Descubra se vale mais a pena pagar à vista com desconto ou parcelar, considerando quanto o seu dinheiro renderia investido no período.",
+      "resumo": "Vale mais pagar à vista ou parcelar?",
+      "intro": "Compare pagar à vista com desconto e parcelar sem juros. O cálculo considera quanto o dinheiro renderia investido enquanto você paga as parcelas.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.7",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "investimentos",
+      "arquivo": "comparador-de-investimentos.html",
+      "titulo": "Comparador de Investimentos: CDB, LCI, Tesouro e Poupança | ExCalc",
+      "descricao": "Compare CDB, LCI/LCA, Tesouro Selic e poupança já com o Imposto de Renda regressivo descontado e descubra qual rende mais no seu prazo.",
+      "resumo": "Compare CDB, LCI/LCA, Tesouro Selic e poupança.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.9",
+      "scripts": ["indicadores.js", "financeiro.js"]
+    },
+    {
+      "id": "fgts",
+      "arquivo": "calculadora-fgts.html",
+      "titulo": "Calculadora de FGTS e Multa Rescisória | ExCalc",
+      "descricao": "Calcule o saldo do FGTS, a multa rescisória de 40% e o aviso prévio indenizado para estimar o que você recebe ao ser demitido sem justa causa.",
+      "resumo": "Saldo, multa de 40% e aviso prévio do FGTS.",
+      "intro": "Informe seu salário, o saldo do FGTS e o tempo de empresa para estimar a multa rescisória de 40%, o aviso prévio indenizado e o total a receber.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.7",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "rescisao-clt",
+      "arquivo": "rescisao-clt.html",
+      "titulo": "Calculadora de Rescisão CLT | ExCalc",
+      "descricao": "Estime sua rescisão CLT: saldo de salário, 13º proporcional, férias, aviso prévio e multa do FGTS conforme o motivo do desligamento.",
+      "resumo": "Estime o valor da sua rescisão trabalhista.",
+      "intro": "Escolha o motivo do desligamento e informe salário, dias trabalhados, 13º e férias para estimar cada verba da sua rescisão CLT.",
+      "categoria": "FinanceApplication",
+      "prioridade": "0.8",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "salario-liquido",
+      "arquivo": "salario-liquido.html",
+      "titulo": "Calculadora de Salário Líquido 2026 (INSS e IRRF) | ExCalc",
+      "descricao": "Calcule seu salário líquido de 2026 com desconto de INSS e Imposto de Renda, já com a nova isenção de até R$ 5.000 por mês (Lei 15.270/2025).",
+      "resumo": "Salário líquido 2026 com INSS e IRRF.",
+      "categoria": "FinanceApplication",
+      "prioridade": "1.0",
+      "scripts": ["financeiro.js"]
+    },
+    {
+      "id": "documentos",
+      "arquivo": "gerador-de-documentos.html",
+      "titulo": "Gerador de Currículo, Contrato e Orçamento em PDF | ExCalc",
+      "descricao": "Crie currículo, contrato de prestação de serviços e orçamento profissionais com prévia em tempo real e exporte em PDF, sem cadastro.",
+      "resumo": "Currículo, contrato e orçamento em PDF.",
+      "intro": "Preencha os campos e acompanhe a prévia na hora. Alterne entre currículo, contrato e orçamento e exporte tudo em PDF pelo próprio navegador.",
+      "categoria": "BusinessApplication",
+      "prioridade": "0.8",
+      "scripts": ["documentos.js"]
+    },
+    {
+      "id": "conversores",
+      "arquivo": "conversor-de-arquivos.html",
+      "titulo": "Conversor de Arquivos e Ferramentas de PDF Grátis | ExCalc",
+      "descricao": "Converta Word, Excel, CSV, JSON e TXT, una, divida e comprima PDF, escreva e assine em PDF e extraia texto. Tudo no navegador, sem enviar arquivos.",
+      "resumo": "Converta arquivos e edite PDF sem enviar nada.",
+      "categoria": "UtilitiesApplication",
+      "prioridade": "0.9",
+      "scripts": ["arquivos.js"]
+    },
+    {
+      "id": "imagens",
+      "arquivo": "ferramentas-de-imagem.html",
+      "titulo": "Ferramentas de Imagem: Comprimir, Redimensionar, Converter | ExCalc",
+      "descricao": "Comprima, redimensione, gire e converta imagens, coloque marca d'água e junte fotos em PDF. Grátis, no navegador, sem enviar suas fotos.",
+      "resumo": "Comprima, redimensione e converta imagens; fotos em PDF.",
+      "categoria": "MultimediaApplication",
+      "prioridade": "0.8",
+      "scripts": ["midia.js"]
+    },
+    {
+      "id": "qrcode",
+      "arquivo": "gerador-de-qr-code.html",
+      "titulo": "Gerador de QR Code Grátis | ExCalc",
+      "descricao": "Gere QR Codes de links e textos na hora, escolha o tamanho e baixe a imagem em PNG. Grátis e sem cadastro.",
+      "resumo": "Crie um QR Code e baixe em PNG.",
+      "intro": "Digite um link ou texto, escolha o tamanho e gere o QR Code na hora. Depois é só baixar a imagem.",
+      "categoria": "UtilitiesApplication",
+      "prioridade": "0.7",
+      "scripts": ["midia.js"]
+    },
+    {
+      "id": "senha",
+      "arquivo": "gerador-de-senha.html",
+      "titulo": "Gerador de Senhas Seguras Online | ExCalc",
+      "descricao": "Gere senhas fortes e aleatórias com o tamanho e os tipos de caracteres que quiser. A senha é criada no seu navegador e nunca é enviada.",
+      "resumo": "Crie senhas fortes e aleatórias.",
+      "categoria": "SecurityApplication",
+      "prioridade": "0.8",
+      "scripts": ["utilitarios.js"]
+    },
+    {
+      "id": "porcentagem",
+      "arquivo": "calculadora-de-porcentagem.html",
+      "titulo": "Calculadora de Porcentagem Online | ExCalc",
+      "descricao": "Calcule porcentagem de um valor, quanto um número representa de outro, aumento e desconto percentual e variação entre dois valores.",
+      "resumo": "Cinco cálculos de porcentagem na hora.",
+      "categoria": "UtilitiesApplication",
+      "prioridade": "0.8",
+      "scripts": ["utilitarios.js"]
+    },
+    {
+      "id": "unidades",
+      "arquivo": "conversor-de-unidades.html",
+      "titulo": "Conversor de Unidades: Comprimento, Massa, Temperatura | ExCalc",
+      "descricao": "Converta comprimento, massa, temperatura, volume, área, velocidade, tempo e dados digitais de forma rápida e gratuita.",
+      "resumo": "Converta comprimento, massa, temperatura e mais.",
+      "categoria": "UtilitiesApplication",
+      "prioridade": "0.8",
+      "scripts": ["utilitarios.js"]
+    }
+  ]
+}

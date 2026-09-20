@@ -1,0 +1,30 @@
+<section id="tab-senha" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Gerador de Senhas Seguras</h1>
+            <p class="text-sm text-gray-400 -mt-3">Crie senhas fortes e aleatórias direto no seu navegador. Nada é enviado nem salvo: a senha só existe nesta tela.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label for="senha-tamanho" class="block text-sm font-medium">Tamanho: <span id="senha-tamanho-valor" class="font-bold text-emerald-400">16</span> caracteres</label>
+                        <input type="range" id="senha-tamanho" min="8" max="64" value="16" oninput="document.getElementById('senha-tamanho-valor').innerText = this.value; gerarSenha()" class="w-full mt-2 accent-cyan-500">
+                    </div>
+                    <fieldset class="space-y-2 text-sm">
+                        <legend class="sr-only">Tipos de caracteres</legend>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="senha-maiusculas" checked onchange="gerarSenha()"> Letras maiúsculas (A-Z)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="senha-minusculas" checked onchange="gerarSenha()"> Letras minúsculas (a-z)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="senha-numeros" checked onchange="gerarSenha()"> Números (0-9)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="senha-simbolos" checked onchange="gerarSenha()"> Símbolos (!@#$%...)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="senha-ambiguos" onchange="gerarSenha()"> Evitar caracteres parecidos (0, O, 1, l, I)</label>
+                    </fieldset>
+                    <button type="button" onclick="gerarSenha()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">🔄 Gerar nova senha</button>
+                </div>
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg flex flex-col justify-center space-y-4">
+                    <div id="senha-resultado" class="bg-gray-700/50 border border-gray-700 rounded-lg p-4 text-center text-lg md:text-xl break-all select-all" style="font-family: 'JetBrains Mono', Consolas, monospace" aria-live="polite">—</div>
+                    <button type="button" id="senha-copiar" onclick="copiarSenha()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold p-2.5 rounded transition text-sm">📋 Copiar senha</button>
+                    <div>
+                        <div class="flex justify-between text-xs text-gray-400 mb-1"><span>Força</span><span id="senha-forca-texto" class="font-semibold text-gray-200">—</span></div>
+                        <div class="h-2 rounded-full bg-gray-700 overflow-hidden"><div id="senha-forca-barra" class="h-full rounded-full transition-all" style="width:0%"></div></div>
+                        <p id="senha-entropia" class="mt-1 text-[11px] text-gray-400"></p>
+                    </div>
+                </div>
+            </div>
+        </section>

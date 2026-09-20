@@ -1,0 +1,91 @@
+<section id="tab-reserva" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Simulador de Reserva de Emergência</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium">Gastos Mensais Essenciais (R$)</label>
+                        <input type="text" id="res-gastos" value="0" class="input-moeda w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Meses de Segurança Desejados</label>
+                        <select id="res-meses" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none">
+                            <option value="6">6 Meses (Recomendado para CLT)</option>
+                            <option value="12">12 Meses (Recomendado para Autônomos)</option>
+                        </select>
+                    </div>
+                    <button onclick="calculateReserva()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Calcular Reserva</button>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center items-center text-center space-y-3">
+                    <span class="text-gray-400">Sua Reserva Ideal deve ser de:</span>
+                    <span id="res-resultado" class="text-3xl md:text-4xl font-extrabold text-emerald-400">R$ 0,00</span>
+                </div>
+            </div>
+            <!-- 🛡️ COMO FUNCIONA A RESERVA DE EMERGÊNCIA -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
+                <div class="border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>🛡️</span> O que é e Como Funciona a Reserva de Emergência?
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Entenda por que este é o primeiro e mais importante passo da sua organização financeira.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
+                    <!-- Card 1: Conceito -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">O que é?</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Conceito</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                A Reserva de Emergência é um montante guardado para cobrir imprevistos (demissão, problemas de saúde, reparos urgentes) sem que você precise recorrer a empréstimos ou resgatar investimentos de longo prazo.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Objetivo:</strong> Trazer tranquilidade e estabilidade financeira diante de imprevistos.
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Cálculo do Valor -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Quantos Meses Guardar?</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Planejamento</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                O cálculo leva em conta o seu custo de vida mensal (apenas o essencial) multiplicado pelo tempo de cobertura:
+                            </p>
+                            <ul class="mt-2 space-y-1 list-disc list-inside text-gray-400">
+                                <li><strong class="text-gray-200">CLT (6 meses):</strong> Maior estabilidade devido a aviso prévio e FGTS.</li>
+                                <li><strong class="text-gray-200">Autônomos / PJ (12 meses):</strong> Maior oscilação de renda exige maior margem de segurança.</li>
+                            </ul>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Base:</strong> Considere gastos fixos básicos (aluguel, alimentação, contas).
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Onde Investir -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Onde Guardar?</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">Liquidez</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                A prioridade total aqui é a <strong class="text-gray-200">liquidez imediata</strong> (facilidade de resgate) e a <strong class="text-gray-200">segurança</strong>, não o alto rendimento.
+                            </p>
+                            <p class="text-gray-400 mt-2">
+                                Opções recomendadas: Tesouro Selic, CDBs 100% do CDI com liquidez diária ou Caixinhas de bancos digitais de baixo risco.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Regra de ouro:</strong> Evite renda variável ou investimentos com prazo de carência.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>

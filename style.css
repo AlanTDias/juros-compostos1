@@ -6,15 +6,211 @@
    que o Tailwind puro não cobre.
    ========================================================== */
 
+/* ==========================================================
+   TEMAS: cada paleta é um conjunto de variáveis "R G B" (usadas pelo tailwind.config no index.html).
+   Padrão = escuro. <html data-tema="claro"> = claro; <html data-tema="neon"> = tema secreto (easter egg).
+   ========================================================== */
+
 :root {
+    --gray-50: 238 242 251;
+    --gray-100: 220 228 245;
+    --gray-200: 199 210 238;
+    --gray-300: 169 182 218;
+    --gray-400: 127 140 176;
+    --gray-500: 92 103 144;
+    --gray-600: 51 64 95;
+    --gray-700: 28 42 71;
+    --gray-800: 18 27 46;
+    --gray-900: 11 17 32;
+    --gray-950: 5 7 14;
+    --emerald-50: 236 254 255;
+    --emerald-100: 207 250 254;
+    --emerald-200: 165 243 252;
+    --emerald-300: 103 232 249;
+    --emerald-400: 34 211 238;
+    --emerald-500: 34 211 238;
+    --emerald-600: 14 165 199;
+    --emerald-700: 12 122 148;
+    --emerald-800: 11 92 112;
+    --emerald-900: 10 70 87;
+    --emerald-950: 6 32 39;
     --accent: #22D3EE;
     --accent-soft: rgba(34, 211, 238, 0.35);
     --accent-glow: rgba(34, 211, 238, 0.18);
     --grid-line: rgba(148, 163, 184, 0.06);
-    --border-card: rgba(34, 211, 238, 0.22);
-    --border-card-hover: rgba(34, 211, 238, 0.5);
-    --border-tile: rgba(34, 211, 238, 0.3);
-    --border-divider: rgba(34, 211, 238, 0.16);
+    --border-card: rgba(34, 211, 238, 0.15);
+    --border-card-hover: rgba(34, 211, 238, 0.45);
+    --border-tile: rgba(34, 211, 238, 0.1);
+    --border-divider: rgba(34, 211, 238, 0.09);
+    --sombra-card: rgba(0, 0, 0, 0.55);
+    --texto-grafico: #E5E7EB;
+    --grade-grafico: rgba(148, 163, 184, 0.15);
+}
+
+html[data-tema="claro"] {
+    --gray-50: 5 7 14;
+    --gray-100: 11 17 32;
+    --gray-200: 28 42 71;
+    --gray-300: 51 64 95;
+    --gray-400: 92 103 144;
+    --gray-500: 127 140 176;
+    --gray-600: 199 210 238;
+    --gray-700: 226 232 246;
+    --gray-800: 255 255 255;
+    --gray-900: 238 242 251;
+    --gray-950: 220 228 245;
+    --emerald-50: 6 32 39;
+    --emerald-100: 10 70 87;
+    --emerald-200: 11 92 112;
+    --emerald-300: 21 94 117;
+    --emerald-400: 14 116 144;
+    --emerald-500: 8 145 178;
+    --emerald-600: 14 116 144;
+    --emerald-700: 21 94 117;
+    --emerald-800: 165 243 252;
+    --emerald-900: 207 250 254;
+    --emerald-950: 236 254 255;
+    --accent: #0891B2;
+    --accent-soft: rgba(8, 145, 178, 0.35);
+    --accent-glow: rgba(8, 145, 178, 0.14);
+    --grid-line: rgba(15, 23, 42, 0.05);
+    --border-card: rgba(8, 145, 178, 0.32);
+    --border-card-hover: rgba(8, 145, 178, 0.6);
+    --border-tile: rgba(8, 145, 178, 0.28);
+    --border-divider: rgba(8, 145, 178, 0.2);
+    --sombra-card: rgba(15, 23, 42, 0.16);
+    --texto-grafico: #33405F;
+    --grade-grafico: rgba(15, 23, 42, 0.1);
+}
+
+html[data-tema="neon"] {
+    --gray-50: 250 240 255;
+    --gray-100: 240 220 255;
+    --gray-200: 225 195 250;
+    --gray-300: 200 165 235;
+    --gray-400: 160 125 200;
+    --gray-500: 120 90 165;
+    --gray-600: 70 40 110;
+    --gray-700: 44 22 80;
+    --gray-800: 26 11 59;
+    --gray-900: 13 2 33;
+    --gray-950: 7 1 20;
+    --emerald-50: 255 240 250;
+    --emerald-100: 255 215 240;
+    --emerald-200: 255 175 225;
+    --emerald-300: 255 130 205;
+    --emerald-400: 255 77 178;
+    --emerald-500: 255 46 151;
+    --emerald-600: 214 28 124;
+    --emerald-700: 165 20 96;
+    --emerald-800: 120 15 70;
+    --emerald-900: 80 10 48;
+    --emerald-950: 45 5 28;
+    --accent: #FF2E97;
+    --accent-soft: rgba(255, 46, 151, 0.4);
+    --accent-glow: rgba(255, 46, 151, 0.22);
+    --border-card: rgba(255, 46, 151, 0.35);
+    --border-card-hover: rgba(255, 46, 151, 0.7);
+    --border-tile: rgba(255, 46, 151, 0.35);
+    --border-divider: rgba(255, 46, 151, 0.22);
+}
+
+/* Tema secreto: brilho retrô nos títulos */
+
+html[data-tema="neon"] h1,
+html[data-tema="neon"] h2,
+html[data-tema="neon"] h3 {
+    text-shadow: 0 0 14px rgba(255, 46, 151, 0.6);
+}
+
+/* Tema VIDRO (glassmorphism): painéis translúcidos com desfoque e bordas luminosas sobre um fundo de "aurora".
+   Duas cores prontas: roxo (padrão) e ciano. Para escolher, no console do navegador: definirCorVidro('roxo') ou
+   definirCorVidro('ciano'); para fixar uma delas de vez, troque o padrão aqui (bloco roxo) pelo conjunto desejado. */
+
+html[data-tema="vidro"] {
+    --gray-50: 245 243 255;
+    --gray-100: 233 228 250;
+    --gray-200: 214 205 240;
+    --gray-300: 184 172 222;
+    --gray-400: 143 130 190;
+    --gray-500: 106 94 155;
+    --gray-600: 63 52 110;
+    --gray-700: 41 31 82;
+    --gray-800: 27 18 58;
+    --gray-900: 16 10 38;
+    --gray-950: 8 5 22;
+    --emerald-50: 250 245 255;
+    --emerald-100: 243 232 255;
+    --emerald-200: 233 213 255;
+    --emerald-300: 216 180 254;
+    --emerald-400: 192 132 252;
+    --emerald-500: 168 85 247;
+    --emerald-600: 147 51 234;
+    --emerald-700: 126 34 206;
+    --emerald-800: 107 33 168;
+    --emerald-900: 88 28 135;
+    --emerald-950: 59 7 100;
+    --accent: #C084FC;
+    --accent-soft: rgba(192, 132, 252, 0.45);
+    --accent-glow: rgba(192, 132, 252, 0.26);
+    --grid-line: rgba(255, 255, 255, 0.03);
+    --border-card: rgba(255, 255, 255, 0.11);
+    --border-card-hover: rgba(255, 255, 255, 0.3);
+    --border-tile: rgba(255, 255, 255, 0.05);
+    --border-divider: rgba(255, 255, 255, 0.07);
+    --sombra-card: rgba(6, 2, 20, 0.55);
+    --vidro-fundo: rgb(27 18 58 / 0.34);
+    --vidro-desfoque: 22px;
+    --aurora-1: rgba(168, 85, 247, 0.55);
+    --aurora-2: rgba(56, 189, 248, 0.32);
+    --aurora-3: rgba(217, 70, 239, 0.38);
+}
+
+html[data-tema="vidro"][data-vidro-cor="ciano"] {
+    --gray-50: 238 242 251;
+    --gray-100: 220 228 245;
+    --gray-200: 199 210 238;
+    --gray-300: 169 182 218;
+    --gray-400: 127 140 176;
+    --gray-500: 92 103 144;
+    --gray-600: 51 64 95;
+    --gray-700: 28 42 71;
+    --gray-800: 18 27 46;
+    --gray-900: 11 17 32;
+    --gray-950: 5 7 14;
+    --emerald-50: 236 254 255;
+    --emerald-100: 207 250 254;
+    --emerald-200: 165 243 252;
+    --emerald-300: 103 232 249;
+    --emerald-400: 34 211 238;
+    --emerald-500: 34 211 238;
+    --emerald-600: 14 165 199;
+    --emerald-700: 12 122 148;
+    --emerald-800: 11 92 112;
+    --emerald-900: 10 70 87;
+    --emerald-950: 6 32 39;
+    --accent: #22D3EE;
+    --accent-soft: rgba(34, 211, 238, 0.45);
+    --accent-glow: rgba(34, 211, 238, 0.26);
+    --vidro-fundo: rgb(18 27 46 / 0.34);
+    --aurora-1: rgba(34, 211, 238, 0.42);
+    --aurora-2: rgba(99, 102, 241, 0.4);
+    --aurora-3: rgba(20, 184, 166, 0.3);
+}
+/* A prévia de documentos é papel branco para impressão: sempre a paleta escura, em qualquer tema */
+
+#doc-printable-area {
+    --gray-50: 238 242 251;
+    --gray-100: 220 228 245;
+    --gray-200: 199 210 238;
+    --gray-300: 169 182 218;
+    --gray-400: 127 140 176;
+    --gray-500: 92 103 144;
+    --gray-600: 51 64 95;
+    --gray-700: 28 42 71;
+    --gray-800: 18 27 46;
+    --gray-900: 11 17 32;
+    --gray-950: 5 7 14;
 }
 
 
@@ -131,7 +327,7 @@ header::after {
     position: relative;
     padding: 1.75rem 1.5rem;
     border-radius: 16px;
-    background: radial-gradient(120% 160% at 0% 0%, rgba(34, 211, 238, 0.10), transparent 55%), #121B2E;
+    background: radial-gradient(120% 160% at 0% 0%, var(--accent-glow), transparent 55%), rgb(var(--gray-800));
     border: 1px solid rgba(148, 163, 184, 0.12);
     overflow: hidden;
 }
@@ -152,7 +348,7 @@ header::after {
 
 .shadow-lg,
 .shadow-md {
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55), 0 0 22px -8px var(--accent-glow), 0 0 0 1px rgba(148, 163, 184, 0.06) inset !important;
+    box-shadow: 0 10px 30px -12px var(--sombra-card), 0 0 22px -8px var(--accent-glow), 0 0 0 1px rgba(148, 163, 184, 0.06) inset !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -161,7 +357,7 @@ header::after {
 
 .shadow-lg:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.6), 0 0 28px -6px var(--accent-soft), 0 0 0 1px var(--accent-soft) inset !important;
+    box-shadow: 0 14px 34px -12px var(--sombra-card), 0 0 28px -6px var(--accent-soft), 0 0 0 1px var(--accent-soft) inset !important;
 }
 
 
@@ -310,354 +506,38 @@ button:focus-visible {
 
 /* Classes de cor para cada aba (inativa) com borda sutil */
 
-.tab-emerald:not(.text-gray-950) {
-    color: #34d399;
-    border-color: rgba(16, 185, 129, 0.4);
-}
-
-.tab-emerald:not(.text-gray-950):hover {
-    border-color: #34d399;
-    background-color: rgba(16, 185, 129, 0.15);
-}
-
-.tab-emerald::before {
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.3), transparent 70%);
-}
-
-.tab-emerald:hover::before {
-    opacity: 1;
-}
-
-.tab-cyan:not(.text-gray-950) {
-    color: #22d3ee;
-    border-color: rgba(6, 182, 212, 0.4);
-}
-
-.tab-cyan:not(.text-gray-950):hover {
-    border-color: #22d3ee;
-    background-color: rgba(6, 182, 212, 0.15);
-}
-
-.tab-cyan::before {
-    background: radial-gradient(circle, rgba(34, 211, 238, 0.3), transparent 70%);
-}
-
-.tab-cyan:hover::before {
-    opacity: 1;
-}
-
-.tab-blue:not(.text-gray-950) {
-    color: #60a5fa;
-    border-color: rgba(59, 130, 246, 0.4);
-}
-
-.tab-blue:not(.text-gray-950):hover {
-    border-color: #60a5fa;
-    background-color: rgba(59, 130, 246, 0.15);
-}
-
-.tab-blue::before {
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent 70%);
-}
-
-.tab-blue:hover::before {
-    opacity: 1;
-}
-
-.tab-indigo:not(.text-gray-950) {
-    color: #818cf8;
-    border-color: rgba(99, 102, 241, 0.4);
-}
-
-.tab-indigo:not(.text-gray-950):hover {
-    border-color: #818cf8;
-    background-color: rgba(99, 102, 241, 0.15);
-}
-
-.tab-indigo::before {
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent 70%);
-}
-
-.tab-indigo:hover::before {
-    opacity: 1;
-}
-
-.tab-purple:not(.text-gray-950) {
-    color: #c084fc;
-    border-color: rgba(168, 85, 247, 0.4);
-}
-
-.tab-purple:not(.text-gray-950):hover {
-    border-color: #c084fc;
-    background-color: rgba(168, 85, 247, 0.15);
-}
-
-.tab-purple::before {
-    background: radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent 70%);
-}
-
-.tab-purple:hover::before {
-    opacity: 1;
-}
-
-.tab-rose:not(.text-gray-950) {
-    color: #fb7185;
-    border-color: rgba(244, 63, 94, 0.4);
-}
-
-.tab-rose:not(.text-gray-950):hover {
-    border-color: #fb7185;
-    background-color: rgba(244, 63, 94, 0.15);
-}
-
-.tab-rose::before {
-    background: radial-gradient(circle, rgba(244, 63, 94, 0.3), transparent 70%);
-}
-
-.tab-rose:hover::before {
-    opacity: 1;
-}
-
-.tab-amber:not(.text-gray-950) {
-    color: #fbbf24;
-    border-color: rgba(245, 158, 11, 0.4);
-}
-
-.tab-amber:not(.text-gray-950):hover {
-    border-color: #fbbf24;
-    background-color: rgba(245, 158, 11, 0.15);
-}
-
-.tab-amber::before {
-    background: radial-gradient(circle, rgba(251, 146, 60, 0.3), transparent 70%);
-}
-
-.tab-amber:hover::before {
-    opacity: 1;
-}
-
-.tab-sky:not(.text-gray-950) {
-    color: #38bdf8;
-    border-color: rgba(14, 165, 233, 0.4);
-}
-
-.tab-sky:not(.text-gray-950):hover {
-    border-color: #38bdf8;
-    background-color: rgba(14, 165, 233, 0.15);
-}
-
-.tab-sky::before {
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.3), transparent 70%);
-}
-
-.tab-sky:hover::before {
-    opacity: 1;
-}
-
-.tab-violet:not(.text-gray-950) {
-    color: #a78bfa;
-    border-color: rgba(139, 92, 246, 0.4);
-}
-
-.tab-violet:not(.text-gray-950):hover {
-    border-color: #a78bfa;
-    background-color: rgba(139, 92, 246, 0.15);
-}
-
-.tab-violet::before {
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.3), transparent 70%);
-}
-
-.tab-violet:hover::before {
-    opacity: 1;
-}
-
-.tab-teal:not(.text-gray-950) {
-    color: #2dd4bf;
-    border-color: rgba(20, 184, 166, 0.4);
-}
-
-.tab-teal:not(.text-gray-950):hover {
-    border-color: #2dd4bf;
-    background-color: rgba(20, 184, 166, 0.15);
-}
-
-.tab-teal::before {
-    background: radial-gradient(circle, rgba(20, 184, 166, 0.3), transparent 70%);
-}
-
-.tab-teal:hover::before {
-    opacity: 1;
-}
-
-.tab-fuchsia:not(.text-gray-950) {
-    color: #e879f9;
-    border-color: rgba(217, 70, 239, 0.4);
-}
-
-.tab-fuchsia:not(.text-gray-950):hover {
-    border-color: #e879f9;
-    background-color: rgba(217, 70, 239, 0.15);
-}
-
-.tab-fuchsia::before {
-    background: radial-gradient(circle, rgba(232, 121, 249, 0.3), transparent 70%);
-}
-
-.tab-fuchsia:hover::before {
-    opacity: 1;
-}
-
-.tab-lime:not(.text-gray-950) {
-    color: #a3e635;
-    border-color: rgba(132, 204, 22, 0.4);
-}
-
-.tab-lime:not(.text-gray-950):hover {
-    border-color: #a3e635;
-    background-color: rgba(132, 204, 22, 0.15);
-}
-
-.tab-lime::before {
-    background: radial-gradient(circle, rgba(132, 204, 22, 0.3), transparent 70%);
-}
-
-.tab-lime:hover::before {
-    opacity: 1;
-}
-
-.tab-green:not(.text-gray-950) {
-    color: #4ade80;
-    border-color: rgba(34, 197, 94, 0.4);
-}
-
-.tab-green:not(.text-gray-950):hover {
-    border-color: #4ade80;
-    background-color: rgba(34, 197, 94, 0.15);
-}
-
-.tab-green::before {
-    background: radial-gradient(circle, rgba(34, 197, 94, 0.3), transparent 70%);
-}
-
-.tab-green:hover::before {
-    opacity: 1;
-}
-
-.tab-orange:not(.text-gray-950) {
-    color: #fb923c;
-    border-color: rgba(249, 115, 22, 0.4);
-}
-
-.tab-orange:not(.text-gray-950):hover {
-    border-color: #fb923c;
-    background-color: rgba(249, 115, 22, 0.15);
-}
-
-.tab-orange::before {
-    background: radial-gradient(circle, rgba(249, 115, 22, 0.3), transparent 70%);
-}
-
-.tab-orange:hover::before {
-    opacity: 1;
-}
-
-.tab-red:not(.text-gray-950) {
-    color: #f87171;
-    border-color: rgba(239, 68, 68, 0.4);
-}
-
-.tab-red:not(.text-gray-950):hover {
-    border-color: #f87171;
-    background-color: rgba(239, 68, 68, 0.15);
-}
-
-.tab-red::before {
-    background: radial-gradient(circle, rgba(239, 68, 68, 0.3), transparent 70%);
-}
-
-.tab-red:hover::before {
-    opacity: 1;
-}
-
 
 /* Glow ATIVO (quando a aba está selecionada) — intenso e realístico */
 
-.glow-emerald {
-    border-color: #34d399 !important;
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.25), inset 0 0 15px rgba(16, 185, 129, 0.2), 0 0 0 1px rgba(16, 185, 129, 0.6);
+
+/* ---------- Abas do menu: UMA cor só (a cor de destaque do tema) ---------- */
+
+.tab-unica:not(.text-gray-950) {
+    --aba-cor: rgb(var(--gray-100)); /* off-white do tema (no claro vira um azul-marinho escuro): texto e ícone do menu */
+    color: var(--aba-cor);
+    border-color: rgb(var(--emerald-500) / 0.3);
 }
 
-.glow-cyan {
-    border-color: #22d3ee !important;
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(34, 211, 238, 0.25), inset 0 0 15px rgba(34, 211, 238, 0.2), 0 0 0 1px rgba(34, 211, 238, 0.6);
+.tab-unica:not(.text-gray-950):hover {
+    color: rgb(var(--gray-50));
+    border-color: rgb(var(--emerald-400) / 0.7);
+    background-color: rgb(var(--emerald-500) / 0.14);
 }
 
-.glow-blue {
-    border-color: #60a5fa !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.25), inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(59, 130, 246, 0.6);
+.tab-unica::before {
+    background: radial-gradient(circle, rgb(var(--emerald-500) / 0.3), transparent 70%);
 }
 
-.glow-indigo {
-    border-color: #818cf8 !important;
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.25), inset 0 0 15px rgba(99, 102, 241, 0.2), 0 0 0 1px rgba(99, 102, 241, 0.6);
+.tab-unica:hover::before {
+    opacity: 1;
 }
 
-.glow-purple {
-    border-color: #c084fc !important;
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.25), inset 0 0 15px rgba(168, 85, 247, 0.2), 0 0 0 1px rgba(168, 85, 247, 0.6);
-}
+/* Aba ativa: preenchida com a cor de destaque + brilho */
 
-.glow-rose {
-    border-color: #fb7185 !important;
-    box-shadow: 0 0 20px rgba(244, 63, 94, 0.5), 0 0 40px rgba(244, 63, 94, 0.25), inset 0 0 15px rgba(244, 63, 94, 0.2), 0 0 0 1px rgba(244, 63, 94, 0.6);
+.glow-unica {
+    border-color: rgb(var(--emerald-400)) !important;
+    box-shadow: 0 0 20px var(--accent-soft), 0 0 40px var(--accent-glow), inset 0 0 15px var(--accent-glow), 0 0 0 1px var(--accent-soft);
 }
-
-.glow-amber {
-    border-color: #fbbf24 !important;
-    box-shadow: 0 0 20px rgba(251, 146, 60, 0.5), 0 0 40px rgba(251, 146, 60, 0.25), inset 0 0 15px rgba(251, 146, 60, 0.2), 0 0 0 1px rgba(251, 146, 60, 0.6);
-}
-
-.glow-sky {
-    border-color: #38bdf8 !important;
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.5), 0 0 40px rgba(56, 189, 248, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.2), 0 0 0 1px rgba(56, 189, 248, 0.6);
-}
-
-.glow-violet {
-    border-color: #a78bfa !important;
-    box-shadow: 0 0 20px rgba(167, 139, 250, 0.5), 0 0 40px rgba(167, 139, 250, 0.25), inset 0 0 15px rgba(167, 139, 250, 0.2), 0 0 0 1px rgba(167, 139, 250, 0.6);
-}
-
-.glow-teal {
-    border-color: #2dd4bf !important;
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.5), 0 0 40px rgba(20, 184, 166, 0.25), inset 0 0 15px rgba(20, 184, 166, 0.2), 0 0 0 1px rgba(20, 184, 166, 0.6);
-}
-
-.glow-fuchsia {
-    border-color: #e879f9 !important;
-    box-shadow: 0 0 20px rgba(232, 121, 249, 0.5), 0 0 40px rgba(232, 121, 249, 0.25), inset 0 0 15px rgba(232, 121, 249, 0.2), 0 0 0 1px rgba(232, 121, 249, 0.6);
-}
-
-.glow-lime {
-    border-color: #a3e635 !important;
-    box-shadow: 0 0 20px rgba(132, 204, 22, 0.5), 0 0 40px rgba(132, 204, 22, 0.25), inset 0 0 15px rgba(132, 204, 22, 0.2), 0 0 0 1px rgba(132, 204, 22, 0.6);
-}
-
-.glow-green {
-    border-color: #4ade80 !important;
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.25), inset 0 0 15px rgba(34, 197, 94, 0.2), 0 0 0 1px rgba(34, 197, 94, 0.6);
-}
-
-.glow-orange {
-    border-color: #fb923c !important;
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.5), 0 0 40px rgba(249, 115, 22, 0.25), inset 0 0 15px rgba(249, 115, 22, 0.2), 0 0 0 1px rgba(249, 115, 22, 0.6);
-}
-
-.glow-red {
-    border-color: #f87171 !important;
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.25), inset 0 0 15px rgba(239, 68, 68, 0.2), 0 0 0 1px rgba(239, 68, 68, 0.6);
-}
-
 
 /* Menu drawer mobile responsivo */
 
@@ -709,46 +589,437 @@ input::-webkit-inner-spin-button {
 }
 
 
-/* ---------- Botão flutuante "não clique" (leva à página psicodélica) ---------- */
+/* ---------- Ajustes do tema claro ---------- */
+
+/* Textos "brancos" do HTML original viram escuros no claro (exceto sobre botões coloridos) */
+
+html[data-tema="claro"] .text-white {
+    color: rgb(var(--gray-100));
+}
+
+html[data-tema="claro"] [class*="bg-blue-"].text-white,
+html[data-tema="claro"] [class*="bg-red-"].text-white,
+html[data-tema="claro"] [class*="bg-green-"].text-white,
+html[data-tema="claro"] [class*="bg-indigo-"].text-white,
+html[data-tema="claro"] [class*="bg-purple-"].text-white {
+    color: #FFFFFF;
+}
+
+/* Cores de destaque em texto: versões mais escuras no tema claro (contraste sobre branco) */
+
+html[data-tema="claro"] .text-blue-400 { color: #2563EB; }
+html[data-tema="claro"] .text-blue-300 { color: #1D4ED8; }
+html[data-tema="claro"] .text-purple-400 { color: #7C3AED; }
+html[data-tema="claro"] .text-red-400 { color: #DC2626; }
+html[data-tema="claro"] .text-yellow-400,
+html[data-tema="claro"] .text-amber-400 { color: #B45309; }
+html[data-tema="claro"] .text-green-400 { color: #15803D; }
+html[data-tema="claro"] .text-orange-400 { color: #C2410C; }
+html[data-tema="claro"] .text-rose-400,
+html[data-tema="claro"] .text-pink-400 { color: #BE185D; }
+
+/* Áreas de upload e campos: bordas e fundo legíveis no claro */
+
+html[data-tema="claro"] input,
+html[data-tema="claro"] select,
+html[data-tema="claro"] textarea {
+    color: rgb(var(--gray-100));
+}
+
+
+/* ---------- Seletor de tema em VIDRO LÍQUIDO (escuro | claro | vidro), no topo do cabeçalho ----------
+   Uma cápsula de vidro fosco com uma "peça" de vidro que desliza até a opção escolhida, estica ao chegar
+   (efeito de líquido) e, no Chrome/Edge, refrata o fundo por um filtro SVG (#vidro-liquido, no base.html).
+   A posição vem do atributo data-ativo, escrito pelo core.js; funciona sem :has(). */
+
+.tema-switch {
+    --op-l: 42px;
+    --op-a: 34px;
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 3px;
+    border-radius: 999px;
+    isolation: isolate;
+    background: rgb(var(--gray-100) / 0.07);
+    -webkit-backdrop-filter: blur(14px) saturate(170%);
+    backdrop-filter: blur(14px) saturate(170%);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.35),
+        inset 0 -6px 10px -6px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgb(var(--gray-100) / 0.14),
+        0 8px 20px -10px var(--sombra-card);
+}
+
+.tema-op {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--op-l);
+    height: var(--op-a);
+    border-radius: 999px;
+    color: rgb(var(--gray-300));
+    cursor: pointer;
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.tema-op:hover {
+    color: rgb(var(--gray-100));
+}
+
+.tema-op input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.tema-op svg {
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tema-op:has(input:checked) {
+    color: rgb(var(--emerald-300));
+}
+
+.tema-op:has(input:checked) svg {
+    transform: scale(1.12);
+}
+
+.tema-op:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+/* A peça de vidro que desliza */
+
+.tema-thumb {
+    position: absolute;
+    z-index: 0;
+    top: 3px;
+    left: 3px;
+    width: var(--op-l);
+    height: var(--op-a);
+    border-radius: 999px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06) 55%, rgba(255, 255, 255, 0.14));
+    -webkit-backdrop-filter: blur(3px) saturate(200%) brightness(1.15);
+    backdrop-filter: blur(3px) saturate(200%) brightness(1.15);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+        inset 0 6px 8px -2px rgba(255, 255, 255, 0.45),
+        inset 0 -8px 10px -4px rgba(0, 0, 0, 0.22),
+        0 6px 16px -4px var(--accent-soft),
+        0 0 18px -6px var(--accent-soft);
+    transition: transform 0.55s cubic-bezier(0.3, 1.45, 0.5, 1), opacity 0.25s ease;
+}
+
+.tema-thumb::after { /* reflexo de luz na parte de cima da peça */
+    content: "";
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    top: 2px;
+    height: 38%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0));
+    opacity: 0.8;
+}
+
+.tema-switch[data-ativo="escuro"] .tema-thumb { transform: translateX(0); }
+.tema-switch[data-ativo="claro"] .tema-thumb { transform: translateX(var(--op-l)); }
+.tema-switch[data-ativo="vidro"] .tema-thumb { transform: translateX(calc(var(--op-l) * 2)); }
+.tema-switch[data-ativo=""] .tema-thumb { opacity: 0; }
+
+/* "Esticar" como um líquido quando a peça muda de lugar */
+
+.tema-switch.esticando .tema-thumb {
+    animation: tema-liquido 0.55s ease-out;
+}
+
+@keyframes tema-liquido {
+    0% { scale: 1 1; }
+    30% { scale: 1.32 0.86; }
+    65% { scale: 0.94 1.07; }
+    100% { scale: 1 1; }
+}
+
+/* Chrome/Edge: o fundo por trás da peça é levemente distorcido (refração), como uma lente de vidro */
+
+html.refracao .tema-thumb {
+    -webkit-backdrop-filter: url(#vidro-liquido) blur(1px) saturate(200%) brightness(1.15);
+    backdrop-filter: url(#vidro-liquido) blur(1px) saturate(200%) brightness(1.15);
+}
+
+html.sem-blur .tema-switch,
+html.sem-blur .tema-thumb {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tema-thumb { transition: none; }
+    .tema-switch.esticando .tema-thumb { animation: none; }
+}
+
+@media print {
+    .tema-switch {
+        display: none;
+    }
+}
+
+
+/* ---------- Marca do rodapé (7 cliques = segredo) e Sala Secreta ---------- */
+
+.marca-secreta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0.4rem;
+    margin-bottom: 0.4rem;
+    border-radius: 0.5rem;
+    background: transparent;
+    border: 1px solid transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.marca-secreta:hover,
+.marca-secreta:focus-visible {
+    border-color: var(--border-card);
+}
+
+.marca-secreta img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.marca-secreta.balanca {
+    animation: marca-balanca 0.25s ease;
+}
+
+@keyframes marca-balanca {
+    0%, 100% { transform: rotate(0); }
+    30% { transform: rotate(-12deg) scale(1.1); }
+    70% { transform: rotate(12deg) scale(1.1); }
+}
+
+.sala-secreta {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(5, 3, 15, 0.82);
+    backdrop-filter: blur(6px);
+}
+
+.sala-secreta-card {
+    max-width: 28rem;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border-radius: 1rem;
+    color: rgb(var(--gray-100));
+    background: rgb(var(--gray-800));
+    border: 1px solid var(--border-card-hover);
+    box-shadow: 0 0 50px -10px var(--accent-soft);
+}
+
+/* ---------- Avisos (toast) e confete ---------- */
+
+.toast-area {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    width: max-content;
+    max-width: calc(100vw - 2rem);
+    pointer-events: none;
+}
+
+.toast {
+    padding: 0.7rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    color: rgb(var(--gray-100));
+    background: rgb(var(--gray-800) / 0.96);
+    border: 1px solid var(--border-card-hover);
+    box-shadow: 0 0 24px -6px var(--accent-soft), 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+    animation: toast-entra 0.25s ease-out;
+}
+
+.toast-humor {
+    border-color: rgba(251, 191, 36, 0.6);
+    box-shadow: 0 0 24px -6px rgba(251, 191, 36, 0.5), 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes toast-entra {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.confete-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 350;
+    pointer-events: none;
+}
+
+
+/* ---------- Botão flutuante "não clique": orbe de vidro iridescente ----------
+   Camadas: fundo de vidro escuro + aro de arco-íris girando (::before) + "filme" iridescente (.iri-filme) +
+   ícone (.iri-icone) + reflexo de luz (.iri-brilho). O JS (core.js) só escreve --px e --py (-1 a 1) com a posição
+   do ponteiro ou a inclinação do celular; o CSS faz cada camada se mover numa profundidade diferente (parallax). */
 
 .troll-btn {
+    --px: 0;
+    --py: 0;
     position: fixed;
     left: 14px;
     bottom: 14px;
     z-index: 30;
-    width: 38px;
-    height: 38px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    isolation: isolate;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    line-height: 1;
-    text-decoration: none;
-    background: rgba(18, 27, 46, 0.9);
-    border: 1px solid var(--border-card);
-    box-shadow: 0 0 14px -4px var(--accent-glow);
-    opacity: 0.6;
-    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    color: #F5F0FF;
+    background:
+        radial-gradient(circle at calc(50% + var(--px) * 14%) calc(36% + var(--py) * 14%), rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 56%),
+        radial-gradient(circle at 50% 55%, rgba(30, 34, 70, 0.78), rgba(8, 10, 28, 0.92));
+    box-shadow:
+        0 8px 22px -8px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -8px 14px rgba(0, 0, 0, 0.4),
+        0 0 24px -4px rgba(140, 100, 255, 0.6);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.troll-btn::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    z-index: -1;
+    padding: 3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #ff5fd2, #8b5cf6, #22d3ee, #5cffb0, #ffe45c, #ff8a5c, #ff5fd2);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    filter: saturate(1.25) drop-shadow(0 0 6px rgba(160, 120, 255, 0.55));
+    animation: iri-gira 7s linear infinite;
+}
+
+.iri-filme {
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 1;
+    background: conic-gradient(from calc(210deg + var(--px) * 70deg) at calc(50% + var(--px) * 24%) calc(50% + var(--py) * 24%),
+        hsla(320, 100%, 70%, 0.8), hsla(255, 100%, 72%, 0.75), hsla(190, 100%, 68%, 0.8),
+        hsla(150, 100%, 68%, 0.75), hsla(52, 100%, 68%, 0.7), hsla(320, 100%, 70%, 0.8));
+    filter: blur(2px) saturate(1.3);
+    -webkit-mask: radial-gradient(circle, transparent 26%, #000 96%);
+    mask: radial-gradient(circle, transparent 26%, #000 96%);
+}
+
+.iri-icone {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    pointer-events: none;
+    transform: translate(calc(var(--px) * 4px), calc(var(--py) * 4px)) rotate(calc(var(--px) * 12deg));
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 6px rgba(190, 160, 255, 0.8));
+}
+
+.iri-brilho {
+    position: absolute;
+    left: 15%;
+    top: 9%;
+    width: 50%;
+    height: 30%;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.9;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.04));
+    filter: blur(0.6px);
+    transform: translate(calc(var(--px) * -5px), calc(var(--py) * -3px)) rotate(-18deg);
 }
 
 .troll-btn:hover,
 .troll-btn:focus-visible {
-    opacity: 1;
-    transform: scale(1.12) rotate(90deg);
-    border-color: var(--border-card-hover);
-    box-shadow: 0 0 20px -2px var(--accent-soft);
+    transform: scale(1.1);
+    box-shadow:
+        0 10px 26px -8px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(255, 255, 255, 0.32),
+        inset 0 1px 1px rgba(255, 255, 255, 0.7),
+        inset 0 -8px 14px rgba(0, 0, 0, 0.35),
+        0 0 34px -2px rgba(160, 120, 255, 0.85);
+}
+
+.troll-btn:hover::before,
+.troll-btn:focus-visible::before {
+    animation-duration: 2.6s;
+}
+
+@keyframes iri-gira {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .troll-btn::before {
+        animation: none;
+    }
 }
 
 .troll-label {
     position: absolute;
-    left: 46px;
+    left: 62px;
     padding: 3px 8px;
     border-radius: 6px;
     white-space: nowrap;
     font-size: 11px;
-    color: #DCE4F5;
-    background: rgba(18, 27, 46, 0.95);
+    color: rgb(var(--gray-100));
+    background: rgb(var(--gray-800) / 0.96);
     border: 1px solid var(--border-card);
     opacity: 0;
     pointer-events: none;
@@ -759,7 +1030,6 @@ input::-webkit-inner-spin-button {
 .troll-btn:focus-visible .troll-label {
     opacity: 1;
 }
-
 @media print {
     .troll-btn,
     .viagem {
@@ -880,5 +1150,372 @@ input::-webkit-inner-spin-button {
         animation-duration: 0.001ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.001ms !important;
+    }
+}
+
+/* ---------- Acessibilidade: link "Pular para o conteúdo" (aparece ao navegar com o teclado) ---------- */
+
+.skip-link {
+    position: absolute;
+    left: 0.5rem;
+    top: -4rem;
+    z-index: 500;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: rgb(var(--gray-950));
+    background: rgb(var(--emerald-500));
+    transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+    top: 0.5rem;
+}
+
+/* Leitores de tela: texto visível só para eles */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+
+/* ---------- Tema VIDRO: superfícies ---------- */
+
+/* Fundo "aurora": manchas de cor fixas; é o que os painéis de vidro desfocam. Sem névoa animada neste tema. */
+
+html[data-tema="vidro"] {
+    background-color: rgb(var(--gray-950)); /* evita o branco do navegador aparecer atrás do vidro */
+}
+
+html[data-tema="vidro"] body {
+    background-color: rgb(var(--gray-950));
+    background-image:
+        radial-gradient(60% 55% at 12% 8%, var(--aurora-1), transparent 70%),
+        radial-gradient(50% 50% at 92% 18%, var(--aurora-2), transparent 70%),
+        radial-gradient(65% 60% at 65% 100%, var(--aurora-3), transparent 72%);
+    background-attachment: fixed;
+}
+
+/* Painéis: translúcidos + desfoque + brilho na borda de cima + reflexo diagonal */
+
+html[data-tema="vidro"] .bg-gray-800,
+html[data-tema="vidro"] .hero-panel {
+    background-color: var(--vidro-fundo);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.02) 42%, rgba(255, 255, 255, 0) 70%);
+    -webkit-backdrop-filter: blur(var(--vidro-desfoque)) saturate(175%) brightness(1.06);
+    backdrop-filter: blur(var(--vidro-desfoque)) saturate(175%) brightness(1.06);
+}
+
+html[data-tema="vidro"] .shadow-lg,
+html[data-tema="vidro"] .shadow-md {
+    box-shadow:
+        0 14px 40px -14px var(--sombra-card),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 0 32px -14px var(--accent-soft) !important;
+}
+
+html[data-tema="vidro"] .shadow-lg:hover {
+    box-shadow:
+        0 18px 46px -14px var(--sombra-card),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 40px -10px var(--accent-soft) !important;
+}
+
+/* Campos e tiles: vidro mais escuro por dentro (sem desfoque extra, para não pesar) */
+
+html[data-tema="vidro"] input,
+html[data-tema="vidro"] select,
+html[data-tema="vidro"] textarea {
+    background-color: rgb(var(--gray-950) / 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+html[data-tema="vidro"] input:focus,
+html[data-tema="vidro"] select:focus,
+html[data-tema="vidro"] textarea:focus {
+    border-color: var(--accent);
+}
+
+html[data-tema="vidro"] .bg-gray-700\/40,
+html[data-tema="vidro"] .bg-gray-700\/50,
+html[data-tema="vidro"] .bg-gray-900:not(body) {
+    background-color: rgb(var(--gray-950) / 0.32);
+}
+
+/* Botões de ação: gradiente com brilho, como uma gema */
+
+html[data-tema="vidro"] .bg-emerald-500 {
+    background-image: linear-gradient(135deg, rgb(var(--emerald-300)), rgb(var(--emerald-500)) 55%, rgb(var(--emerald-600)));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 22px -8px var(--accent-soft);
+}
+
+/* Abas do menu em vidro */
+
+html[data-tema="vidro"] .tab-btn:not(.text-gray-950) {
+    background-color: rgba(255, 255, 255, 0.05);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+/* Modais e caixas flutuantes também viram vidro */
+
+html[data-tema="vidro"] .sala-secreta-card {
+    background: rgb(var(--gray-800) / 0.55);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    backdrop-filter: blur(22px) saturate(150%);
+    border-color: var(--border-card);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 50px -12px var(--accent-soft);
+}
+
+/* Aparelho fraco, economia de dados ou "reduzir transparência": mantém o vidro, sem desfoque (bem mais leve) */
+
+html.sem-blur[data-tema="vidro"] .bg-gray-800,
+html.sem-blur[data-tema="vidro"] .hero-panel,
+html.sem-blur[data-tema="vidro"] .sala-secreta-card,
+html.sem-blur[data-tema="vidro"] .tab-btn {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: rgb(var(--gray-800) / 0.8);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    html[data-tema="vidro"] .bg-gray-800,
+    html[data-tema="vidro"] .hero-panel,
+    html[data-tema="vidro"] .sala-secreta-card,
+    html[data-tema="vidro"] .tab-btn {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background-color: rgb(var(--gray-800) / 0.92);
+    }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    html[data-tema="vidro"] .bg-gray-800,
+    html[data-tema="vidro"] .hero-panel {
+        background-color: rgb(var(--gray-800) / 0.88);
+    }
+}
+
+
+/* ---------- Link "Enviar uma sugestão" no rodapé ---------- */
+
+.link-sugestao {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-card);
+    background: transparent;
+    color: rgb(var(--emerald-400));
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.link-sugestao:hover,
+.link-sugestao:focus-visible {
+    background: rgb(var(--emerald-500) / 0.15);
+    box-shadow: 0 0 16px -4px var(--accent-soft);
+}
+
+
+/* ---------- Tema VIDRO: menos bordas sólidas, mais luz ----------
+   O vidro de verdade quase não tem contorno: o que "desenha" a peça é o reflexo na quina e o brilho em volta.
+   Por isso aqui as bordas comuns ficam quase invisíveis e o volume vem de sombras internas e do halo. */
+
+html[data-tema="vidro"] [class*="border-gray-"]:not(.border-dashed) {
+    border-color: rgba(255, 255, 255, 0.07);
+}
+
+html[data-tema="vidro"] .bg-gray-800[class*="border-gray-"] {
+    border-color: var(--border-card);
+}
+
+html[data-tema="vidro"] .rounded-xl,
+html[data-tema="vidro"] .hero-panel {
+    border-radius: 1.25rem;
+}
+
+html[data-tema="vidro"] .rounded-lg {
+    border-radius: 0.9rem;
+}
+
+/* Tiles internos: sem contorno, só um vidro mais escuro e a luz da quina */
+
+html[data-tema="vidro"] .bg-gray-700\/40,
+html[data-tema="vidro"] .bg-gray-700\/30,
+html[data-tema="vidro"] .bg-gray-700\/50 {
+    border-color: transparent;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -10px 24px -12px rgba(0, 0, 0, 0.35);
+}
+
+/* Campos: fundo fundo (afundado), sem linha; o foco acende um halo */
+
+html[data-tema="vidro"] input,
+html[data-tema="vidro"] select,
+html[data-tema="vidro"] textarea {
+    border-color: transparent;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+html[data-tema="vidro"] input:focus,
+html[data-tema="vidro"] select:focus,
+html[data-tema="vidro"] textarea:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--accent-soft), 0 0 22px -4px var(--accent-soft);
+}
+
+/* Menu: abas em vidro, sem contorno colorido; a ativa vira uma "gema" */
+
+html[data-tema="vidro"] .tab-btn:not(.text-gray-950) {
+    border-color: rgba(255, 255, 255, 0.08);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+html[data-tema="vidro"] .tab-btn.text-gray-950 {
+    background-image: linear-gradient(135deg, rgb(var(--emerald-300)), rgb(var(--emerald-500)) 55%, rgb(var(--emerald-600)));
+}
+
+/* Cabeçalho e rodapé: uma faixa de vidro com uma linha de luz, não uma borda dura */
+
+html[data-tema="vidro"] header,
+html[data-tema="vidro"] footer {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Tabelas: linhas de separação bem sutis */
+
+html[data-tema="vidro"] .divide-y > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-tema="vidro"] thead {
+    background-color: rgb(var(--gray-950) / 0.35);
+}
+
+/* ---------- Botão "Get started" (texto + círculo com seta; no hover o círculo se expande e preenche o botão) ----------
+   Estrutura: <a class="box start-btn" style="--w:..; --h:..; --tr:.."> <span.text> <span.btn-icon><svg.svg> <span.circle-overlay>
+   --w largura, --h altura e --tr raio da borda são definidos no próprio elemento. Segue as cores do tema. */
+
+.start-btn {
+    --w: 260px;
+    --h: 64px;
+    --tr: 999px;
+    --d: calc(var(--h) * 0.76); /* diâmetro do círculo */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: var(--w);
+    max-width: 100%;
+    height: var(--h);
+    padding: 0 calc(var(--h) + 8px) 0 calc(var(--h) * 0.45);
+    border-radius: var(--tr);
+    overflow: hidden;
+    isolation: isolate;
+    text-decoration: none;
+    color: rgb(var(--gray-50));
+    background: linear-gradient(135deg, rgb(var(--emerald-500) / 0.26), rgb(var(--emerald-700) / 0.34));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 0 1px rgb(var(--emerald-400) / 0.4), 0 12px 28px -14px var(--accent-soft);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: box-shadow 0.35s ease, transform 0.35s ease;
+}
+
+.start-btn .text {
+    position: relative;
+    z-index: 3;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    transition: color 0.4s ease 0.05s, transform 0.5s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+.start-btn .btn-icon,
+.start-btn .circle-overlay {
+    position: absolute;
+    top: 50%;
+    right: calc((var(--h) - var(--d)) / 2);
+    width: var(--d);
+    height: var(--d);
+    margin-top: calc(var(--d) / -2);
+    border-radius: 50%;
+}
+
+.start-btn .btn-icon {
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    color: rgb(var(--gray-950));
+    background: rgb(var(--emerald-500));
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 4px 12px -4px var(--accent-soft);
+    transition: background 0.35s ease, color 0.35s ease, transform 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+.start-btn .svg {
+    width: 34%;
+    height: 34%;
+    fill: currentColor;
+    transition: transform 0.45s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.start-btn .circle-overlay {
+    z-index: 2;
+    background: rgb(var(--emerald-400));
+    transition: transform 0.65s cubic-bezier(0.65, 0, 0.25, 1);
+}
+
+.start-btn:hover,
+.start-btn:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 0 1px rgb(var(--emerald-300) / 0.7), 0 16px 34px -12px var(--accent-soft);
+    outline: none;
+}
+
+.start-btn:hover .circle-overlay,
+.start-btn:focus-visible .circle-overlay {
+    transform: scale(14);
+}
+
+.start-btn:hover .text,
+.start-btn:focus-visible .text {
+    color: rgb(var(--gray-950));
+    transform: translateX(4px);
+}
+
+.start-btn:hover .btn-icon,
+.start-btn:focus-visible .btn-icon {
+    background: rgb(var(--gray-950));
+    color: rgb(var(--emerald-300));
+    transform: scale(1.04);
+}
+
+.start-btn:hover .svg,
+.start-btn:focus-visible .svg {
+    transform: translateX(3px);
+}
+
+.start-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .start-btn,
+    .start-btn .text,
+    .start-btn .btn-icon,
+    .start-btn .svg,
+    .start-btn .circle-overlay {
+        transition-duration: 0.01ms;
     }
 }

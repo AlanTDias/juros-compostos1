@@ -1,0 +1,60 @@
+<section id="tab-investimentos" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Comparador de Investimentos: CDB, LCI/LCA, Tesouro Selic e Poupança</h1>
+            <p class="text-sm text-gray-400 -mt-3">Compare o quanto cada aplicação rende de verdade, já descontado o Imposto de Renda regressivo. Os campos de CDI e Selic são preenchidos com os indicadores em tempo real do site.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label for="inv-valor" class="block text-sm font-medium">Valor aplicado (R$)</label>
+                        <input type="text" inputmode="decimal" id="inv-valor" value="10.000,00" oninput="calculateInvestimentos()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="inv-meses" class="block text-sm font-medium">Prazo (meses)</label>
+                            <input type="number" min="1" max="600" id="inv-meses" value="12" oninput="calculateInvestimentos()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label for="inv-cdi" class="block text-sm font-medium">CDI (% a.a.)</label>
+                            <input type="number" step="0.01" id="inv-cdi" value="13.65" oninput="calculateInvestimentos()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="inv-selic" class="block text-sm font-medium">Selic (% a.a.)</label>
+                            <input type="number" step="0.01" id="inv-selic" value="13.75" oninput="calculateInvestimentos()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label for="inv-cdb-pct" class="block text-sm font-medium">CDB (% do CDI)</label>
+                            <input type="number" step="1" id="inv-cdb-pct" value="100" oninput="calculateInvestimentos()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="inv-lci-pct" class="block text-sm font-medium">LCI/LCA (% do CDI)</label>
+                        <input type="number" step="1" id="inv-lci-pct" value="90" oninput="calculateInvestimentos()" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <button type="button" onclick="usarIndicadoresNoComparador()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 text-sm p-2 rounded transition">↻ Usar CDI e Selic do site (tempo real)</button>
+                </div>
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg lg:col-span-2 space-y-3">
+                    <h3 class="text-lg font-semibold text-emerald-300">Quanto cada opção rende (líquido)</h3>
+                    <div class="overflow-x-auto rounded-lg border border-gray-700">
+                        <table class="w-full text-left text-xs md:text-sm whitespace-nowrap">
+                            <thead class="bg-gray-900 text-gray-400 uppercase">
+                                <tr><th class="p-3">Aplicação</th><th class="p-3">Bruto</th><th class="p-3">IR</th><th class="p-3">Líquido final</th><th class="p-3 text-right">Rent. líquida a.a.</th></tr>
+                            </thead>
+                            <tbody id="inv-tabela" class="divide-y divide-gray-700/60 text-gray-300" aria-live="polite"></tbody>
+                        </table>
+                    </div>
+                    <p id="inv-melhor" class="text-sm text-emerald-300 font-semibold"></p>
+                    <p class="text-[11px] text-gray-400">Simplificações: Tesouro Selic rende a Selic sem ágio nem taxa de custódia da B3; poupança com TR zerada (0,5% ao mês quando a Selic está acima de 8,5% ao ano; 70% da Selic quando está abaixo); IOF de resgates em menos de 30 dias não considerado. Rentabilidade passada não garante rentabilidade futura, e este comparador não é recomendação de investimento.</p>
+                </div>
+            </div>
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
+                <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">Imposto de Renda regressivo</h3>
+                <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-300">
+                    <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60"><strong class="text-gray-100 block">Até 180 dias</strong>22,5% sobre o rendimento</div>
+                    <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60"><strong class="text-gray-100 block">181 a 360 dias</strong>20%</div>
+                    <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60"><strong class="text-gray-100 block">361 a 720 dias</strong>17,5%</div>
+                    <div class="bg-gray-700/40 p-3 rounded-lg border border-gray-700/60"><strong class="text-gray-100 block">Acima de 720 dias</strong>15%</div>
+                </div>
+                <p class="mt-3 text-[11px] text-gray-400">LCI, LCA e poupança são isentas de IR para pessoa física. CDB e Tesouro Selic seguem a tabela regressiva acima.</p>
+            </section>
+        </section>

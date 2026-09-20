@@ -1,0 +1,85 @@
+<section id="tab-qrcode" class="tab-content space-y-6">
+            <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Gerador de QR Code</h1>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium">Conteúdo (URL, Texto ou telefone)</label>
+                        <input type="text" id="qr-input" placeholder="https://exemplo.com" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none focus:ring-2 focus:ring-emerald-500 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Tamanho (px)</label>
+                        <select id="qr-size" class="w-full bg-gray-700 rounded p-2 mt-1 outline-none text-white">
+                    <option value="180">180x180</option>
+                    <option value="250" selected>250x250</option>
+                    <option value="350">350x350</option>
+                </select>
+                    </div>
+                    <button onclick="generateQRCode()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded transition">Gerar QR Code</button>
+                </div>
+                <div class="bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg lg:col-span-2 flex flex-col items-center justify-center min-h-[260px] space-y-4">
+                    <div id="qr-code-container" class="bg-white p-4 rounded-lg hidden"></div>
+                    <p id="qr-placeholder" class="text-gray-400 text-sm">Insira o link ou texto e clique em "Gerar".</p>
+                    <a id="qr-download" class="hidden bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition">Baixar QR Code</a>
+                </div>
+            </div>
+            <!-- 📱 COMO FUNCIONA O GERADOR DE QR CODE -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
+                <div class="border-b border-gray-700 pb-3 mb-4">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>📱</span> Como Funciona o Gerador de QR Code?
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Crie códigos QR personalizados para links, textos ou contatos e baixe em alta resolução para uso digital ou impresso.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
+                    <!-- Card 1: Entrada Flexível -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Entrada Flexível</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-medium">Conteúdo</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Insira <strong class="text-gray-200">URLs, textos, telefones ou chaves Pix</strong> no campo para gerar o código bidimensional instantaneamente.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Versatilidade:</strong> Compatível com qualquer informação textual ou endereço web.
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Ajuste de Resolução -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Dimensão Ajustável</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded-full font-medium">Personalizável</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                Escolha a <strong class="text-gray-200">resolução em pixels</strong> ideal para a sua necessidade, desde exibições em telas até impressões gráficas.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Nítido:</strong> Evite códigos borrados garantindo leitura rápida em qualquer câmera.
+                        </div>
+                    </div>
+                    <!-- Card 3: Download Direto -->
+                    <div class="bg-gray-700/40 p-4 rounded-lg border border-gray-700/60 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-white text-sm">Download Instantâneo</span>
+                                <span class="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 rounded-full font-medium">PNG / Imagem</span>
+                            </div>
+                            <p class="text-gray-400 leading-relaxed">
+                                O QR Code é gerado na hora com um botão direto para <strong class="text-gray-200">salvar o arquivo de imagem</strong> no seu dispositivo.
+                            </p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-gray-600/50 text-[11px] text-gray-400">
+                            📌 <strong class="text-gray-200">Praticidade:</strong> Baixe a imagem pronta para aplicar em cartões, panfletos ou sites.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
