@@ -14,8 +14,10 @@ const VERSAO_JS = (() => {
 })();
 
 const LIBS_SOB_DEMANDA = {
-    // Modo Viagem: arquivo local carregado só quando a pessoa clica no botão flutuante
+    // Modo Viagem: arquivo local carregado só quando a pessoa chega ao 6º clique no botão flutuante
     viagem: { src: `js/viagem.js?v=${VERSAO_JS}`, pronta: () => window.__viagemCarregada },
+    // Mapa de sistemas (easter egg): arquivo local carregado só quando a pessoa clica na marca do rodapé
+    mapa: { src: `js/mapa.js?v=${VERSAO_JS}`, pronta: () => window.__mapaCarregada },
     pdflib: { src: 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js', pronta: () => window.PDFLib },
     pdfjs: {
         src: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
@@ -83,7 +85,7 @@ const abas = [
     { id: 'rescisao-clt', nome: 'Rescisão CLT', color: 'fuchsia', pagina: 'rescisao-clt.html' },
     { id: 'salario-liquido', nome: 'Salário Líquido', color: 'teal', pagina: 'salario-liquido.html' },
     { id: 'documentos', nome: 'Gerador Docs', color: 'lime', pagina: 'gerador-de-documentos.html' },
-    { id: 'conversores', nome: 'Conversores', color: 'green', pagina: 'conversor-de-arquivos.html' },
+    { id: 'conversores', nome: 'Ferramentas de PDF', color: 'green', pagina: 'conversor-de-arquivos.html' },
     { id: 'imagens', nome: 'Imagens', color: 'orange', pagina: 'ferramentas-de-imagem.html' },
     { id: 'qrcode', nome: 'QR-Code', color: 'red', pagina: 'gerador-de-qr-code.html' },
     { id: 'senha', nome: 'Gerador de Senha', color: 'rose', pagina: 'gerador-de-senha.html' },
@@ -266,10 +268,10 @@ const arredonda2 = v => Math.round((v + 1e-9) * 100) / 100;
 // ---------- Salário líquido (tabelas 2026: INSS e IRRF) ----------
 // Fontes: Portaria Interministerial MPS/MF nº 13/2026 (INSS) e Receita Federal / Lei 15.270/2025 (IRRF).
 
-// TEMA CLARO / ESCURO (botão flutuante) + tema secreto "neon"
+// TEMA CLARO / ESCURO / VIDRO
 // ==========================================
 // O tema é o atributo data-tema no <html>; as cores vêm das variáveis do style.css.
-// Claro/escuro ficam salvos no localStorage; o tema secreto (neon) vale só até recarregar.
+// Claro/escuro/vidro ficam salvos no localStorage.
 const TEMA_KEY = 'excalc_tema';
 
 function temaAtual() {
@@ -297,7 +299,7 @@ function aplicarTema(tema, salvar) {
     }
 }
 
-// Ciclo do botão flutuante: escuro -> claro -> vidro -> escuro (o tema secreto "neon" volta para o escuro)
+// Ciclo dos temas: escuro -> claro -> vidro -> escuro
 const TEMAS_CICLO = ['escuro', 'claro', 'vidro'];
 
 function proximoTema() {
@@ -311,13 +313,11 @@ function alternarTema() {
 
 function corDoNavegadorPorTema(tema) {
     if (tema === 'claro') return '#F0F0F4';
-    if (tema === 'neon') return '#0D0221';
     if (tema === 'vidro') return '#1B123A';
     return '#060607';
 }
 
 // Seletor de tema em "vidro líquido" (3 opções): marca a opção certa e move a peça de vidro até ela.
-// No tema secreto (neon) nenhuma opção fica marcada e a peça some.
 function atualizarBotaoDeTema() {
     const seletor = document.getElementById('tema-switch');
     if (!seletor) return;
@@ -442,46 +442,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 // ==========================================
-// EASTER EGG: 7 cliques na marca do rodapé (às vezes a Sala Secreta, às vezes o tema neon)
+// EASTER EGG: 7 cliques seguidos na marca do rodapé abrem o MAPA DE SISTEMAS (js/mapa.js, carregado sob demanda)
 // ==========================================
-const FRASES_SECRETAS = [
-    'Juros compostos: a oitava maravilha do mundo, segundo alguém que provavelmente não disse isso. 😄',
-    'Você achou! Dica de ouro: quem começa cedo, agradece tarde. 💰',
-    'Segredo financeiro nº 1: o melhor momento para investir foi ontem. O segundo melhor é hoje.',
-    'Parabéns, você clicou 7 vezes numa logo. Isso é dedicação de investidor de longo prazo. 🧘',
-    'Se dinheiro desse em árvore, o IPCA seria o jardineiro. 🌳',
-    'Aviso: nenhum rendimento de 10.000% ao mês foi maltratado na criação deste site.'
-];
-
-function abrirSalaSecreta() {
-    const sala = document.getElementById('sala-secreta');
-    if (!sala) return;
-    document.getElementById('sala-secreta-frase').textContent = FRASES_SECRETAS[(Math.random() * FRASES_SECRETAS.length) | 0];
-    sala.classList.remove('hidden');
-    lancarConfete();
-}
-
-function fecharSalaSecreta() {
-    const sala = document.getElementById('sala-secreta');
-    if (sala) sala.classList.add('hidden');
-}
-
-function ativarTemaSecreto() {
-    aplicarTema('neon', false); // nunca é salvo: recarregar a página volta ao normal
-    celebrar('🌈 Tema secreto ativado! Recarregue a página para voltar ao normal.');
-}
-
-function dispararSegredo() {
-    // Sorteia entre os dois segredos (se o neon já está ativo, sempre abre a sala)
-    if (temaAtual() !== 'neon' && Math.random() < 0.5) ativarTemaSecreto();
-    else abrirSalaSecreta();
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     const marca = document.getElementById('marca-secreta');
     if (!marca) return;
     let cliques = 0;
     let timer = null;
+    // Já baixa o js/mapa.js quando o mouse chega na marca / no 1º toque: no 7º clique o mapa abre na hora
+    const preparar = () => { carregarLib('mapa').catch(() => {}); };
+    marca.addEventListener('pointerenter', preparar, { once: true });
+    marca.addEventListener('pointerdown', preparar, { once: true });
     marca.addEventListener('click', () => {
         cliques++;
         marca.classList.remove('balanca');
@@ -491,11 +462,10 @@ document.addEventListener('DOMContentLoaded', () => {
         timer = setTimeout(() => { cliques = 0; }, 2500); // precisa ser em sequência (<2,5s entre cliques)
         if (cliques >= 7) {
             cliques = 0;
-            dispararSegredo();
+            abrirMapa();
         }
     });
 });
-
 // TOASTY!! (Mortal Kombat): digitar um código famoso, fora de campos de texto, faz o personagem surgir no canto
 const CODIGOS_TOASTY = ['abacabb', 'toasty']; // "ABACABB" = código do sangue no Mega Drive
 let teclasDigitadas = '';
@@ -562,7 +532,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-        fecharSalaSecreta();
         fecharSugestao();
         if (typeof fecharAssinatura === 'function') fecharAssinatura();
     }
@@ -888,7 +857,7 @@ async function enviarSugestao(evento) {
     }
 }
 // ==========================================
-// MODO VIAGEM (carregamento sob demanda) e INICIALIZAÇÃO DA PÁGINA
+// MODO VIAGEM E MAPA DE SISTEMAS (carregamento sob demanda) e INICIALIZAÇÃO DA PÁGINA
 // ==========================================
 // O botão flutuante chama abrirViagem(); na primeira vez baixa js/viagem.js, que assume o nome
 // window.abrirViagem / window.fecharViagem e abre os efeitos. Assim as demais páginas ficam mais leves.
@@ -899,6 +868,15 @@ const abrirViagemInicial = function () {
 };
 window.abrirViagem = abrirViagemInicial;
 window.fecharViagem = function () { /* nada aberto ainda */ };
+// Os 7 cliques na marca do rodapé chamam abrirMapa(); na primeira vez baixa js/mapa.js, que assume o nome
+// window.abrirMapa / window.fecharMapa e abre o mapa. Assim as demais páginas ficam mais leves.
+const abrirMapaInicial = function () {
+    carregarLib('mapa')
+        .then(() => { if (window.abrirMapa !== abrirMapaInicial) window.abrirMapa(); })
+        .catch(() => mostrarToast('Não foi possível carregar o mapa. Verifique a conexão.', { tipo: 'humor' }));
+};
+window.abrirMapa = abrirMapaInicial;
+window.fecharMapa = function () { /* nada aberto ainda */ };
 
 document.addEventListener('DOMContentLoaded', function () {
     renderMenuTabs();

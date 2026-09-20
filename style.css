@@ -8,7 +8,7 @@
 
 /* ==========================================================
    TEMAS: cada paleta é um conjunto de variáveis "R G B" (usadas pelo tailwind.config no index.html).
-   Padrão = escuro. <html data-tema="claro"> = claro; <html data-tema="neon"> = tema secreto (easter egg).
+   Padrão = escuro. <html data-tema="claro"> = claro; <html data-tema="vidro"> = vidro.
    ========================================================== */
 
 :root {
@@ -99,49 +99,6 @@ html[data-tema="claro"] {
     --vidro-borda-int: rgba(15, 23, 42, 0.2);
     --texto-grafico: #3A3A40;
     --grade-grafico: rgba(15, 23, 42, 0.1);
-}
-
-html[data-tema="neon"] {
-    --gray-50: 250 240 255;
-    --gray-100: 240 220 255;
-    --gray-200: 225 195 250;
-    --gray-300: 200 165 235;
-    --gray-400: 160 125 200;
-    --gray-500: 120 90 165;
-    --gray-600: 70 40 110;
-    --gray-700: 44 22 80;
-    --gray-800: 26 11 59;
-    --gray-900: 13 2 33;
-    --gray-950: 7 1 20;
-    --emerald-50: 255 240 250;
-    --emerald-100: 255 215 240;
-    --emerald-200: 255 175 225;
-    --emerald-300: 255 130 205;
-    --emerald-400: 255 77 178;
-    --emerald-500: 255 46 151;
-    --emerald-600: 214 28 124;
-    --emerald-700: 165 20 96;
-    --emerald-800: 120 15 70;
-    --emerald-900: 80 10 48;
-    --emerald-950: 45 5 28;
-    --accent: #FF2E97;
-    --accent-soft: rgba(255, 46, 151, 0.4);
-    --accent-glow: rgba(255, 46, 151, 0.22);
-    --border-card: rgba(255, 46, 151, 0.35);
-    --border-card-hover: rgba(255, 46, 151, 0.7);
-    --border-tile: rgba(255, 46, 151, 0.35);
-    --border-divider: rgba(255, 46, 151, 0.22);
-    --aurora-1: rgba(255, 46, 151, 0.28);
-    --aurora-2: rgba(139, 92, 246, 0.26);
-    --aurora-3: rgba(143, 163, 251, 0.16);
-}
-
-/* Tema secreto: brilho retrô nos títulos */
-
-html[data-tema="neon"] h1,
-html[data-tema="neon"] h2,
-html[data-tema="neon"] h3 {
-    text-shadow: 0 0 14px rgba(255, 46, 151, 0.6);
 }
 
 /* Tema VIDRO (glassmorphism): painéis translúcidos com desfoque e bordas luminosas sobre um fundo de "aurora" roxa. */
@@ -1016,9 +973,17 @@ html.sem-blur .tema-thumb {
 }
 @media print {
     .troll-btn,
-    .viagem {
+    .viagem,
+    .mapa {
         display: none !important;
     }
+}
+
+
+.troll-btn {
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 
@@ -1026,12 +991,6 @@ html.sem-blur .tema-thumb {
 
 :root {
     --viagem-bg: #05030f;
-}
-
-.troll-btn {
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
 }
 
 .viagem {
@@ -1645,4 +1604,491 @@ html:not([data-tema]) body[data-aba="home"] {
 html:not([data-tema]) .tab-btn:not(.text-gray-950) {
     background-color: rgb(var(--gray-950) / 0.4);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 18%, transparent 82%, rgba(255, 255, 255, 0.1) 100%);
+}
+
+/* ---------- Mapa de sistemas (easter egg do botão flutuante): minimalista, preto e off-white, estilo Apple ----------
+   Tem tema PRÓPRIO (claro/escuro pelo botão da barra), independente do tema do site. Só tons de cinza; a única cor
+   que aparece é o pontinho de departamento de cada caixa. */
+
+.mapa {
+    --m-fundo: #000000;
+    --m-superficie: #1C1C1E;
+    --m-texto: #F5F5F7;
+    --m-suave: #98989D;
+    --m-linha: #3A3A3C;
+    --m-realce: #F5F5F7;
+    --m-realce-texto: #000000;
+    --m-vidro: rgba(20, 20, 22, 0.72);
+    --m-grade: rgba(255, 255, 255, 0.11);
+    --m-sombra: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    flex-direction: column;
+    background: var(--m-fundo);
+    color: var(--m-texto);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    outline: none;
+}
+
+.mapa[data-tema-mapa="claro"] {
+    --m-fundo: #F5F5F7;
+    --m-superficie: #FFFFFF;
+    --m-texto: #1D1D1F;
+    --m-suave: #6E6E73;
+    --m-linha: #D2D2D7;
+    --m-realce: #1D1D1F;
+    --m-realce-texto: #F5F5F7;
+    --m-vidro: rgba(245, 245, 247, 0.72);
+    --m-grade: rgba(0, 0, 0, 0.11);
+    --m-sombra: rgba(0, 0, 0, 0.12);
+}
+
+.mapa.hidden {
+    display: none !important;
+}
+
+.mapa:not(.hidden) {
+    display: flex;
+}
+
+.mapa-barra {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.9rem;
+    padding: 0.55rem 1rem;
+    background: var(--m-vidro);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    border-bottom: 1px solid var(--m-linha);
+}
+
+.mapa-grupo {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+}
+
+.mapa-fim {
+    margin-left: auto;
+}
+
+/* Campos (com prefixo forte para vencer as regras globais de input/select/textarea do site) */
+
+html body .mapa input,
+html body .mapa select,
+html body .mapa textarea {
+    background: var(--m-superficie);
+    color: var(--m-texto);
+    border: 1px solid var(--m-linha);
+    border-radius: 10px;
+    box-shadow: none;
+    font: 400 0.9rem -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    padding: 0.5rem 0.65rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+html body .mapa input:focus,
+html body .mapa select:focus,
+html body .mapa textarea:focus {
+    border-color: var(--m-texto);
+    box-shadow: 0 0 0 3px rgba(127, 127, 127, 0.25);
+}
+
+html body .mapa input.mapa-titulo {
+    flex: 1 1 220px;
+    max-width: 380px;
+    background: transparent;
+    border-color: transparent;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    padding: 0.35rem 0.5rem;
+}
+
+html body .mapa input.mapa-titulo:hover {
+    border-color: var(--m-linha);
+}
+
+html body .mapa input[type="color"] {
+    width: 30px;
+    height: 30px;
+    padding: 2px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex: 0 0 30px;
+}
+
+/* Botões: só texto, sem borda; um toque de fundo ao passar o mouse */
+
+.mapa-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.8rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--m-texto);
+    font: 500 0.85rem -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.mapa-btn:hover:not(:disabled),
+.mapa-btn:focus-visible {
+    background: rgba(127, 127, 127, 0.2);
+    outline: none;
+}
+
+.mapa-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.mapa-btn.ativo {
+    background: var(--m-realce);
+    color: var(--m-realce-texto);
+}
+
+.mapa-btn[data-mapa-acao="salvar"] {
+    background: var(--m-realce);
+    color: var(--m-realce-texto);
+}
+
+.mapa-btn[data-mapa-acao="salvar"]:hover {
+    background: var(--m-realce);
+    opacity: 0.85;
+}
+
+.mapa-contorno {
+    border: 1px solid var(--m-linha);
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.mapa-icone {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    font-size: 1.05rem;
+}
+
+.mapa-btn[data-mapa-acao="desfazer"],
+.mapa-btn[data-mapa-acao="refazer"] {
+    font-size: 1.3rem;
+    padding: 0.2rem 0.55rem;
+}
+
+.mapa-mini {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: var(--m-suave);
+}
+
+.mapa-sol {
+    display: none;
+}
+
+.mapa[data-tema-mapa="escuro"] .mapa-sol {
+    display: block;
+}
+
+.mapa[data-tema-mapa="escuro"] .mapa-lua {
+    display: none;
+}
+
+/* Área do mapa */
+
+.mapa-corpo {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}
+
+.mapa-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    background-image: radial-gradient(var(--m-grade) 1px, transparent 1.6px);
+    background-size: 24px 24px;
+}
+
+.mapa-no {
+    cursor: pointer;
+}
+
+.mapa-no .corpo {
+    fill: var(--m-superficie);
+    stroke: var(--m-linha);
+    stroke-width: 1;
+    filter: drop-shadow(0 6px 14px var(--m-sombra));
+}
+
+.mapa-no:hover .corpo {
+    stroke: var(--m-suave);
+}
+
+.mapa-no.sel .corpo {
+    stroke: var(--m-texto);
+    stroke-width: 2;
+}
+
+.mapa-no.origem .corpo {
+    stroke: var(--m-texto);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+}
+
+.mapa-no text {
+    fill: var(--m-texto);
+    font: 600 14px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    pointer-events: none;
+}
+
+.mapa-no .dep {
+    fill: var(--m-suave);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.mapa-no .nota-ic {
+    fill: var(--m-suave);
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.mapa-no .ponto-dep {
+    pointer-events: none;
+}
+
+.mapa-no .alca {
+    fill: var(--m-texto);
+    stroke: var(--m-fundo);
+    stroke-width: 2.5;
+    opacity: 0;
+    cursor: crosshair;
+    transition: opacity 0.12s ease;
+}
+
+.mapa-no:hover .alca,
+.mapa-no.sel .alca {
+    opacity: 1;
+}
+
+.mapa-lig .hit {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 16;
+    pointer-events: stroke;
+    cursor: pointer;
+}
+
+.mapa-lig .linha {
+    fill: none;
+    stroke: var(--m-suave);
+    stroke-width: 1.5;
+    pointer-events: none;
+}
+
+.mapa-lig .seta {
+    fill: var(--m-suave);
+    pointer-events: none;
+}
+
+.mapa-lig.sel .linha {
+    stroke: var(--m-texto);
+    stroke-width: 2.5;
+}
+
+.mapa-lig.sel .seta {
+    fill: var(--m-texto);
+}
+
+.mapa-lig .rotulo {
+    fill: var(--m-suave);
+    font: 500 12px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    paint-order: stroke;
+    stroke: var(--m-fundo);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.mapa-temp path {
+    fill: none;
+    stroke: var(--m-texto);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 5;
+    pointer-events: none;
+}
+
+/* Zoom */
+
+.mapa-zoom {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 0.2rem;
+    border: 1px solid var(--m-linha);
+    border-radius: 999px;
+    background: var(--m-vidro);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+}
+
+/* Editor de texto direto na caixa (textarea posicionado sobre a caixa; Enter pula linha) */
+
+html body .mapa textarea.mapa-editor {
+    position: absolute;
+    z-index: 4;
+    box-sizing: border-box;
+    width: auto;
+    margin: 0;
+    resize: none;
+    overflow: hidden;
+    background: var(--m-superficie);
+    color: var(--m-texto);
+    border: 2px solid var(--m-texto);
+    box-shadow: 0 10px 30px var(--m-sombra);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-align: left;
+}
+
+html body .mapa textarea.mapa-editor[hidden] {
+    display: none;
+}
+
+/* Seletor de departamento na barra */
+
+html body .mapa select.mapa-sel {
+    width: auto;
+    max-width: 150px;
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+html body .mapa select.mapa-sel:disabled {
+    opacity: 0.35;
+}
+
+.mapa-btn[hidden] {
+    display: none;
+}
+
+.mapa-ctx {
+    align-items: center;
+    gap: 0.15rem;
+}
+
+/* Menu de departamentos (abre sob demanda) */
+
+.mapa-pop {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 5;
+    width: 290px;
+    max-height: calc(100% - 1.5rem);
+    overflow-y: auto;
+    padding: 0.9rem;
+    border: 1px solid var(--m-linha);
+    border-radius: 18px;
+    background: var(--m-vidro);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    box-shadow: 0 16px 40px var(--m-sombra);
+}
+
+.mapa-pop[hidden] {
+    display: none;
+}
+
+.mapa-h {
+    margin: 0 0 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--m-suave);
+}
+
+.mapa-ajuda {
+    margin: 0.7rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--m-suave);
+}
+.mapa-dep {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.mapa-dica {
+    position: absolute;
+    left: 50%;
+    bottom: 0.9rem;
+    z-index: 1;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 0.4rem 0.9rem;
+    max-width: calc(100vw - 2rem);
+    border-radius: 999px;
+    background: var(--m-vidro);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid var(--m-linha);
+    font-size: 0.78rem;
+    color: var(--m-suave);
+    text-align: center;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+}
+
+.mapa-dica.oculta {
+    opacity: 0;
+}
+
+@media (max-width: 768px) {
+    .mapa-barra {
+        padding: 0.4rem 0.6rem;
+        gap: 0.1rem 0.4rem;
+    }
+
+    html body .mapa input.mapa-titulo {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+
+    .mapa-btn {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .mapa-pop {
+        left: 0.75rem;
+        width: auto;
+    }
 }

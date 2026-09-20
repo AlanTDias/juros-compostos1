@@ -20,6 +20,10 @@ const config = JSON.parse(lerArq(path.join(__dirname, 'paginas.json')));
 const base = lerArq(path.join(__dirname, 'base.html'));
 const paginas = config.paginas;
 const problemas = [];
+// o esqueleto precisa ter todos os marcadores (se um sumir, a página sai sem scripts/rodapé e ninguém percebe)
+for (const m of ['{{TITLE}}', '{{META}}', '{{ABA}}', '{{SUGESTOES_KEY}}', '{{RODAPE_LINKS}}', '{{SCRIPTS}}', '{{CONTEUDO}}']) {
+    if (!base.includes(m)) problemas.push('base.html perdeu o marcador ' + m);
+}
 
 // ---------- versão dos arquivos JS (muda quando qualquer um muda) ----------
 const jsDir = path.join(raiz, 'js');

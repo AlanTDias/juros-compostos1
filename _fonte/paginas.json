@@ -6,7 +6,7 @@
     {
       "id": "home",
       "arquivo": "index.html",
-      "titulo": "ExCalc | Calculadoras Financeiras e Conversores Grátis",
+      "titulo": "ExCalc | Calculadoras Financeiras e Ferramentas de PDF Grátis",
       "descricao": "Calculadoras financeiras (juros compostos, salário líquido, financiamento), conversores de arquivos, ferramentas de PDF e utilitários grátis, sem cadastro.",
       "resumo": "Todas as ferramentas do ExCalc reunidas em um só lugar.",
       "categoria": "FinanceApplication",
@@ -158,7 +158,7 @@
     {
       "id": "conversores",
       "arquivo": "conversor-de-arquivos.html",
-      "titulo": "Conversor de Arquivos e Ferramentas de PDF Grátis | ExCalc",
+      "titulo": "Ferramentas de PDF e Conversor de Arquivos Grátis | ExCalc",
       "descricao": "Converta Word, Excel, CSV, JSON e TXT, una, divida e comprima PDF, escreva e assine em PDF e extraia texto. Tudo no navegador, sem enviar arquivos.",
       "resumo": "Converta arquivos e edite PDF sem enviar nada.",
       "categoria": "UtilitiesApplication",

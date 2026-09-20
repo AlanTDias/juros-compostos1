@@ -25,7 +25,7 @@ for (const p of cfg.paginas) {
     const arquivos = ['core.js', ...(p.scripts || [])];
     const disponiveis = new Set();
     arquivos.forEach(a => definidos[a].forEach(n => disponiveis.add(n)));
-    if (p.id !== 'home' || true) disponiveis.add('abrirViagem'), disponiveis.add('fecharViagem'); // stubs no core
+    if (p.id !== 'home' || true) disponiveis.add('abrirViagem'), disponiveis.add('fecharViagem'), disponiveis.add('abrirMapa'), disponiveis.add('fecharMapa'); // stubs no core
     const faltando = {};
     for (const a of arquivos) {
         if (a === 'core.js') continue; // o core chama as funções de cada ferramenta só na página dela (protegido)
