@@ -19,6 +19,7 @@ const LIBS_SOB_DEMANDA = {
     xlsx: { src: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js', pronta: () => window.XLSX },
     mammoth: { src: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js', pronta: () => window.mammoth },
     html2pdf: { src: 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', pronta: () => window.html2pdf },
+    vantaclouds: { src: 'https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.clouds.min.js', pronta: () => window.VANTA && window.VANTA.CLOUDS },
     qrcode: { src: 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', pronta: () => window.QRCode },
     // Fundo animado (Vanta.js "fog"): o Vanta precisa do three.js (r134) já carregado
     three: { src: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js', pronta: () => window.THREE },
@@ -198,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// MODO VIAGEM: efeitos psicodélicos que reagem ao mouse/toque (rede neural, fluxo e caleidoscópio)
+// MODO VIAGEM: efeitos psicodélicos que reagem ao mouse/toque (caleidoscópio, rede neural e nuvens)
 // Tudo dentro de uma IIFE; só abrirViagem() e fecharViagem() ficam globais (usadas pelo HTML).
 // ==========================================
 (function () {
@@ -208,12 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     const bar = document.getElementById('viagem-bar');
     const dica = document.getElementById('viagem-dica');
+    const nuvemEl = document.getElementById('viagem-nuvem');
+    const DICA_PADRAO = dica.innerText;
     const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const velocidadeGlobal = reduzMovimento ? 0.4 : 1; // quem pede menos movimento recebe tudo mais devagar
     const FUNDO = '#05030f'; // mesmo valor de --viagem-bg no style.css
 
     let W = 0, H = 0, dpr = 1;
-    let modo = 'neural';
+    let modo = 'caleido'; // caleidoscópio é o efeito principal
     let rodando = false;
     let rafId = 0;
     let t = 0;
@@ -354,57 +357,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ---------- Efeito 2: campo de fluxo ----------
-    let particulas = [];
+    // ---------- Efeito 2: nuvens realistas (Vanta.js "clouds") ----------
+    // Não usa o canvas 2D: o Vanta cria o próprio canvas WebGL dentro de #viagem-nuvem.
+    let nuvemEfeito = null;
 
-    function iniciarFluxo() {
-        const n = Math.max(500, Math.min(2200, Math.floor((W * H) / 900)));
-        particulas = [];
-        for (let i = 0; i < n; i++) particulas.push({ x: Math.random() * W, y: Math.random() * H, px: 0, py: 0, vida: Math.random() * 200 });
+    async function iniciarNuvem() {
+        if (nuvemEfeito || !nuvemEl) return;
+        dica.innerText = '☁️ Carregando as nuvens...';
+        dica.classList.remove('oculta');
+        try {
+            await carregarLibs('three', 'vantaclouds');
+            if (!rodando || modo !== 'nuvem' || nuvemEfeito) return; // o usuário já trocou de efeito
+            nuvemEfeito = VANTA.CLOUDS({
+                el: nuvemEl,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                minHeight: 200,
+                minWidth: 200,
+                speed: reduzMovimento ? 0.4 : 1.2,
+                skyColor: 0x0a2a5e,         // céu azul-navy
+                cloudColor: 0xa9c4ee,       // nuvens azuladas claras
+                cloudShadowColor: 0x0b1120, // sombras no navy do site
+                sunColor: 0x22d3ee,         // "sol" ciano (cor de destaque do site)
+                sunGlareColor: 0x0e7490,
+                sunlightColor: 0x67e8f9
+            });
+            dica.innerText = DICA_PADRAO;
+        } catch (erro) {
+            console.warn('Nuvens indisponíveis:', erro && erro.message);
+            dica.innerText = 'Não foi possível carregar as nuvens. Verifique a conexão e tente de novo.';
+        }
+        setTimeout(() => dica.classList.add('oculta'), 5000);
     }
 
-    function campo(x, y) {
-        const s = 0.0022;
-        return Math.sin(x * s + t * 0.4) + Math.cos(y * s * 1.3 - t * 0.3) + Math.sin((x + y) * s * 0.6 + t * 0.2);
-    }
-
-    function desenharFluxo() {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(5, 3, 15, 0.09)';
-        ctx.fillRect(0, 0, W, H);
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.lineWidth = 1.2;
-
-        for (const p of particulas) {
-            p.px = p.x; p.py = p.y;
-            const a = campo(p.x, p.y) * Math.PI;
-            let vx = Math.cos(a) * 1.6, vy = Math.sin(a) * 1.6;
-
-            if (ponteiro.ativo) {
-                const dx = p.x - ponteiro.x, dy = p.y - ponteiro.y, d = Math.hypot(dx, dy) || 1;
-                if (d < 260) {
-                    const f = (1 - d / 260);
-                    vx += (-dy / d) * f * 5 + (dx / d) * f * 1.2; // redemoinho em volta do ponteiro
-                    vy += (dx / d) * f * 5 + (dy / d) * f * 1.2;
-                }
-            }
-            for (const o of ondas) {
-                const dx = p.x - o.x, dy = p.y - o.y, d = Math.hypot(dx, dy) || 1;
-                if (Math.abs(d - o.r) < 50) { vx += (dx / d) * 6 * o.vida; vy += (dy / d) * 6 * o.vida; }
-            }
-
-            p.x += vx * velocidadeGlobal; p.y += vy * velocidadeGlobal; p.vida--;
-            const hue = (a * 60 + t * 30 * velCores + p.x * 0.05) % 360;
-            ctx.strokeStyle = `hsla(${hue}, 95%, 60%, 0.55)`;
-            ctx.beginPath(); ctx.moveTo(p.px, p.py); ctx.lineTo(p.x, p.y); ctx.stroke();
-
-            if (p.vida < 0 || p.x < -10 || p.x > W + 10 || p.y < -10 || p.y > H + 10) {
-                p.x = Math.random() * W; p.y = Math.random() * H; p.px = p.x; p.py = p.y; p.vida = 100 + Math.random() * 200;
-            }
+    function pararNuvem() {
+        if (nuvemEfeito) {
+            nuvemEfeito.destroy();
+            nuvemEfeito = null;
         }
     }
 
-    // ---------- Efeito 3: caleidoscópio ----------
+    // ---------- Efeito 3: caleidoscópio (padrão) ----------
     const caleido = { x: 0, y: 0, px: 0, py: 0, ok: false };
     const SEGMENTOS = 8;
 
@@ -452,11 +446,11 @@ document.addEventListener('DOMContentLoaded', () => {
         t += 0.016 * velocidadeGlobal;
         pilotoAutomatico(agora);
 
+        if (modo === 'nuvem') return; // o Vanta anima sozinho, num canvas WebGL próprio
         if (modo === 'neural') desenharNeural();
-        else if (modo === 'fluxo') desenharFluxo();
         else desenharCaleido();
 
-        // ondas de choque: expandem e somem (comum aos três efeitos)
+        // ondas de choque: expandem e somem (comum aos efeitos 2D)
         for (let i = ondas.length - 1; i >= 0; i--) {
             ondas[i].r += 12; ondas[i].vida -= 0.02;
             if (ondas[i].vida <= 0) ondas.splice(i, 1);
@@ -479,11 +473,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function trocarModo(novo) {
         modo = novo;
         caleido.ok = false;
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = FUNDO;
-        ctx.fillRect(0, 0, W, H);
-        if (novo === 'neural') iniciarNeural();
-        if (novo === 'fluxo') iniciarFluxo();
+        const ehNuvem = novo === 'nuvem';
+        canvas.style.display = ehNuvem ? 'none' : 'block';
+        if (nuvemEl) nuvemEl.style.display = ehNuvem ? 'block' : 'none';
+        if (ehNuvem) {
+            iniciarNuvem();
+        } else {
+            pararNuvem();
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = FUNDO;
+            ctx.fillRect(0, 0, W, H);
+            if (novo === 'neural') iniciarNeural();
+        }
         overlay.querySelectorAll('[data-viagem-modo]').forEach(b => b.classList.toggle('ativo', b.dataset.viagemModo === novo));
     }
 
@@ -494,7 +495,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.fillStyle = FUNDO; ctx.fillRect(0, 0, W, H);
         if (modo === 'neural') iniciarNeural();
-        if (modo === 'fluxo') iniciarFluxo();
     }
 
     // barra de controles some quando o mouse fica parado
@@ -526,7 +526,8 @@ document.addEventListener('DOMContentLoaded', () => {
         redimensionar();
         moverPonteiro(W / 2, H / 2);
         ponteiro.ativo = false;
-        trocarModo('neural');
+        trocarModo('caleido');
+        dica.innerText = DICA_PADRAO;
         dica.classList.remove('oculta');
         setTimeout(() => dica.classList.add('oculta'), 6000);
         mostrarBarra();
@@ -538,6 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rodando = false;
         cancelAnimationFrame(rafId);
         clearTimeout(timerBarra);
+        pararNuvem();
         if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
         overlay.classList.add('hidden');
         document.body.style.overflow = '';
@@ -551,9 +553,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', () => { if (rodando) redimensionar(); });
     window.addEventListener('keydown', e => {
         if (!rodando) return;
-        if (e.key === '1') trocarModo('neural');
-        else if (e.key === '2') trocarModo('fluxo');
-        else if (e.key === '3') trocarModo('caleido');
+        if (e.key === '1') trocarModo('caleido');
+        else if (e.key === '2') trocarModo('neural');
+        else if (e.key === '3') trocarModo('nuvem');
         else if (e.key.toLowerCase() === 'f') alternarTelaCheia();
         else if (e.key.toLowerCase() === 'c') alternarCores();
         else if (e.key === 'Escape' && !document.fullscreenElement) window.fecharViagem();

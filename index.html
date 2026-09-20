@@ -2329,12 +2329,13 @@ Gestão do plano de cargos e salários, avaliação de desempenho e mediação d
     </button>
 
     <div id="viagem" class="viagem hidden" role="dialog" aria-modal="true" aria-label="Modo Viagem">
+        <div id="viagem-nuvem" class="viagem-nuvem" style="display:none"></div>
         <canvas id="viagem-canvas"></canvas>
         <div id="viagem-dica" class="viagem-dica">Mova o mouse · clique para uma onda de choque · teclas 1, 2, 3 trocam o efeito · Esc sai</div>
         <div id="viagem-bar" class="viagem-bar" role="toolbar" aria-label="Controles do Modo Viagem">
-            <button type="button" class="viagem-btn" data-viagem-modo="neural">🕸️ Neural</button>
-            <button type="button" class="viagem-btn" data-viagem-modo="fluxo">🌊 Fluxo</button>
             <button type="button" class="viagem-btn" data-viagem-modo="caleido">🔮 Caleidoscópio</button>
+            <button type="button" class="viagem-btn" data-viagem-modo="neural">🕸️ Neural</button>
+            <button type="button" class="viagem-btn" data-viagem-modo="nuvem">☁️ Nuvens</button>
             <button type="button" class="viagem-btn" id="viagem-cores" title="Alterna a velocidade de troca de cores">🎨 Cores</button>
             <button type="button" class="viagem-btn" id="viagem-tela">⛶ Tela cheia</button>
             <button type="button" class="viagem-btn viagem-sair" onclick="fecharViagem()">✕ Sair</button>
