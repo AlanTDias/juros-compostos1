@@ -11,6 +11,10 @@
     --accent-soft: rgba(34, 211, 238, 0.35);
     --accent-glow: rgba(34, 211, 238, 0.18);
     --grid-line: rgba(148, 163, 184, 0.06);
+    --border-card: rgba(34, 211, 238, 0.22);
+    --border-card-hover: rgba(34, 211, 238, 0.5);
+    --border-tile: rgba(34, 211, 238, 0.3);
+    --border-divider: rgba(34, 211, 238, 0.16);
 }
 
 
@@ -56,6 +60,16 @@ body::before {
     background-size: 32px 32px;
     -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
     mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+
+/* ---------- Fundo animado (névoa Vanta.js), atrás da grade e de todo o conteúdo ---------- */
+
+#fundo-fog {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
 }
 
 
@@ -138,7 +152,7 @@ header::after {
 
 .shadow-lg,
 .shadow-md {
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.06) inset !important;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55), 0 0 22px -8px var(--accent-glow), 0 0 0 1px rgba(148, 163, 184, 0.06) inset !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -147,7 +161,59 @@ header::after {
 
 .shadow-lg:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--accent-soft) inset !important;
+    box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.6), 0 0 28px -6px var(--accent-soft), 0 0 0 1px var(--accent-soft) inset !important;
+}
+
+
+/* ---------- Bordas com vida: cards, tiles internos, divisórias e áreas de upload ----------
+   O cinza-700 da paleta é quase igual ao fundo dos cards (gray-800), então a borda
+   sumia. Aqui elas ganham um tom ciano discreto; o brilho aparece ao passar o mouse.
+   Seletores mais específicos que as classes do Tailwind, então dispensam !important.
+   Não afeta a área de impressão (#doc-printable-area usa border-gray-300/200). */
+
+.bg-gray-800.border-gray-700 {
+    border-color: var(--border-card);
+}
+
+.bg-gray-800.border-gray-700.shadow-lg:hover {
+    border-color: var(--border-card-hover);
+}
+
+.border-gray-700\/60,
+.border-gray-700\/50 {
+    border-color: var(--border-tile);
+    box-shadow: 0 0 14px -6px var(--accent-glow);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.border-gray-700\/60:hover {
+    border-color: var(--accent-soft);
+    box-shadow: 0 0 18px -3px var(--accent-soft);
+}
+
+/* Linha separadora dentro dos tiles (ex.: "📌 Agilidade: ...") */
+
+.border-t.border-gray-600\/50 {
+    border-color: var(--border-divider);
+}
+
+.border-b.border-gray-700,
+.border-b.border-gray-700\/60,
+.border-r.border-gray-700 {
+    border-color: var(--border-divider);
+}
+
+.border-dashed:hover {
+    box-shadow: 0 0 20px -4px var(--accent-soft);
+}
+
+
+/* Campos: a borda acende junto com o anel de foco */
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--accent);
 }
 
 
@@ -204,12 +270,599 @@ button:focus-visible {
 }
 
 
+/* ---------- Pop-up de novidades: entrada leve (evento único, não repetitivo) ---------- */
+
+.novidades-pop {
+    animation: novidades-in 0.25s ease-out;
+}
+
+@keyframes novidades-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* ---------- Cores e Glow das Abas (estilo cyberpunk) ---------- */
+
+.tab-btn {
+    position: relative;
+    overflow: visible;
+    border-width: 1.5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-btn::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+
+/* Classes de cor para cada aba (inativa) com borda sutil */
+
+.tab-emerald:not(.text-gray-950) {
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.tab-emerald:not(.text-gray-950):hover {
+    border-color: #34d399;
+    background-color: rgba(16, 185, 129, 0.15);
+}
+
+.tab-emerald::before {
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.3), transparent 70%);
+}
+
+.tab-emerald:hover::before {
+    opacity: 1;
+}
+
+.tab-cyan:not(.text-gray-950) {
+    color: #22d3ee;
+    border-color: rgba(6, 182, 212, 0.4);
+}
+
+.tab-cyan:not(.text-gray-950):hover {
+    border-color: #22d3ee;
+    background-color: rgba(6, 182, 212, 0.15);
+}
+
+.tab-cyan::before {
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.3), transparent 70%);
+}
+
+.tab-cyan:hover::before {
+    opacity: 1;
+}
+
+.tab-blue:not(.text-gray-950) {
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.tab-blue:not(.text-gray-950):hover {
+    border-color: #60a5fa;
+    background-color: rgba(59, 130, 246, 0.15);
+}
+
+.tab-blue::before {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent 70%);
+}
+
+.tab-blue:hover::before {
+    opacity: 1;
+}
+
+.tab-indigo:not(.text-gray-950) {
+    color: #818cf8;
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.tab-indigo:not(.text-gray-950):hover {
+    border-color: #818cf8;
+    background-color: rgba(99, 102, 241, 0.15);
+}
+
+.tab-indigo::before {
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent 70%);
+}
+
+.tab-indigo:hover::before {
+    opacity: 1;
+}
+
+.tab-purple:not(.text-gray-950) {
+    color: #c084fc;
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+.tab-purple:not(.text-gray-950):hover {
+    border-color: #c084fc;
+    background-color: rgba(168, 85, 247, 0.15);
+}
+
+.tab-purple::before {
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent 70%);
+}
+
+.tab-purple:hover::before {
+    opacity: 1;
+}
+
+.tab-rose:not(.text-gray-950) {
+    color: #fb7185;
+    border-color: rgba(244, 63, 94, 0.4);
+}
+
+.tab-rose:not(.text-gray-950):hover {
+    border-color: #fb7185;
+    background-color: rgba(244, 63, 94, 0.15);
+}
+
+.tab-rose::before {
+    background: radial-gradient(circle, rgba(244, 63, 94, 0.3), transparent 70%);
+}
+
+.tab-rose:hover::before {
+    opacity: 1;
+}
+
+.tab-amber:not(.text-gray-950) {
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.tab-amber:not(.text-gray-950):hover {
+    border-color: #fbbf24;
+    background-color: rgba(245, 158, 11, 0.15);
+}
+
+.tab-amber::before {
+    background: radial-gradient(circle, rgba(251, 146, 60, 0.3), transparent 70%);
+}
+
+.tab-amber:hover::before {
+    opacity: 1;
+}
+
+.tab-sky:not(.text-gray-950) {
+    color: #38bdf8;
+    border-color: rgba(14, 165, 233, 0.4);
+}
+
+.tab-sky:not(.text-gray-950):hover {
+    border-color: #38bdf8;
+    background-color: rgba(14, 165, 233, 0.15);
+}
+
+.tab-sky::before {
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.3), transparent 70%);
+}
+
+.tab-sky:hover::before {
+    opacity: 1;
+}
+
+.tab-violet:not(.text-gray-950) {
+    color: #a78bfa;
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
+.tab-violet:not(.text-gray-950):hover {
+    border-color: #a78bfa;
+    background-color: rgba(139, 92, 246, 0.15);
+}
+
+.tab-violet::before {
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.3), transparent 70%);
+}
+
+.tab-violet:hover::before {
+    opacity: 1;
+}
+
+.tab-teal:not(.text-gray-950) {
+    color: #2dd4bf;
+    border-color: rgba(20, 184, 166, 0.4);
+}
+
+.tab-teal:not(.text-gray-950):hover {
+    border-color: #2dd4bf;
+    background-color: rgba(20, 184, 166, 0.15);
+}
+
+.tab-teal::before {
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.3), transparent 70%);
+}
+
+.tab-teal:hover::before {
+    opacity: 1;
+}
+
+.tab-fuchsia:not(.text-gray-950) {
+    color: #e879f9;
+    border-color: rgba(217, 70, 239, 0.4);
+}
+
+.tab-fuchsia:not(.text-gray-950):hover {
+    border-color: #e879f9;
+    background-color: rgba(217, 70, 239, 0.15);
+}
+
+.tab-fuchsia::before {
+    background: radial-gradient(circle, rgba(232, 121, 249, 0.3), transparent 70%);
+}
+
+.tab-fuchsia:hover::before {
+    opacity: 1;
+}
+
+.tab-lime:not(.text-gray-950) {
+    color: #a3e635;
+    border-color: rgba(132, 204, 22, 0.4);
+}
+
+.tab-lime:not(.text-gray-950):hover {
+    border-color: #a3e635;
+    background-color: rgba(132, 204, 22, 0.15);
+}
+
+.tab-lime::before {
+    background: radial-gradient(circle, rgba(132, 204, 22, 0.3), transparent 70%);
+}
+
+.tab-lime:hover::before {
+    opacity: 1;
+}
+
+.tab-green:not(.text-gray-950) {
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.tab-green:not(.text-gray-950):hover {
+    border-color: #4ade80;
+    background-color: rgba(34, 197, 94, 0.15);
+}
+
+.tab-green::before {
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.3), transparent 70%);
+}
+
+.tab-green:hover::before {
+    opacity: 1;
+}
+
+.tab-orange:not(.text-gray-950) {
+    color: #fb923c;
+    border-color: rgba(249, 115, 22, 0.4);
+}
+
+.tab-orange:not(.text-gray-950):hover {
+    border-color: #fb923c;
+    background-color: rgba(249, 115, 22, 0.15);
+}
+
+.tab-orange::before {
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.3), transparent 70%);
+}
+
+.tab-orange:hover::before {
+    opacity: 1;
+}
+
+.tab-red:not(.text-gray-950) {
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.tab-red:not(.text-gray-950):hover {
+    border-color: #f87171;
+    background-color: rgba(239, 68, 68, 0.15);
+}
+
+.tab-red::before {
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.3), transparent 70%);
+}
+
+.tab-red:hover::before {
+    opacity: 1;
+}
+
+
+/* Glow ATIVO (quando a aba está selecionada) — intenso e realístico */
+
+.glow-emerald {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.25), inset 0 0 15px rgba(16, 185, 129, 0.2), 0 0 0 1px rgba(16, 185, 129, 0.6);
+}
+
+.glow-cyan {
+    border-color: #22d3ee !important;
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(34, 211, 238, 0.25), inset 0 0 15px rgba(34, 211, 238, 0.2), 0 0 0 1px rgba(34, 211, 238, 0.6);
+}
+
+.glow-blue {
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.25), inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(59, 130, 246, 0.6);
+}
+
+.glow-indigo {
+    border-color: #818cf8 !important;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.25), inset 0 0 15px rgba(99, 102, 241, 0.2), 0 0 0 1px rgba(99, 102, 241, 0.6);
+}
+
+.glow-purple {
+    border-color: #c084fc !important;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.25), inset 0 0 15px rgba(168, 85, 247, 0.2), 0 0 0 1px rgba(168, 85, 247, 0.6);
+}
+
+.glow-rose {
+    border-color: #fb7185 !important;
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.5), 0 0 40px rgba(244, 63, 94, 0.25), inset 0 0 15px rgba(244, 63, 94, 0.2), 0 0 0 1px rgba(244, 63, 94, 0.6);
+}
+
+.glow-amber {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 20px rgba(251, 146, 60, 0.5), 0 0 40px rgba(251, 146, 60, 0.25), inset 0 0 15px rgba(251, 146, 60, 0.2), 0 0 0 1px rgba(251, 146, 60, 0.6);
+}
+
+.glow-sky {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.5), 0 0 40px rgba(56, 189, 248, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.2), 0 0 0 1px rgba(56, 189, 248, 0.6);
+}
+
+.glow-violet {
+    border-color: #a78bfa !important;
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.5), 0 0 40px rgba(167, 139, 250, 0.25), inset 0 0 15px rgba(167, 139, 250, 0.2), 0 0 0 1px rgba(167, 139, 250, 0.6);
+}
+
+.glow-teal {
+    border-color: #2dd4bf !important;
+    box-shadow: 0 0 20px rgba(20, 184, 166, 0.5), 0 0 40px rgba(20, 184, 166, 0.25), inset 0 0 15px rgba(20, 184, 166, 0.2), 0 0 0 1px rgba(20, 184, 166, 0.6);
+}
+
+.glow-fuchsia {
+    border-color: #e879f9 !important;
+    box-shadow: 0 0 20px rgba(232, 121, 249, 0.5), 0 0 40px rgba(232, 121, 249, 0.25), inset 0 0 15px rgba(232, 121, 249, 0.2), 0 0 0 1px rgba(232, 121, 249, 0.6);
+}
+
+.glow-lime {
+    border-color: #a3e635 !important;
+    box-shadow: 0 0 20px rgba(132, 204, 22, 0.5), 0 0 40px rgba(132, 204, 22, 0.25), inset 0 0 15px rgba(132, 204, 22, 0.2), 0 0 0 1px rgba(132, 204, 22, 0.6);
+}
+
+.glow-green {
+    border-color: #4ade80 !important;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.25), inset 0 0 15px rgba(34, 197, 94, 0.2), 0 0 0 1px rgba(34, 197, 94, 0.6);
+}
+
+.glow-orange {
+    border-color: #fb923c !important;
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.5), 0 0 40px rgba(249, 115, 22, 0.25), inset 0 0 15px rgba(249, 115, 22, 0.2), 0 0 0 1px rgba(249, 115, 22, 0.6);
+}
+
+.glow-red {
+    border-color: #f87171 !important;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.25), inset 0 0 15px rgba(239, 68, 68, 0.2), 0 0 0 1px rgba(239, 68, 68, 0.6);
+}
+
+
+/* Menu drawer mobile responsivo */
+
+/* Abaixo de 1024px (breakpoint lg do Tailwind) o menu de abas some e entra o hambúrguer.
+   Só o #menu-nav: o #drawer-nav também fica dentro do header e não pode ser escondido. */
+
+@media (max-width: 1023px) {
+    #menu-nav {
+        display: none !important;
+    }
+}
+
+
+/* Animação do drawer mobile */
+
+#mobile-drawer {
+    animation: drawer-fade 0.3s ease;
+}
+
+@keyframes drawer-fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+#drawer-nav {
+    animation: drawer-slide 0.3s ease;
+}
+
+@keyframes drawer-slide {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+
 /* ---------- Removidos os spinners nativos dos inputs numéricos ---------- */
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+
+/* ---------- Botão flutuante "não clique" (leva à página psicodélica) ---------- */
+
+.troll-btn {
+    position: fixed;
+    left: 14px;
+    bottom: 14px;
+    z-index: 30;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    text-decoration: none;
+    background: rgba(18, 27, 46, 0.9);
+    border: 1px solid var(--border-card);
+    box-shadow: 0 0 14px -4px var(--accent-glow);
+    opacity: 0.6;
+    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.troll-btn:hover,
+.troll-btn:focus-visible {
+    opacity: 1;
+    transform: scale(1.12) rotate(90deg);
+    border-color: var(--border-card-hover);
+    box-shadow: 0 0 20px -2px var(--accent-soft);
+}
+
+.troll-label {
+    position: absolute;
+    left: 46px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 11px;
+    color: #DCE4F5;
+    background: rgba(18, 27, 46, 0.95);
+    border: 1px solid var(--border-card);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.troll-btn:hover .troll-label,
+.troll-btn:focus-visible .troll-label {
+    opacity: 1;
+}
+
+@media print {
+    .troll-btn,
+    .viagem {
+        display: none !important;
+    }
+}
+
+
+/* ---------- Modo Viagem: camada psicodélica em tela cheia (abre pelo botão flutuante) ---------- */
+
+:root {
+    --viagem-bg: #05030f;
+}
+
+.troll-btn {
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.viagem {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--viagem-bg);
+    overflow: hidden;
+}
+
+#viagem-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: none;
+    touch-action: none;
+}
+
+.viagem-bar {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem;
+    max-width: calc(100vw - 1rem);
+    border-radius: 0.9rem;
+    background: rgba(11, 17, 32, 0.72);
+    border: 1px solid var(--border-card);
+    backdrop-filter: blur(8px);
+    transition: opacity 0.5s ease;
+}
+
+.viagem-bar.oculta,
+.viagem-dica.oculta {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.viagem-btn {
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.6rem;
+    border: 1px solid var(--border-card);
+    background: rgba(34, 211, 238, 0.14);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.viagem-btn:hover,
+.viagem-btn:focus-visible {
+    background: rgba(34, 211, 238, 0.25);
+    box-shadow: 0 0 16px -2px var(--accent);
+}
+
+.viagem-btn.ativo {
+    background: rgba(34, 211, 238, 0.3);
+    box-shadow: 0 0 14px -2px var(--accent);
+}
+
+.viagem-sair {
+    background: transparent;
+    color: #A9B6DA;
+    border-color: rgba(127, 140, 176, 0.35);
+}
+
+.viagem-dica {
+    position: absolute;
+    top: 0.8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 1rem;
+    font-size: 0.78rem;
+    text-align: center;
+    color: rgba(220, 228, 245, 0.7);
+    text-shadow: 0 0 8px #000;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
 }
 
 

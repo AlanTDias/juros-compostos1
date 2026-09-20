@@ -1,7 +1,573 @@
 let myChart = null;
 
-// Função executada ao carregar a página
-window.onload = function() {
+// ==========================================
+// CARREGAMENTO SOB DEMANDA DE BIBLIOTECAS
+// ==========================================
+// Libs pesadas (PDF, Word, Excel...) só são baixadas quando a função que as usa é acionada.
+// Chart.js continua no index.html porque a calculadora inicial depende dele.
+// Novas libs: registrar aqui E liberar o domínio na CSP do index.html.
+const LIBS_SOB_DEMANDA = {
+    pdflib: { src: 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js', pronta: () => window.PDFLib },
+    pdfjs: {
+        src: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+        pronta: () => window.pdfjsLib,
+        aoCarregar: () => {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    },
+    docx: { src: 'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js', pronta: () => window.docx },
+    xlsx: { src: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js', pronta: () => window.XLSX },
+    mammoth: { src: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js', pronta: () => window.mammoth },
+    html2pdf: { src: 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', pronta: () => window.html2pdf },
+    qrcode: { src: 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', pronta: () => window.QRCode },
+    // Fundo animado (Vanta.js "fog"): o Vanta precisa do three.js (r134) já carregado
+    three: { src: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js', pronta: () => window.THREE },
+    vantafog: { src: 'https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js', pronta: () => window.VANTA && window.VANTA.FOG }
+};
+const libsEmCarga = {};
+
+function carregarLib(nome) {
+    const lib = LIBS_SOB_DEMANDA[nome];
+    if (!lib) return Promise.reject(new Error(`Biblioteca desconhecida: ${nome}`));
+    if (lib.pronta()) return Promise.resolve();
+    if (!libsEmCarga[nome]) {
+        libsEmCarga[nome] = new Promise((resolve, reject) => {
+            const tag = document.createElement('script');
+            tag.src = lib.src;
+            tag.crossOrigin = 'anonymous';
+            tag.referrerPolicy = 'no-referrer';
+            tag.onload = () => {
+                if (lib.aoCarregar) lib.aoCarregar();
+                resolve();
+            };
+            tag.onerror = () => {
+                delete libsEmCarga[nome]; // permite tentar de novo depois
+                reject(new Error('Não foi possível carregar uma biblioteca necessária. Verifique sua conexão e tente novamente.'));
+            };
+            document.head.appendChild(tag);
+        });
+    }
+    return libsEmCarga[nome];
+}
+
+function carregarLibs(...nomes) {
+    return Promise.all(nomes.map(carregarLib));
+}
+
+// ==========================================
+// FUNDO ANIMADO: névoa (Vanta.js "fog") nas cores navy + ciano do site
+// ==========================================
+// Carrega depois do site já estar utilizável e falha em silêncio (sem WebGL/CDN o site segue
+// com o fundo normal). Fica no <div id="fundo-fog"> (fixo, atrás de tudo). O Modo Viagem
+// pausa o efeito enquanto está aberto para não gastar GPU à toa.
+let fogEfeito = null;
+
+async function iniciarFog() {
+    const el = document.getElementById('fundo-fog');
+    if (!el || fogEfeito) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; // respeita quem pede menos movimento
+    try {
+        await carregarLib('three');
+        await carregarLib('vantafog');
+        if (fogEfeito) return; // outra chamada já criou enquanto carregava
+        fogEfeito = VANTA.FOG({
+            el,
+            mouseControls: false,
+            touchControls: false,
+            gyroControls: false,
+            minHeight: 200,
+            minWidth: 200,
+            highlightColor: 0x0e7490, // ciano escuro (luzes da névoa)
+            midtoneColor: 0x123a63,   // azul navy (tons médios)
+            lowlightColor: 0x0b1120,  // navy profundo (sombras)
+            baseColor: 0x05070e,      // fundo quase preto-azulado
+            blurFactor: 0.3,          // "blur em 30%": névoa mais definida que o padrão do Vanta (0.6)
+            speed: 1.0,
+            zoom: 1.0
+        });
+    } catch (erro) {
+        console.warn('Fundo animado indisponível:', erro && erro.message);
+    }
+}
+
+function pararFog() {
+    if (fogEfeito) {
+        fogEfeito.destroy();
+        fogEfeito = null;
+    }
+}
+
+window.addEventListener('load', () => setTimeout(iniciarFog, 400));
+
+// ==========================================
+// CONFIGURAÇÃO DE ABAS COM CORES
+// ==========================================
+const abas = [
+    { id: 'home', nome: 'Início', color: 'emerald' },
+    { id: 'juros-compostos', nome: 'Juros Compostos', color: 'cyan' },
+    { id: 'reserva', nome: 'Reserva', color: 'blue' },
+    { id: 'milhao', nome: 'Rumo ao Milhão', color: 'indigo' },
+    { id: 'financiamento', nome: 'Imóvel', color: 'purple' },
+    { id: 'veiculos', nome: 'Veículos', color: 'rose' },
+    { id: 'amortizacao', nome: 'Amortização', color: 'amber' },
+    { id: 'alugar-comprar', nome: 'Alugar vs Comp.', color: 'sky' },
+    { id: 'comparador', nome: 'À Vista vs Parc.', color: 'violet' },
+    { id: 'fgts', nome: 'FGTS', color: 'teal' },
+    { id: 'rescisao-clt', nome: 'Rescisão CLT', color: 'fuchsia' },
+    { id: 'documentos', nome: 'Gerador Docs', color: 'lime' },
+    { id: 'conversores', nome: 'Conversores', color: 'green' },
+    { id: 'foto-video', nome: 'Foto & Vídeo', color: 'orange' },
+    { id: 'qrcode', nome: 'QR-Code', color: 'red' }
+];
+
+// Ícones das abas: SVG inline (traço herdando a cor do texto via currentColor), sem depender de CDN.
+const ICONES_ABAS = {
+    'home': '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+    'juros-compostos': '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+    'reserva': '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+    'milhao': '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    'financiamento': '<path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/>',
+    'veiculos': '<path d="M5 16l1.5-5a2 2 0 0 1 2-1.5h7a2 2 0 0 1 2 1.5L19 16"/><rect x="3" y="16" width="18" height="4" rx="1"/><path d="M7 18h.01M17 18h.01"/>',
+    'amortizacao': '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+    'alugar-comprar': '<path d="M12 3v18"/><path d="M6 21h12"/><path d="M4 7h16"/><path d="M6 7l-3 7a3 3 0 0 0 6 0z"/><path d="M18 7l-3 7a3 3 0 0 0 6 0z"/>',
+    'comparador': '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1 0-2-.5-2.5-1.5"/><path d="M12 6v2M12 16v2"/>',
+    'fgts': '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M3 13h18"/>',
+    'rescisao-clt': '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
+    'documentos': '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    'conversores': '<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
+    'foto-video': '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5-9 9"/>',
+    'qrcode': '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 20h3v-3"/>'
+};
+
+function iconeAba(id, px) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">${ICONES_ABAS[id] || ''}</svg>`;
+}
+
+// Classes-base dos botões de aba (menu superior compacto e drawer mobile); usadas também em switchTab().
+function classeBaseAba(cor, noDrawer) {
+    return noDrawer
+        ? `tab-btn tab-${cor} p-3 rounded-lg w-full text-left flex items-center gap-2 transition-all duration-200`
+        : `tab-btn tab-${cor} px-2 py-1 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 text-center h-8`;
+}
+
+// Renderizar abas dinamicamente
+function renderMenuTabs() {
+    const menuNav = document.getElementById('menu-nav');
+    const drawerNav = document.getElementById('drawer-nav');
+
+    menuNav.innerHTML = abas.map(aba => `
+        <button onclick="switchTab('${aba.id}')" id="btn-${aba.id}" 
+            class="${classeBaseAba(aba.color, false)}"
+            title="${aba.nome}">
+            ${iconeAba(aba.id, 14)}
+            <span class="text-[11px] font-semibold leading-tight whitespace-nowrap">${aba.nome}</span>
+        </button>
+    `).join('');
+
+    drawerNav.innerHTML = `<button onclick="closeMobileMenu()" class="self-end text-gray-400 hover:text-gray-100 text-2xl leading-none mb-4">✕</button>` + abas.map(aba => `
+        <button onclick="switchTab('${aba.id}'); closeMobileMenu();" 
+            class="${classeBaseAba(aba.color, true)}"
+            title="${aba.nome}">
+            ${iconeAba(aba.id, 18)}
+            <span class="font-semibold">${aba.nome}</span>
+        </button>
+    `).join('');
+}
+
+function toggleMobileMenu() {
+    const drawer = document.getElementById('mobile-drawer');
+    drawer.classList.toggle('hidden');
+}
+
+function closeMobileMenu() {
+    const drawer = document.getElementById('mobile-drawer');
+    drawer.classList.add('hidden');
+}
+
+// Botão flutuante "não clique": a legenda muda a cada passada do mouse (a "trolagem")
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('troll-btn');
+    const label = document.getElementById('troll-label');
+    if (!btn || !label) return;
+
+    const frases = ['não clique', 'sério, não clique', 'você foi avisado', 'último aviso...', 'ok, você pediu 🌀'];
+    let i = 0;
+    const proxima = () => { label.innerText = frases[Math.min(i, frases.length - 1)]; i++; };
+    btn.addEventListener('mouseenter', proxima);
+    btn.addEventListener('focus', proxima);
+});
+
+// ==========================================
+// MODO VIAGEM: efeitos psicodélicos que reagem ao mouse/toque (rede neural, fluxo e caleidoscópio)
+// Tudo dentro de uma IIFE; só abrirViagem() e fecharViagem() ficam globais (usadas pelo HTML).
+// ==========================================
+(function () {
+    const overlay = document.getElementById('viagem');
+    const canvas = document.getElementById('viagem-canvas');
+    if (!overlay || !canvas) return;
+    const ctx = canvas.getContext('2d');
+    const bar = document.getElementById('viagem-bar');
+    const dica = document.getElementById('viagem-dica');
+    const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const velocidadeGlobal = reduzMovimento ? 0.4 : 1; // quem pede menos movimento recebe tudo mais devagar
+    const FUNDO = '#05030f'; // mesmo valor de --viagem-bg no style.css
+
+    let W = 0, H = 0, dpr = 1;
+    let modo = 'neural';
+    let rodando = false;
+    let rafId = 0;
+    let t = 0;
+    let velCores = 1; // multiplicador da troca de cor
+    let timerBarra = null;
+
+    // ---------- Ponteiro (mouse/toque) com piloto automático quando parado ----------
+    const ponteiro = { x: 0, y: 0, ativo: false, ultimaAtividade: 0 };
+
+    function moverPonteiro(x, y) {
+        ponteiro.x = x;
+        ponteiro.y = y;
+        ponteiro.ativo = true;
+        ponteiro.ultimaAtividade = performance.now();
+    }
+
+    // Se ninguém mexe no mouse por 3s, um "fantasma" desenha uma figura de Lissajous
+    function pilotoAutomatico(agora) {
+        if (agora - ponteiro.ultimaAtividade < 3000) return;
+        const s = agora / 1000 * 0.6;
+        ponteiro.x = W / 2 + Math.sin(s * 1.3) * W * 0.32;
+        ponteiro.y = H / 2 + Math.sin(s * 1.9 + 1) * H * 0.3;
+        ponteiro.ativo = true;
+    }
+
+    // ---------- Ondas de choque (clique/toque) ----------
+    const ondas = [];
+    function novaOnda(x, y) {
+        ondas.push({ x, y, r: 0, vida: 1 });
+    }
+
+    // ---------- Efeito 1: rede neural ----------
+    let nos = [];
+    let pulsos = [];
+    const DIST_LIGACAO = 140;
+    const DIST_MOUSE = 220;
+
+    function iniciarNeural() {
+        const n = Math.max(40, Math.min(150, Math.floor((W * H) / 14000)));
+        nos = [];
+        pulsos = [];
+        for (let i = 0; i < n; i++) {
+            nos.push({
+                x: Math.random() * W, y: Math.random() * H,
+                vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
+                hue: Math.random() * 360, r: 1.5 + Math.random() * 2
+            });
+        }
+    }
+
+    function desenharNeural() {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(5, 3, 15, 0.2)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'lighter';
+
+        for (const n of nos) {
+            const dx = ponteiro.x - n.x, dy = ponteiro.y - n.y;
+            const d = Math.hypot(dx, dy) || 1;
+            if (ponteiro.ativo && d < DIST_MOUSE) {
+                const f = (1 - d / DIST_MOUSE) * 0.08;
+                n.vx += (dx / d) * f + (-dy / d) * f * 0.8; // atrai e faz girar em volta
+                n.vy += (dy / d) * f + (dx / d) * f * 0.8;
+            }
+            for (const o of ondas) {
+                const ox = n.x - o.x, oy = n.y - o.y, od = Math.hypot(ox, oy) || 1;
+                if (Math.abs(od - o.r) < 40) { n.vx += (ox / od) * 0.9 * o.vida; n.vy += (oy / od) * 0.9 * o.vida; }
+            }
+            const v = Math.hypot(n.vx, n.vy), vmax = 2.4;
+            if (v > vmax) { n.vx *= vmax / v; n.vy *= vmax / v; }
+            n.vx *= 0.995; n.vy *= 0.995;
+            n.x += n.vx * velocidadeGlobal; n.y += n.vy * velocidadeGlobal;
+            if (n.x < 0 || n.x > W) { n.vx *= -1; n.x = Math.max(0, Math.min(W, n.x)); }
+            if (n.y < 0 || n.y > H) { n.vy *= -1; n.y = Math.max(0, Math.min(H, n.y)); }
+            n.hue = (n.hue + 0.15 * velCores) % 360;
+        }
+
+        const ligacoes = [];
+        ctx.lineWidth = 1;
+        for (let i = 0; i < nos.length; i++) {
+            for (let j = i + 1; j < nos.length; j++) {
+                const a = nos[i], b = nos[j];
+                const d = Math.hypot(a.x - b.x, a.y - b.y);
+                if (d < DIST_LIGACAO) {
+                    const alpha = 1 - d / DIST_LIGACAO;
+                    ctx.strokeStyle = `hsla(${(a.hue + b.hue) / 2}, 95%, 60%, ${alpha * 0.55})`;
+                    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+                    ligacoes.push([i, j]);
+                }
+            }
+        }
+
+        // o ponteiro é um "neurônio" que se liga aos nós próximos
+        if (ponteiro.ativo) {
+            for (const n of nos) {
+                const d = Math.hypot(ponteiro.x - n.x, ponteiro.y - n.y);
+                if (d < DIST_MOUSE) {
+                    ctx.strokeStyle = `hsla(${n.hue}, 100%, 70%, ${(1 - d / DIST_MOUSE) * 0.9})`;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.moveTo(ponteiro.x, ponteiro.y); ctx.lineTo(n.x, n.y); ctx.stroke();
+                }
+            }
+            const g = ctx.createRadialGradient(ponteiro.x, ponteiro.y, 0, ponteiro.x, ponteiro.y, 40);
+            g.addColorStop(0, `hsla(${t * 40 % 360}, 100%, 70%, 0.9)`);
+            g.addColorStop(1, 'transparent');
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.arc(ponteiro.x, ponteiro.y, 40, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // pulsos de "sinapse" viajando pelas ligações
+        if (ligacoes.length && pulsos.length < 90 && Math.random() < 0.5) {
+            const [i, j] = ligacoes[(Math.random() * ligacoes.length) | 0];
+            pulsos.push({ de: i, para: j, p: 0, vel: 0.02 + Math.random() * 0.03 });
+        }
+        for (let k = pulsos.length - 1; k >= 0; k--) {
+            const s = pulsos[k];
+            const a = nos[s.de], b = nos[s.para];
+            s.p += s.vel * velocidadeGlobal;
+            if (s.p >= 1) {
+                const viz = ligacoes.filter(l => l[0] === s.para || l[1] === s.para);
+                if (viz.length && Math.random() < 0.85) {
+                    const l = viz[(Math.random() * viz.length) | 0];
+                    s.de = s.para; s.para = l[0] === s.para ? l[1] : l[0]; s.p = 0;
+                } else { pulsos.splice(k, 1); }
+                continue;
+            }
+            const x = a.x + (b.x - a.x) * s.p, y = a.y + (b.y - a.y) * s.p;
+            const g = ctx.createRadialGradient(x, y, 0, x, y, 9);
+            g.addColorStop(0, `hsla(${a.hue}, 100%, 85%, 1)`);
+            g.addColorStop(1, 'transparent');
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.fill();
+        }
+
+        for (const n of nos) {
+            ctx.fillStyle = `hsla(${n.hue}, 100%, 65%, 0.95)`;
+            ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+
+    // ---------- Efeito 2: campo de fluxo ----------
+    let particulas = [];
+
+    function iniciarFluxo() {
+        const n = Math.max(500, Math.min(2200, Math.floor((W * H) / 900)));
+        particulas = [];
+        for (let i = 0; i < n; i++) particulas.push({ x: Math.random() * W, y: Math.random() * H, px: 0, py: 0, vida: Math.random() * 200 });
+    }
+
+    function campo(x, y) {
+        const s = 0.0022;
+        return Math.sin(x * s + t * 0.4) + Math.cos(y * s * 1.3 - t * 0.3) + Math.sin((x + y) * s * 0.6 + t * 0.2);
+    }
+
+    function desenharFluxo() {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(5, 3, 15, 0.09)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.lineWidth = 1.2;
+
+        for (const p of particulas) {
+            p.px = p.x; p.py = p.y;
+            const a = campo(p.x, p.y) * Math.PI;
+            let vx = Math.cos(a) * 1.6, vy = Math.sin(a) * 1.6;
+
+            if (ponteiro.ativo) {
+                const dx = p.x - ponteiro.x, dy = p.y - ponteiro.y, d = Math.hypot(dx, dy) || 1;
+                if (d < 260) {
+                    const f = (1 - d / 260);
+                    vx += (-dy / d) * f * 5 + (dx / d) * f * 1.2; // redemoinho em volta do ponteiro
+                    vy += (dx / d) * f * 5 + (dy / d) * f * 1.2;
+                }
+            }
+            for (const o of ondas) {
+                const dx = p.x - o.x, dy = p.y - o.y, d = Math.hypot(dx, dy) || 1;
+                if (Math.abs(d - o.r) < 50) { vx += (dx / d) * 6 * o.vida; vy += (dy / d) * 6 * o.vida; }
+            }
+
+            p.x += vx * velocidadeGlobal; p.y += vy * velocidadeGlobal; p.vida--;
+            const hue = (a * 60 + t * 30 * velCores + p.x * 0.05) % 360;
+            ctx.strokeStyle = `hsla(${hue}, 95%, 60%, 0.55)`;
+            ctx.beginPath(); ctx.moveTo(p.px, p.py); ctx.lineTo(p.x, p.y); ctx.stroke();
+
+            if (p.vida < 0 || p.x < -10 || p.x > W + 10 || p.y < -10 || p.y > H + 10) {
+                p.x = Math.random() * W; p.y = Math.random() * H; p.px = p.x; p.py = p.y; p.vida = 100 + Math.random() * 200;
+            }
+        }
+    }
+
+    // ---------- Efeito 3: caleidoscópio ----------
+    const caleido = { x: 0, y: 0, px: 0, py: 0, ok: false };
+    const SEGMENTOS = 8;
+
+    function desenharCaleido() {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(5, 3, 15, 0.07)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'lighter';
+
+        // o ponto desenhado segue o ponteiro suavemente (relativo ao centro)
+        const alvoX = ponteiro.x - W / 2, alvoY = ponteiro.y - H / 2;
+        if (!caleido.ok) { caleido.x = caleido.px = alvoX; caleido.y = caleido.py = alvoY; caleido.ok = true; }
+        caleido.px = caleido.x; caleido.py = caleido.y;
+        caleido.x += (alvoX - caleido.x) * 0.15;
+        caleido.y += (alvoY - caleido.y) * 0.15;
+
+        const vel = Math.hypot(caleido.x - caleido.px, caleido.y - caleido.py);
+        ctx.lineWidth = 1 + Math.min(6, vel * 0.25);
+        ctx.lineCap = 'round';
+        const giro = t * 0.05 * velocidadeGlobal;
+
+        for (let k = 0; k < SEGMENTOS; k++) {
+            for (let espelho = 0; espelho < 2; espelho++) {
+                ctx.save();
+                ctx.translate(W / 2, H / 2);
+                ctx.rotate(k * (Math.PI * 2 / SEGMENTOS) + giro);
+                if (espelho) ctx.scale(1, -1);
+                ctx.strokeStyle = `hsla(${(t * 40 * velCores + k * 25 + vel * 3) % 360}, 100%, 62%, 0.7)`;
+                ctx.beginPath(); ctx.moveTo(caleido.px, caleido.py); ctx.lineTo(caleido.x, caleido.y); ctx.stroke();
+                ctx.fillStyle = `hsla(${(t * 40 * velCores + k * 25 + 180) % 360}, 100%, 75%, 0.5)`;
+                ctx.beginPath(); ctx.arc(caleido.x, caleido.y, 1.5 + vel * 0.1, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            }
+        }
+        for (const o of ondas) {
+            // no caleidoscópio a onda vira um anel colorido
+            ctx.strokeStyle = `hsla(${(o.r * 0.6 + t * 40) % 360}, 100%, 65%, ${o.vida * 0.6})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); ctx.stroke();
+        }
+    }
+
+    // ---------- Loop principal ----------
+    function passo(agora) {
+        t += 0.016 * velocidadeGlobal;
+        pilotoAutomatico(agora);
+
+        if (modo === 'neural') desenharNeural();
+        else if (modo === 'fluxo') desenharFluxo();
+        else desenharCaleido();
+
+        // ondas de choque: expandem e somem (comum aos três efeitos)
+        for (let i = ondas.length - 1; i >= 0; i--) {
+            ondas[i].r += 12; ondas[i].vida -= 0.02;
+            if (ondas[i].vida <= 0) ondas.splice(i, 1);
+        }
+        // cursor personalizado: um anel que acompanha o ponteiro
+        ctx.globalCompositeOperation = 'source-over';
+        if (ponteiro.ativo) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(ponteiro.x, ponteiro.y, 10, 0, Math.PI * 2); ctx.stroke();
+        }
+    }
+
+    function quadro(agora) {
+        if (!rodando) return;
+        passo(agora);
+        rafId = requestAnimationFrame(quadro);
+    }
+
+    function trocarModo(novo) {
+        modo = novo;
+        caleido.ok = false;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = FUNDO;
+        ctx.fillRect(0, 0, W, H);
+        if (novo === 'neural') iniciarNeural();
+        if (novo === 'fluxo') iniciarFluxo();
+        overlay.querySelectorAll('[data-viagem-modo]').forEach(b => b.classList.toggle('ativo', b.dataset.viagemModo === novo));
+    }
+
+    function redimensionar() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = window.innerWidth; H = window.innerHeight;
+        canvas.width = W * dpr; canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.fillStyle = FUNDO; ctx.fillRect(0, 0, W, H);
+        if (modo === 'neural') iniciarNeural();
+        if (modo === 'fluxo') iniciarFluxo();
+    }
+
+    // barra de controles some quando o mouse fica parado
+    function mostrarBarra() {
+        bar.classList.remove('oculta');
+        clearTimeout(timerBarra);
+        timerBarra = setTimeout(() => bar.classList.add('oculta'), 3500);
+    }
+
+    function alternarCores() { velCores = velCores === 1 ? 6 : (velCores === 6 ? 0 : 1); }
+
+    function alternarTelaCheia() {
+        if (!document.fullscreenElement) {
+            if (overlay.requestFullscreen) overlay.requestFullscreen().catch(() => {});
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+
+    // ---------- Abrir / fechar ----------
+    window.abrirViagem = function () {
+        if (rodando) return;
+        pararFog();
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        rodando = true;
+        t = 0;
+        ondas.length = 0;
+        redimensionar();
+        moverPonteiro(W / 2, H / 2);
+        ponteiro.ativo = false;
+        trocarModo('neural');
+        dica.classList.remove('oculta');
+        setTimeout(() => dica.classList.add('oculta'), 6000);
+        mostrarBarra();
+        rafId = requestAnimationFrame(quadro);
+    };
+
+    window.fecharViagem = function () {
+        if (!rodando) return;
+        rodando = false;
+        cancelAnimationFrame(rafId);
+        clearTimeout(timerBarra);
+        if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+        iniciarFog();
+    };
+
+    // ---------- Entradas ----------
+    canvas.addEventListener('pointermove', e => moverPonteiro(e.clientX, e.clientY));
+    canvas.addEventListener('pointerdown', e => { moverPonteiro(e.clientX, e.clientY); novaOnda(e.clientX, e.clientY); });
+    overlay.addEventListener('pointermove', mostrarBarra);
+    window.addEventListener('resize', () => { if (rodando) redimensionar(); });
+    window.addEventListener('keydown', e => {
+        if (!rodando) return;
+        if (e.key === '1') trocarModo('neural');
+        else if (e.key === '2') trocarModo('fluxo');
+        else if (e.key === '3') trocarModo('caleido');
+        else if (e.key.toLowerCase() === 'f') alternarTelaCheia();
+        else if (e.key.toLowerCase() === 'c') alternarCores();
+        else if (e.key === 'Escape' && !document.fullscreenElement) window.fecharViagem();
+    });
+    overlay.querySelectorAll('[data-viagem-modo]').forEach(b => b.addEventListener('click', () => trocarModo(b.dataset.viagemModo)));
+    document.getElementById('viagem-cores').addEventListener('click', alternarCores);
+    document.getElementById('viagem-tela').addEventListener('click', alternarTelaCheia);
+})();
+
+// Função existente adaptada para renderizar com cores
+
+window.addEventListener('load', function() {
+    renderMenuTabs();
+
     // Aplica a máscara de moeda a todos os inputs monetários
     document.querySelectorAll('.input-moeda').forEach(input => {
         if (input.value) {
@@ -21,7 +587,50 @@ window.onload = function() {
     calculateJC();
     fetchMarketIndicators();
     updateFooterAndCounter();
-};
+});
+
+// ==========================================
+// POP-UP DE NOVIDADES (exibe só até a data definida abaixo)
+// ==========================================
+
+// Data limite: depois dela, o pop-up nunca mais aparece, nem para visitante novo.
+// Formato 'AAAA-MM-DDT00:00:00' — ajuste aqui se quiser prorrogar/encerrar antes.
+const NOVIDADES_EXPIRA_EM = new Date('2026-10-09T00:00:00');
+const NOVIDADES_STORAGE_KEY = 'excalc_novidades_2026_10_vistas';
+
+function fecharNovidades() {
+    const overlay = document.getElementById('novidades-overlay');
+    if (overlay) overlay.classList.add('hidden');
+    try {
+        localStorage.setItem(NOVIDADES_STORAGE_KEY, '1');
+    } catch (e) {
+        // localStorage pode estar bloqueado (modo privado); tudo bem, só não vai lembrar na próxima visita.
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('novidades-overlay');
+    if (!overlay) return;
+
+    const dentroDoPrazo = new Date() < NOVIDADES_EXPIRA_EM;
+
+    let jaViu = false;
+    try {
+        jaViu = localStorage.getItem(NOVIDADES_STORAGE_KEY) === '1';
+    } catch (e) {
+        jaViu = false;
+    }
+
+    if (dentroDoPrazo && !jaViu) {
+        overlay.classList.remove('hidden');
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
+            fecharNovidades();
+        }
+    });
+});
 
 // ==========================================
 // FUNÇÃO DE SEGURANÇA CONTRA XSS (ATUALIZADA)
@@ -46,16 +655,28 @@ function getVal(id) {
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+    // Remove estilos ativos de todas as abas — mantém a classe de cor original
     document.querySelectorAll('.tab-btn').forEach(el => {
-        el.classList.remove('bg-emerald-500', 'text-gray-950', 'font-bold');
-        el.classList.add('text-gray-300', 'hover:bg-gray-700');
+        const colorClass = Array.from(el.classList).find(c => c.startsWith('tab-') && c !== 'tab-btn');
+        el.className = classeBaseAba(colorClass.replace('tab-', ''), !!el.closest('#drawer-nav'));
+        el.classList.remove('glow-emerald', 'glow-cyan', 'glow-blue', 'glow-indigo', 'glow-purple',
+            'glow-rose', 'glow-amber', 'glow-sky', 'glow-violet', 'glow-teal',
+            'glow-fuchsia', 'glow-lime', 'glow-green', 'glow-orange', 'glow-red',
+            'bg-emerald-500', 'bg-cyan-500', 'bg-blue-500', 'bg-indigo-500', 'bg-purple-500',
+            'bg-rose-500', 'bg-amber-500', 'bg-sky-500', 'bg-violet-500', 'bg-teal-500',
+            'bg-fuchsia-500', 'bg-lime-500', 'bg-green-500', 'bg-orange-500', 'bg-red-500',
+            'text-gray-950', 'font-bold');
     });
 
+    // Mostra o conteúdo ativo
     document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+    // Aplica estilo ativo à aba selecionada com a cor correta + glow + borda vibrante
+    let abaInfo = abas.find(a => a.id === tabId);
     let activeBtn = document.getElementById(`btn-${tabId}`);
-    if (activeBtn) {
-        activeBtn.classList.remove('text-gray-300', 'hover:bg-gray-700');
-        activeBtn.classList.add('bg-emerald-500', 'text-gray-950', 'font-bold');
+    if (activeBtn && abaInfo) {
+        activeBtn.classList.add(`bg-${abaInfo.color}-500`, 'text-gray-950', 'font-bold', `glow-${abaInfo.color}`);
     }
 
     if (tabId === 'juros-compostos') calculateJC();
@@ -79,6 +700,9 @@ async function fetchMarketIndicators() {
     const dolarEl = document.getElementById('ind-dolar');
     const poupancaEl = document.getElementById('ind-poupanca');
 
+    // Indicadores que conseguiram atualizar; os demais ficam com o valor padrão e recebem aviso "estimado".
+    const atualizados = new Set();
+
     // valores padrão
     selicEl.innerText = "14.00% a.a.";
     cdiEl.innerText = "13.90% a.a.";
@@ -92,6 +716,7 @@ async function fetchMarketIndicators() {
         if (dataDolar && dataDolar.USDBRL) {
             let dolarValue = parseFloat(dataDolar.USDBRL.bid);
             dolarEl.innerText = dolarValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            atualizados.add(dolarEl);
         }
     } catch (error) {
         console.warn("Aviso: Não foi possível atualizar o dólar em tempo real.");
@@ -102,6 +727,7 @@ async function fetchMarketIndicators() {
         let dataSelic = await resSelic.json();
         if (dataSelic && dataSelic[0] && dataSelic[0].valor) {
             selicEl.innerText = `${parseFloat(dataSelic[0].valor).toFixed(2)}% a.a.`;
+            atualizados.add(selicEl);
         }
     } catch (error) {
         console.warn("Aviso: Não foi possível atualizar a Selic.");
@@ -112,6 +738,7 @@ async function fetchMarketIndicators() {
         let dataCdi = await resCdi.json();
         if (dataCdi && dataCdi[0] && dataCdi[0].valor) {
             cdiEl.innerText = `${parseFloat(dataCdi[0].valor).toFixed(2)}% a.a.`;
+            atualizados.add(cdiEl);
         }
     } catch (error) {
         console.warn("Aviso: Não foi possível atualizar o CDI.");
@@ -122,6 +749,7 @@ async function fetchMarketIndicators() {
         let dataIpca = await resIpca.json();
         if (dataIpca && dataIpca[0] && dataIpca[0].valor) {
             ipcaEl.innerText = `${parseFloat(dataIpca[0].valor).toFixed(2)}% a.a.`;
+            atualizados.add(ipcaEl);
         }
     } catch (error) {
         console.warn("Aviso: Não foi possível atualizar o IPCA.");
@@ -134,16 +762,71 @@ async function fetchMarketIndicators() {
             let mensal = parseFloat(dataPoupanca[0].valor) / 100;
             let anual = (Math.pow(1 + mensal, 12) - 1) * 100;
             poupancaEl.innerText = `${anual.toFixed(2)}% a.a.`;
+            atualizados.add(poupancaEl);
         }
     } catch (error) {
         console.warn("Aviso: Não foi possível atualizar a poupança.");
     }
+
+    [selicEl, cdiEl, ipcaEl, dolarEl, poupancaEl].forEach(el => {
+        if (!atualizados.has(el)) {
+            el.innerText += ' ⚠️ estimado';
+            el.title = 'Não foi possível buscar o valor em tempo real; exibindo estimativa.';
+        }
+    });
 
     let hoje = new Date();
     dateSpan.innerText = `Atualizado em: ${hoje.toLocaleDateString('pt-BR')} às ${hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
 // 1. Juros Compostos
+let jcCronograma = [];
+let jcViewMode = 'monthly';
+
+function setJCView(mode) {
+    jcViewMode = mode;
+    renderJCTable();
+}
+
+// Linha do tempo: só números gerados pelo cálculo entram no innerHTML (nenhum texto do usuário).
+function renderJCTable() {
+    const brl = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const corpo = document.getElementById('jc-tabela-corpo');
+    if (!corpo) return;
+
+    const ativo = 'px-3 py-1.5 rounded-md font-medium transition-all bg-emerald-500 text-gray-950 font-bold';
+    const inativo = 'px-3 py-1.5 rounded-md font-medium transition-all text-gray-400 hover:text-white';
+    document.getElementById('jc-view-monthly').className = jcViewMode === 'monthly' ? ativo : inativo;
+    document.getElementById('jc-view-yearly').className = jcViewMode === 'yearly' ? ativo : inativo;
+    document.getElementById('jc-th-periodo').innerText = jcViewMode === 'monthly' ? 'Mês' : 'Ano';
+
+    let linhas = [];
+    if (jcViewMode === 'monthly') {
+        linhas = jcCronograma.map(r => ({ periodo: `Mês ${r.month}`, aporte: r.aporte, juros: r.juros, r }));
+    } else {
+        // Anual: soma aportes e juros do ano; saldos vêm do último mês do ano
+        const porAno = new Map();
+        jcCronograma.forEach(r => {
+            const acc = porAno.get(r.year) || { periodo: `Ano ${r.year}`, aporte: 0, juros: 0, r };
+            acc.aporte += r.aporte;
+            acc.juros += r.juros;
+            acc.r = r;
+            porAno.set(r.year, acc);
+        });
+        linhas = Array.from(porAno.values());
+    }
+
+    corpo.innerHTML = linhas.map((l, i) => `
+        <tr class="${i % 2 === 0 ? 'bg-gray-800' : 'bg-gray-900/40'} hover:bg-gray-700/50 transition-colors">
+            <td class="p-3 font-semibold text-emerald-400">${l.periodo}</td>
+            <td class="p-3">${brl(l.aporte)}</td>
+            <td class="p-3 text-emerald-400">+${brl(l.juros)}</td>
+            <td class="p-3">${brl(l.r.totalInvestido)}</td>
+            <td class="p-3 text-emerald-400">${brl(l.r.totalJuros)}</td>
+            <td class="p-3 text-right font-bold text-white">${brl(l.r.saldo)}</td>
+        </tr>`).join('');
+}
+
 function calculateJC() {
     let p = getVal('jc-initial');
     let pmt = getVal('jc-monthly');
@@ -160,11 +843,22 @@ function calculateJC() {
     let labels = ['Início'];
     let dataTotal = [p];
     let dataInvested = [p];
+    jcCronograma = [];
 
     for (let month = 1; month <= totalMonths; month++) {
         let interestEarned = currentTotal * monthlyRate;
         currentTotal += interestEarned + pmt;
         totalInvested += pmt;
+
+        jcCronograma.push({
+            month: month,
+            year: Math.ceil(month / 12),
+            aporte: pmt,
+            juros: interestEarned,
+            totalInvestido: totalInvested,
+            totalJuros: currentTotal - totalInvested,
+            saldo: currentTotal
+        });
 
         if (month % 12 === 0 || month === totalMonths) {
             labels.push(`Ano ${Math.ceil(month/12)}`);
@@ -174,6 +868,8 @@ function calculateJC() {
     }
 
     let totalJuros = currentTotal - totalInvested;
+
+    renderJCTable();
 
     document.getElementById('jc-res-investido').innerText = totalInvested.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('jc-res-juros').innerText = totalJuros.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -748,6 +1444,15 @@ async function convertFile() {
     updateStatus(statusEl, "⏳ Processando arquivo...", true);
 
     try {
+        const libsNecessarias = [];
+        if (ext === 'docx') libsNecessarias.push('mammoth');
+        if (['xlsx', 'xls', 'csv'].includes(ext)) libsNecessarias.push('xlsx');
+        if (ext === 'json' && ['csv', 'xlsx'].includes(targetFormat)) libsNecessarias.push('xlsx');
+        if (ext === 'pdf') libsNecessarias.push('pdfjs');
+        if (targetFormat === 'pdf') libsNecessarias.push('html2pdf');
+        if (targetFormat === 'docx') libsNecessarias.push('docx');
+        await carregarLibs(...libsNecessarias);
+
         if (ext === 'docx') {
             if (targetFormat === 'pdf') await convertDocxToPdf(file, statusEl);
             else if (targetFormat === 'txt') await convertDocxToTxt(file, statusEl);
@@ -1245,6 +1950,7 @@ async function compressPDF() {
     statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem] animate-pulse";
 
     try {
+        await carregarLibs('pdfjs', 'pdflib');
         const arrayBuffer = await file.arrayBuffer();
         const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         const newPdfDoc = await PDFLib.PDFDocument.create();
@@ -1275,7 +1981,12 @@ async function compressPDF() {
         }
 
         const compressedBytes = await newPdfDoc.save();
-        const finalBlob = new Blob([compressedBytes], { type: 'application/pdf' });
+        let finalBlob = new Blob([compressedBytes], { type: 'application/pdf' });
+
+        // Reconverter as páginas em imagem pode aumentar PDFs que já eram leves (só texto/vetor).
+        // Nesse caso, entrega o original em vez de um arquivo maior.
+        const jaOtimizado = finalBlob.size >= initialSize;
+        if (jaOtimizado) finalBlob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const finalSize = finalBlob.size;
 
         const savedPercent = (((initialSize - finalSize) / initialSize) * 100).toFixed(1);
@@ -1292,7 +2003,9 @@ async function compressPDF() {
         URL.revokeObjectURL(downloadUrl);
 
         statusEl.className = "text-xs text-center text-emerald-400 mt-3 min-h-[1rem]";
-        statusEl.innerText = `✅ Concluído! De ${originalMB}MB para ${finalMB}MB (${savedPercent}% de redução).`;
+        statusEl.innerText = jaOtimizado
+            ? `ℹ️ Este PDF já é leve (${originalMB}MB): comprimir aumentaria o arquivo, então o original foi mantido.`
+            : `✅ Concluído! De ${originalMB}MB para ${finalMB}MB (${savedPercent}% de redução).`;
 
     } catch (error) {
         console.error(error);
@@ -1310,7 +2023,7 @@ function updateFooterAndCounter() {
 
 // ==================== 1. GERADOR DE QR CODE ====================
 
-function generateQRCode() {
+async function generateQRCode() {
     const input = document.getElementById('qr-input').value;
     const size = parseInt(document.getElementById('qr-size').value, 10);
     const container = document.getElementById('qr-code-container');
@@ -1319,6 +2032,13 @@ function generateQRCode() {
 
     if (!input.trim()) {
         alert('Por favor, insira um texto ou URL.');
+        return;
+    }
+
+    try {
+        await carregarLib('qrcode');
+    } catch (error) {
+        alert(error.message);
         return;
     }
 
@@ -1630,6 +2350,7 @@ async function loadPdfForEditing(file) {
     updateStatus(statusEl, "⏳ Carregando PDF...", true);
 
     try {
+        await carregarLibs('pdfjs', 'pdflib');
         pdfEditOriginalBytes = await file.arrayBuffer();
         // pdfjsLib consome o buffer; usamos uma cópia para não afetar os bytes originais salvos
         pdfEditDoc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfEditOriginalBytes.slice(0)) }).promise;
@@ -1648,8 +2369,23 @@ async function loadPdfForEditing(file) {
     }
 }
 
+// Evita "Cannot use the same canvas during multiple render() operations" ao trocar de página
+// rápido: cada chamada ganha um número, a anterior é cancelada e chamadas antigas são descartadas.
+let pdfEditRenderSeq = 0;
+let pdfEditRenderTask = null;
+
 async function renderPdfEditPage(pageNum) {
+    const seq = ++pdfEditRenderSeq;
+
+    if (pdfEditRenderTask) {
+        pdfEditRenderTask.cancel();
+        try { await pdfEditRenderTask.promise; } catch (e) { /* cancelamento esperado */ }
+        pdfEditRenderTask = null;
+    }
+
     const page = await pdfEditDoc.getPage(pageNum);
+    if (seq !== pdfEditRenderSeq) return; // uma chamada mais nova já assumiu
+
     const viewport = page.getViewport({ scale: pdfEditRenderScale });
     pdfEditCurrentViewport = viewport;
 
@@ -1658,7 +2394,16 @@ async function renderPdfEditPage(pageNum) {
     canvas.height = viewport.height;
     const ctx = canvas.getContext('2d');
 
-    await page.render({ canvasContext: ctx, viewport }).promise;
+    const task = page.render({ canvasContext: ctx, viewport });
+    pdfEditRenderTask = task;
+    try {
+        await task.promise;
+    } catch (e) {
+        if (e && e.name === 'RenderingCancelledException') return;
+        throw e;
+    }
+    if (pdfEditRenderTask === task) pdfEditRenderTask = null;
+    if (seq !== pdfEditRenderSeq) return;
 
     canvas.onclick = onPdfEditCanvasClick;
 
@@ -1681,8 +2426,23 @@ function pdfEditNextPage() {
 }
 
 function pdfEditClearPage() {
+    const statusEl = document.getElementById('status-pdfedit');
+    const wrapper = document.getElementById('pdfedit-canvas-wrapper');
+
+    // Descarta uma caixa de digitação ainda aberta (esvazia antes: remover dispara o blur, que confirmaria o texto)
+    wrapper.querySelectorAll('.pdfedit-temp-input').forEach(box => {
+        const campo = box.querySelector('textarea');
+        if (campo) campo.value = '';
+        box.remove();
+    });
+
+    const quantidade = (pdfEditAnnotations[pdfEditCurrentPage] || []).length;
     pdfEditAnnotations[pdfEditCurrentPage] = [];
     renderPdfEditOverlays();
+
+    statusEl.innerText = quantidade
+        ? `🗑️ ${quantidade} anotação(ões) removida(s) desta página.`
+        : 'Não há anotações nesta página para limpar.';
 }
 
 function onPdfEditCanvasClick(event) {
@@ -1703,26 +2463,44 @@ function openPdfEditInlineInput(clickX, clickY) {
     const fontSize = parseInt(document.getElementById('pdfedit-fontsize').value) || 12;
     const color = document.getElementById('pdfedit-color').value;
 
+    // Caixa móvel: uma alça "✥ mover" em cima e o textarea embaixo
+    const box = document.createElement('div');
+    box.className = 'pdfedit-temp-input absolute z-10';
+    box.style.left = `${clickX}px`;
+    box.style.top = `${clickY}px`;
+
+    const handle = document.createElement('div');
+    handle.textContent = '✥ mover';
+    handle.className = 'bg-emerald-500 text-gray-950 text-[10px] font-bold px-1.5 py-0.5 rounded-t select-none w-max';
+
     const input = document.createElement('textarea');
-    input.className = 'pdfedit-temp-input absolute z-10 bg-white/90 border-2 border-emerald-500 rounded px-1 py-0.5 outline-none resize';
-    input.style.left = `${clickX}px`;
-    input.style.top = `${clickY}px`;
+    input.className = 'block bg-white/90 border-2 border-emerald-500 rounded-b rounded-tr px-1 py-0.5 outline-none resize';
     input.style.fontSize = `${fontSize}px`;
     input.style.color = color;
     input.style.minWidth = '120px';
     input.rows = 1;
-    wrapper.appendChild(input);
+
+    box.appendChild(handle);
+    box.appendChild(input);
+    wrapper.appendChild(box);
+    makePdfEditDraggable(box, handle);
     input.focus();
 
+    let finalizado = false;
     const commit = () => {
+        if (finalizado) return;
+        finalizado = true;
         const text = input.value;
-        input.remove();
+        // Posição final = onde a caixa foi parar (o texto fica no topo do textarea)
+        const finalX = parseFloat(box.style.left) || 0;
+        const finalY = (parseFloat(box.style.top) || 0) + input.offsetTop;
+        box.remove();
         if (!text || !text.trim()) return;
 
         const canvas = document.getElementById('pdfedit-canvas');
         const annotation = {
-            xRatio: clickX / canvas.width,
-            yRatio: clickY / canvas.height,
+            xRatio: finalX / canvas.width,
+            yRatio: finalY / canvas.height,
             text: text,
             fontSize: fontSize,
             color: color
@@ -1739,11 +2517,92 @@ function openPdfEditInlineInput(clickX, clickY) {
             commit();
         } else if (e.key === 'Escape') {
             input.value = '';
-            input.remove();
+            commit();
         }
     });
     input.addEventListener('blur', commit);
 }
+
+// Arrasta `el` (posicionado com left/top em px dentro do wrapper) segurando `handle`.
+function makePdfEditDraggable(el, handle, onDrop) {
+    handle.style.cursor = 'move';
+    handle.style.touchAction = 'none';
+    // Impede que clicar na alça tire o foco do textarea (o blur confirmaria/cancelaria o texto)
+    handle.addEventListener('mousedown', e => e.preventDefault());
+
+    handle.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const canvas = document.getElementById('pdfedit-canvas');
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const origLeft = parseFloat(el.style.left) || 0;
+        const origTop = parseFloat(el.style.top) || 0;
+        handle.setPointerCapture(e.pointerId);
+
+        const move = ev => {
+            el.style.left = `${Math.min(Math.max(0, origLeft + ev.clientX - startX), canvas.width - 20)}px`;
+            el.style.top = `${Math.min(Math.max(0, origTop + ev.clientY - startY), canvas.height - 20)}px`;
+        };
+        const up = () => {
+            handle.removeEventListener('pointermove', move);
+            handle.removeEventListener('pointerup', up);
+            handle.removeEventListener('pointercancel', up);
+            if (onDrop) onDrop(parseFloat(el.style.left) || 0, parseFloat(el.style.top) || 0);
+        };
+        handle.addEventListener('pointermove', move);
+        handle.addEventListener('pointerup', up);
+        handle.addEventListener('pointercancel', up);
+    });
+}
+
+// Modo tela cheia: o workspace vai para o <body> (fora do card, cujo hover usa transform e
+// quebraria o position:fixed) e ocupa a janela inteira; ao fechar, volta ao lugar original.
+let pdfEditFsPlaceholder = null;
+
+function togglePdfEditFullscreen() {
+    const workspace = document.getElementById('pdfedit-workspace');
+    const wrapper = document.getElementById('pdfedit-canvas-wrapper');
+    const btn = document.getElementById('pdfedit-fs-btn');
+    const dlBtn = document.getElementById('pdfedit-fs-download');
+    const abrindo = !pdfEditFsPlaceholder;
+
+    if (abrindo) {
+        pdfEditFsPlaceholder = document.createComment('pdfedit-workspace');
+        workspace.parentNode.insertBefore(pdfEditFsPlaceholder, workspace);
+        document.body.appendChild(workspace);
+        workspace.classList.add('fixed', 'inset-0', 'bg-gray-900', 'p-4', 'overflow-auto');
+        workspace.style.zIndex = '100';
+        wrapper.style.maxHeight = 'calc(100vh - 150px)';
+        // Centraliza o documento na janela
+        wrapper.style.display = 'block';
+        wrapper.style.width = 'fit-content';
+        wrapper.style.maxWidth = '100%';
+        wrapper.style.margin = '0 auto';
+        document.body.style.overflow = 'hidden';
+    } else {
+        pdfEditFsPlaceholder.parentNode.insertBefore(workspace, pdfEditFsPlaceholder);
+        pdfEditFsPlaceholder.remove();
+        pdfEditFsPlaceholder = null;
+        workspace.classList.remove('fixed', 'inset-0', 'bg-gray-900', 'p-4', 'overflow-auto');
+        workspace.style.zIndex = '';
+        wrapper.style.maxHeight = '';
+        wrapper.style.display = '';
+        wrapper.style.width = '';
+        wrapper.style.maxWidth = '';
+        wrapper.style.margin = '';
+        document.body.style.overflow = '';
+    }
+    btn.innerText = abrindo ? '✕ Sair da tela cheia' : '⛶ Tela cheia';
+    dlBtn.classList.toggle('hidden', !abrindo);
+}
+
+document.addEventListener('keydown', e => {
+    // Esc sai da tela cheia (se estiver digitando numa caixa, o Esc só cancela o texto)
+    if (e.key === 'Escape' && pdfEditFsPlaceholder && !document.querySelector('.pdfedit-temp-input')) {
+        togglePdfEditFullscreen();
+    }
+});
 
 function renderPdfEditOverlays() {
     const wrapper = document.getElementById('pdfedit-canvas-wrapper');
@@ -1774,6 +2633,18 @@ function renderPdfEditOverlays() {
             renderPdfEditOverlays();
         };
 
+        // Alça para reposicionar o texto já colocado
+        const moveHandle = document.createElement('span');
+        moveHandle.textContent = '✥';
+        moveHandle.title = 'Arraste para mover';
+        moveHandle.className = 'align-top mr-1 text-emerald-500 text-xs opacity-40 group-hover:opacity-100 transition select-none';
+        makePdfEditDraggable(box, moveHandle, (x, y) => {
+            ann.xRatio = x / canvas.width;
+            ann.yRatio = y / canvas.height;
+            renderPdfEditOverlays();
+        });
+
+        box.appendChild(moveHandle);
         box.appendChild(textSpan);
         box.appendChild(removeBtn);
         wrapper.appendChild(box);
@@ -1806,6 +2677,7 @@ async function downloadEditedPdf() {
     updateStatus(statusEl, "⏳ Gerando PDF com as anotações...", true);
 
     try {
+        await carregarLib('pdflib');
         const pdfDoc = await PDFLib.PDFDocument.load(pdfEditOriginalBytes);
         const helvetica = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
         const pages = pdfDoc.getPages();
@@ -1874,6 +2746,7 @@ async function mergePDFs() {
     updateStatus(statusEl, "⏳ Unindo arquivos PDF...", true);
 
     try {
+        await carregarLib('pdflib');
         const mergedPdf = await PDFLib.PDFDocument.create();
 
         for (let i = 0; i < fileInput.files.length; i++) {
@@ -1927,6 +2800,7 @@ async function splitPDF() {
     updateStatus(statusEl, "⏳ Dividindo e extraindo páginas...", true);
 
     try {
+        await carregarLib('pdflib');
         const file = fileInput.files[0];
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await PDFLib.PDFDocument.load(arrayBuffer);

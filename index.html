@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="favicon.png">
+    <!-- Favicon: SVG (nítido em qualquer tamanho) + PNG de reserva; ?v=2 força o navegador a trocar o ícone antigo -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+    <link rel="icon" type="image/png" sizes="256x256" href="favicon.png?v=2">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
     <!-- Ajuste de segurança HTTPS para forçar requisições seguras -->
     <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
@@ -65,82 +68,50 @@
 </head>
 
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+    <!-- Fundo animado (névoa Vanta.js), criado por iniciarFog() no script.js -->
+    <div id="fundo-fog" aria-hidden="true"></div>
+
+
+    <!-- 🆕 POP-UP DE NOVIDADES (some sozinho após a data definida em NOVIDADES_EXPIRA_EM) -->
+    <div id="novidades-overlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-950/70 backdrop-blur-sm" onclick="if(event.target===this) fecharNovidades()">
+        <div class="relative w-full max-w-md bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-6 novidades-pop">
+            <button onclick="fecharNovidades()" aria-label="Fechar" class="absolute top-3 right-3 text-gray-400 hover:text-gray-100 transition text-lg leading-none">✕</button>
+
+            <span class="inline-block text-[11px] font-semibold text-emerald-400 tracking-wide mb-2">✨ NOVIDADES NO EXCALC</span>
+            <h3 class="font-display text-xl font-bold text-gray-50 mb-3">O que mudou por aqui</h3>
+
+            <ul class="space-y-3 text-sm text-gray-300 mb-5">
+                <li class="flex gap-2"><span class="text-emerald-400">✍️</span> <span><strong class="text-gray-100">Escrever no PDF:</strong> clique em qualquer ponto de qualquer página do PDF e adicione texto ali — sem precisar de campo de formulário.</span></li>
+                <li class="flex gap-2"><span class="text-emerald-400">🎨</span> <span><strong class="text-gray-100">Visual novo:</strong> o site inteiro ganhou uma identidade mais técnica, com valores numéricos em fonte monoespaçada.</span></li>
+                <li class="flex gap-2"><span class="text-emerald-400">🔒</span> <span><strong class="text-gray-100">Mais segurança:</strong> correções na conversão de Excel/CSV para PDF.</span></li>
+            </ul>
+
+            <button onclick="fecharNovidades()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold p-3 rounded-lg transition text-sm">
+                Entendi, começar a usar
+            </button>
+        </div>
+    </div>
 
     <!-- 📱 MENU SUPERIOR RESPONSIVO -->
-    <header class="w-full bg-gray-800 border-b border-gray-700 relative md:sticky md:top-0 z-50 shadow-md">
+    <header class="w-full bg-gray-800 border-b border-gray-700 relative z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 pt-3">
-            <div class="flex items-center gap-2 pb-3 mb-1 border-b border-gray-700/60">
-                <span class="brand-mark" aria-hidden="true"></span>
-                <span class="font-display font-semibold text-gray-100 tracking-tight text-lg">ExCalc</span>
-                <span class="hidden sm:inline text-[11px] text-gray-400 ml-1">central de cálculo financeiro</span>
+            <div class="flex lg:hidden items-center justify-end pb-3 mb-1 border-b border-gray-700/60">
+                <!-- Botão hambúrguer (só mobile) -->
+                <button id="menu-toggle" onclick="toggleMobileMenu()" class="lg:hidden text-gray-300 hover:text-emerald-400 transition text-2xl leading-none p-1">
+                    ☰
+                </button>
             </div>
-            <nav class="grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-center lg:justify-center gap-2 w-full pb-3">
-                <button onclick="switchTab('home')" id="btn-home" class="tab-btn active p-2 rounded-lg bg-emerald-500 text-gray-950 transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Início">
-                    <span class="text-base">🏠</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Início</span>
-                </button>
-                <button onclick="switchTab('juros-compostos')" id="btn-juros-compostos" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
-                    title="Juros Compostos">
-                    <span class="text-base">📈</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Juros Compostos</span>
-                </button>
-                <button onclick="switchTab('conversores')" id="btn-conversores" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
-                    title="Conversores de Arquivos">
-                    <span class="text-base">🔄</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Conversores</span>
-                </button>
-                <button onclick="switchTab('foto-video')" id="btn-foto-video" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Foto & Vídeo">
-                    <span class="text-base">🖼️ 🎬</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Foto & Vídeo</span>
-                </button>
-                <button onclick="switchTab('reserva')" id="btn-reserva" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Reserva de Emergência">
-                    <span class="text-base">🛡️</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Reserva</span>
-                </button>
-                <button onclick="switchTab('milhao')" id="btn-milhao" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Rumo ao Milhão">
-                    <span class="text-base">🎯</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Rumo ao Milhão</span>
-                </button>
-                <button onclick="switchTab('financiamento')" id="btn-financiamento" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
-                    title="Financiamento Imobiliário">
-                    <span class="text-base">🏡</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Imóvel</span>
-                </button>
-                <button onclick="switchTab('veiculos')" id="btn-veiculos" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Financiamento de Veículos">
-                    <span class="text-base">🚗</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Veículos</span>
-                </button>
-                <button onclick="switchTab('amortizacao')" id="btn-amortizacao" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
-                    title="Amortização Extra">
-                    <span class="text-base">⚡</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Amortização</span>
-                </button>
-                <button onclick="switchTab('alugar-comprar')" id="btn-alugar-comprar" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
-                    title="Alugar vs. Comprar">
-                    <span class="text-base">⚖️</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Alugar vs Comp.</span>
-                </button>
-                <button onclick="switchTab('comparador')" id="btn-comparador" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="À Vista vs. Parcelado">
-                    <span class="text-base">💸</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">À Vista vs Parc.</span>
-                </button>
-                <button onclick="switchTab('fgts')" id="btn-fgts" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Rescisão FGTS">
-                    <span class="text-base">💼</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">FGTS</span>
-                </button>
-                <button onclick="switchTab('rescisao-clt')" id="btn-rescisao-clt" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16"
-                    title="Rescisão CLT Completa">
-                    <span class="text-base">📄</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Rescisão CLT</span>
-                </button>
-                <button onclick="switchTab('documentos')" id="btn-documentos" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Gerador de Documentos">
-                    <span class="text-base">📄</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Gerador Documentos</span>
-                </button>
-                <button onclick="switchTab('qrcode')" id="btn-qrcode" class="tab-btn p-2 rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 flex flex-col items-center justify-center gap-1 text-center h-16" title="Gerador de QR Code">
-                    <span class="text-base">📱</span>
-                    <span class="text-[10px] md:text-xs font-semibold leading-tight truncate w-full">Gerador  QR-Code</span>
-                </button>
+
+            <!-- Menu de abas (desktop normal, mobile = drawer) -->
+            <nav id="menu-nav" class="hidden lg:grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-center lg:justify-center gap-2 w-full pb-3">
+            </nav>
+        </div>
+
+        <!-- Drawer mobile (abre/fecha com hambúrguer) -->
+        <div id="mobile-drawer" class="hidden fixed inset-0 z-40 lg:hidden">
+            <div class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm" onclick="closeMobileMenu()"></div>
+            <nav id="drawer-nav" class="absolute top-0 left-0 h-full w-72 bg-gray-800 border-r border-gray-700 overflow-y-auto space-y-2 p-4 flex flex-col">
+                <button onclick="closeMobileMenu()" class="self-end text-gray-400 hover:text-gray-100 text-2xl leading-none mb-4">✕</button>
             </nav>
         </div>
     </header>
@@ -355,6 +326,36 @@
                     <div class="w-full h-56 md:h-64"><canvas id="growthChart"></canvas></div>
                 </div>
             </div>
+            <!-- 🗓️ LINHA DO TEMPO / CRONOGRAMA DETALHADO -->
+            <section class="bg-gray-800 border border-gray-700 rounded-xl p-4 md:p-6 shadow-lg">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-700 pb-3 mb-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                            <span>🗓️</span> Linha do Tempo do Investimento
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1">Acompanhe aportes e rendimentos período a período.</p>
+                    </div>
+                    <div class="inline-flex rounded-lg p-0.5 bg-gray-900 border border-gray-700 text-xs self-start sm:self-auto">
+                        <button type="button" id="jc-view-monthly" onclick="setJCView('monthly')" class="px-3 py-1.5 rounded-md font-medium transition-all">Mensal</button>
+                        <button type="button" id="jc-view-yearly" onclick="setJCView('yearly')" class="px-3 py-1.5 rounded-md font-medium transition-all">Anual</button>
+                    </div>
+                </div>
+                <div class="overflow-auto max-h-96 rounded-lg border border-gray-700">
+                    <table class="w-full text-left text-xs md:text-sm whitespace-nowrap">
+                        <thead class="bg-gray-900 text-gray-400 uppercase sticky top-0">
+                            <tr>
+                                <th id="jc-th-periodo" class="p-3">Mês</th>
+                                <th class="p-3">Aportes no Período</th>
+                                <th class="p-3">Juros no Período</th>
+                                <th class="p-3">Total Investido</th>
+                                <th class="p-3">Total em Juros</th>
+                                <th class="p-3 text-right">Saldo Acumulado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jc-tabela-corpo" class="divide-y divide-gray-700/60 text-gray-300"></tbody>
+                    </table>
+                </div>
+            </section>
             <!-- 💡 COMO FUNCIONAM OS JUROS COMPOSTOS -->
             <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
                 <div class="border-b border-gray-700 pb-3 mb-4">
@@ -595,7 +596,9 @@
                                 <input type="color" id="pdfedit-color" value="#111111" class="w-7 h-7 rounded bg-transparent border-0 cursor-pointer">
                             </label>
 
-                            <button onclick="pdfEditClearPage()" class="ml-auto bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded">🗑️ Limpar página</button>
+                            <button id="pdfedit-fs-btn" onclick="togglePdfEditFullscreen()" class="ml-auto bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded">⛶ Tela cheia</button>
+                            <button id="pdfedit-fs-download" onclick="downloadEditedPdf()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold px-3 py-1.5 rounded">⬇️ Baixar PDF</button>
+                            <button onclick="pdfEditClearPage()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded">🗑️ Limpar página</button>
                         </div>
 
                         <p class="text-[11px] text-gray-400">Clique em qualquer ponto da página abaixo para inserir um texto. Clique no "✕" de um texto já colocado para removê-lo.</p>
@@ -852,7 +855,7 @@
                             <h3 id="video-title" class="text-white font-semibold text-center text-sm md:text-base line-clamp-2">Título do Vídeo</h3>
 
                             <div class="w-full max-w-sm">
-                                <a id="video-download-btn" href="#" target="_blank" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded transition flex items-center justify-center gap-2 text-sm">
+                                <a id="video-download-btn" href="#" target="_blank" rel="noopener noreferrer" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded transition flex items-center justify-center gap-2 text-sm">
                                     <span>⬇️</span> Fazer Download Agora
                                 </a>
                             </div>
@@ -2318,24 +2321,27 @@ Gestão do plano de cargos e salários, avaliação de desempenho e mediação d
             </p>
         </div>
     </footer>
-    <!--  BIBLIOTECAS EXTERNAS (Seguras, sem duplicações) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- 🌀 Botão flutuante "não clique" -> abre a camada psicodélica (tela cheia, tudo neste arquivo) -->
+    <button type="button" id="troll-btn" onclick="abrirViagem()" class="troll-btn" aria-label="Não clique neste botão">
+        <span aria-hidden="true">🌀</span>
+        <span id="troll-label" class="troll-label">não clique</span>
+    </button>
+
+    <div id="viagem" class="viagem hidden" role="dialog" aria-modal="true" aria-label="Modo Viagem">
+        <canvas id="viagem-canvas"></canvas>
+        <div id="viagem-dica" class="viagem-dica">Mova o mouse · clique para uma onda de choque · teclas 1, 2, 3 trocam o efeito · Esc sai</div>
+        <div id="viagem-bar" class="viagem-bar" role="toolbar" aria-label="Controles do Modo Viagem">
+            <button type="button" class="viagem-btn" data-viagem-modo="neural">🕸️ Neural</button>
+            <button type="button" class="viagem-btn" data-viagem-modo="fluxo">🌊 Fluxo</button>
+            <button type="button" class="viagem-btn" data-viagem-modo="caleido">🔮 Caleidoscópio</button>
+            <button type="button" class="viagem-btn" id="viagem-cores" title="Alterna a velocidade de troca de cores">🎨 Cores</button>
+            <button type="button" class="viagem-btn" id="viagem-tela">⛶ Tela cheia</button>
+            <button type="button" class="viagem-btn viagem-sair" onclick="fecharViagem()">✕ Sair</button>
+        </div>
+    </div>
+    <!-- BIBLIOTECAS EXTERNAS: só o Chart.js carrega de início. PDF/Word/Excel/QR são carregados sob demanda por carregarLib() no script.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script type="module" crossorigin="anonymous">
-        import imglyRemoveBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm';
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="script.js"></script>
 </body>
 
