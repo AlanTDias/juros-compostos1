@@ -131,16 +131,8 @@
     </div>
 
     <!-- 📱 MENU SUPERIOR RESPONSIVO -->
-    <header class="w-full bg-gray-800 border-b border-gray-700 relative z-50 shadow-md">
+    <header class="hidden lg:block w-full bg-gray-800 border-b border-gray-700 relative z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 pt-3">
-            <div class="flex lg:hidden items-center justify-end pb-3 mb-1 border-b border-gray-700/60">
-
-                <!-- Botão hambúrguer (só mobile) -->
-                <button id="menu-toggle" onclick="toggleMobileMenu()" class="lg:hidden text-gray-300 hover:text-emerald-400 transition text-2xl leading-none p-1">
-                    ☰
-                </button>
-            </div>
-
             <!-- Menu de abas (desktop normal, mobile = drawer) -->
             <nav id="menu-nav" class="hidden lg:grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-center lg:justify-center gap-2 w-full pb-3">
             </nav>
@@ -159,7 +151,10 @@
     <!-- 💻 CONTEÚDO PRINCIPAL -->
     <main id="conteudo" tabindex="-1" class="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
         <!-- Seletor de tema em "vidro líquido" (escuro, claro, vidro): logo abaixo do menu, à direita -->
-        <div class="flex justify-end md:-mt-4 -mb-2">
+        <div class="flex items-center justify-between lg:justify-end lg:-mt-4 -mb-2">
+        <button id="menu-toggle" type="button" onclick="toggleMobileMenu()" class="menu-hamb" aria-label="Abrir menu" aria-controls="mobile-drawer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
         <div id="tema-switch" class="tema-switch" role="radiogroup" aria-label="Tema do site" data-ativo="escuro">
                             <span class="tema-thumb" aria-hidden="true"></span>
                             <label class="tema-op" title="Tema escuro">
@@ -416,7 +411,19 @@
         </div>
         <div class="mapa-corpo">
             <svg id="mapa-svg" class="mapa-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Área do mapa">
-                <g id="mapa-raiz"><g id="mapa-ligacoes"></g><g id="mapa-caixas"></g><g id="mapa-temp" class="mapa-temp"></g></g>
+                <defs>
+                    <pattern id="mapa-grade-pat" width="24" height="24" patternUnits="userSpaceOnUse"><circle class="mapa-grade-ponto" cx="1" cy="1" r="1"/></pattern>
+                    <!-- Lente: o que está atrás da caixa aparece desfocado e ampliado (região em coordenadas locais da caixa) -->
+                    <filter id="mapa-lente" filterUnits="userSpaceOnUse" x="-16" y="-16" width="222" height="210" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="2.6"/><feColorMatrix type="saturate" values="1.35"/></filter>
+                    <!-- Aro de luz: forte em cima e embaixo, quase apagado nas laterais (como o realce do shader) -->
+                    <linearGradient id="mapa-aro" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" class="mapa-aro-luz" style="stop-opacity:0.95"/>
+                        <stop offset="0.28" class="mapa-aro-luz" style="stop-opacity:0.16"/>
+                        <stop offset="0.72" class="mapa-aro-luz" style="stop-opacity:0.16"/>
+                        <stop offset="1" class="mapa-aro-luz" style="stop-opacity:0.7"/>
+                    </linearGradient>
+                </defs>
+                <g id="mapa-raiz"><g id="mapa-fundo"><rect class="mapa-grade" x="-20000" y="-20000" width="40000" height="40000" fill="url(#mapa-grade-pat)"/><g id="mapa-ligacoes"></g></g><g id="mapa-caixas"></g><g id="mapa-temp" class="mapa-temp"></g></g>
             </svg>
             <textarea id="mapa-editor" class="mapa-editor" hidden aria-label="Texto da caixa" spellcheck="false"></textarea>
             <div class="mapa-zoom" role="group" aria-label="Zoom">
@@ -435,8 +442,8 @@
         <input type="file" id="mapa-arquivo" accept=".json,application/json" hidden>
     </div>
     <!-- Scripts: só o que esta página usa. O núcleo (core.js) vem primeiro. -->
-    <script src="js/core.js?v=dd972cc8"></script>
-    <script src="js/financeiro.js?v=dd972cc8"></script>
+    <script src="js/core.js?v=ac880f92"></script>
+    <script src="js/financeiro.js?v=ac880f92"></script>
 </body>
 
 </html>

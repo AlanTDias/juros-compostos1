@@ -170,14 +170,38 @@
         }
     }
 
-    function desenharNo(n) {
+    // Contorno da caixa: retângulo de cantos arredondados (raio 14), como a forma original do mapa
+    const contornos = {};
+    function contorno(w, h) {
+        const chave = w + 'x' + h;
+        if (contornos[chave]) return contornos[chave];
+        const r = 14;
+        return (contornos[chave] = `M${r},0 H${w - r} A${r},${r} 0 0 1 ${w},${r} V${h - r} A${r},${r} 0 0 1 ${w - r},${h} H${r} A${r},${r} 0 0 1 0,${h - r} V${r} A${r},${r} 0 0 1 ${r},0 Z`);
+    }
+    // A caixa é uma LENTE de vidro: o que está atrás (grade e ligações) aparece desfocado e levemente ampliado dentro dela,
+    // com um aro de luz em cima e embaixo. Com muitas caixas a lente é desligada (fica só o vidro), para não pesar.
+    const LIMITE_LENTE = 80;
+
+    function desenharNo(n, comLente) {
         const linhas = linhasDoNo(n), h = alturaNo(n), cor = corDoDep(n.dep);
         const escolhido = sel && sel.tipo === 'no' && sel.id === n.id;
         const g = el('g', {
             class: 'mapa-no' + (escolhido ? ' sel' : '') + (origemLigar === n.id ? ' origem' : ''),
             'data-no': n.id, transform: `translate(${n.x},${n.y})`
         }, gNos);
-        el('rect', { class: 'corpo', width: LARGURA, height: h, rx: 14 }, g);
+        const d = contorno(LARGURA, h), idClip = 'mapa-c-' + n.id;
+        el('path', { d }, el('clipPath', { id: idClip }, el('defs', {}, g)));
+        if (comLente) {
+            const cx = n.x + LARGURA / 2, cy = n.y + h / 2;
+            const lente = el('g', { 'clip-path': `url(#${idClip})`, class: 'lente' }, g);
+            const filtrado = el('g', { filter: 'url(#mapa-lente)' }, lente);
+            const mundo = el('g', { transform: `translate(${-n.x},${-n.y}) translate(${cx},${cy}) scale(1.07) translate(${-cx},${-cy})` }, filtrado);
+            el('use', { href: '#mapa-fundo' }, mundo);
+        }
+        el('path', { d, class: 'vidro' }, g);
+        el('path', { d, class: 'brilho-interno', 'clip-path': `url(#${idClip})` }, g);
+        el('path', { d, class: 'contorno' }, g);
+        el('path', { d, class: 'aro' }, g);
         linhas.forEach((t, i) => { if (t) el('text', { x: 18, y: 27 + i * 18, class: 'titulo' }, g).textContent = t; });
         if (n.dep) {
             const dep = departamento(n.dep), yDep = 29 + linhas.length * 18;
@@ -186,12 +210,12 @@
         }
         el('circle', { class: 'alca', 'data-alca': n.id, cx: LARGURA, cy: h / 2, r: 8 }, g);
     }
-
     function desenhar() {
         gLig.replaceChildren();
         gNos.replaceChildren();
         estado.ligacoes.forEach(desenharLigacao);
-        estado.nos.forEach(desenharNo);
+        const comLente = estado.nos.length <= LIMITE_LENTE;
+        estado.nos.forEach(n => desenharNo(n, comLente));
     }
 
     function agendar() {
@@ -204,8 +228,6 @@
 
     function aplicarVista() {
         gRaiz.setAttribute('transform', `translate(${vista.x},${vista.y}) scale(${vista.k})`);
-        svg.style.backgroundSize = `${24 * vista.k}px ${24 * vista.k}px`;
-        svg.style.backgroundPosition = `${vista.x}px ${vista.y}px`;
     }
 
     // ---------- Vista: zoom, pan, ajustar ----------

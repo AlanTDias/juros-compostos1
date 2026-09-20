@@ -1547,28 +1547,6 @@ html[data-tema="claro"] .bg-gray-600:not(#doc-printable-area *) {
     box-shadow: inset 2px -2px 1px -1px var(--vidro-realce), inset -2px 2px 1px -1px var(--vidro-realce), inset 0 0 2px var(--vidro-borda-int);
 }
 
-/* Início (claro): as duas caixas de indicadores e os quadros de dentro ficam 35% mais transparentes */
-
-html[data-tema="claro"] body[data-aba="home"] section.bg-gray-800,
-html[data-tema="claro"] body[data-aba="home"] .hero-panel {
-    background-color: rgb(255 255 255 / 0.08);
-}
-
-html[data-tema="claro"] body[data-aba="home"] section.bg-gray-800 [class*="bg-gray-700/"] {
-    background-color: rgb(255 255 255 / 0.058);
-}
-
-/* Início (escuro): as mesmas caixas ficam 35% + 12% mais transparentes (o claro já foi feito acima) */
-
-html:not([data-tema]) body[data-aba="home"] section.bg-gray-800 {
-    background-color: rgb(var(--gray-800) / 0.286);
-}
-
-html:not([data-tema]) body[data-aba="home"] section.bg-gray-800 [class*="bg-gray-700/"] {
-    background-color: rgb(var(--gray-950) / 0.183);
-}
-
-
 /* Menu do topo: desfoque fixo de 8px (os demais painéis usam 18-24px) (segue as regras de aparelho fraco / reduzir transparência) */
 
 html header.bg-gray-800 {
@@ -1589,15 +1567,6 @@ html.sem-blur header.bg-gray-800 {
 }
 
 
-/* ---------- APROVADO (só a página Início, tema escuro): aurora de fundo em tons âmbar/laranja escurecidos ----------
-   Só o fundo boreal muda; o resto da paleta continua igual. Para desfazer: apague este bloco. */
-
-html:not([data-tema]) body[data-aba="home"] {
-    --aurora-1: rgba(64, 31, 7, 0.22);      /* laranja escurecido em 75% */
-    --aurora-2: rgba(64, 42, 13, 0.14);
-    --aurora-3: rgba(35, 11, 3, 0.24);
-}
-
 /* Menu (tema escuro): botões menos "esbranquiçados" — sem o degradê branco de cima para baixo, brilho diagonal mais fraco
    e fundo mais escuro, para o contorno e os reflexos das quinas aparecerem sem névoa cinza. */
 
@@ -1611,21 +1580,30 @@ html:not([data-tema]) .tab-btn:not(.text-gray-950) {
    que aparece é o pontinho de departamento de cada caixa. */
 
 .mapa {
-    --m-fundo: #000000;
+    --m-fundo: #0C0C0E;
+    --m-gradiente: #0C0C0E;
+    --m-gradiente-img:
+        radial-gradient(65% 50% at 50% -6%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 72%),
+        radial-gradient(45% 35% at 50% 108%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 70%),
+        radial-gradient(130% 105% at 50% 38%, #212125 0%, #101013 50%, #030304 100%);
     --m-superficie: #1C1C1E;
     --m-texto: #F5F5F7;
     --m-suave: #98989D;
     --m-linha: #3A3A3C;
     --m-realce: #F5F5F7;
     --m-realce-texto: #000000;
-    --m-vidro: rgba(20, 20, 22, 0.72);
+    --m-vidro: rgba(16, 16, 18, 0.66);
     --m-grade: rgba(255, 255, 255, 0.11);
     --m-sombra: rgba(0, 0, 0, 0.5);
+    --m-caixa: rgba(255, 255, 255, 0.07);
+    --m-caixa-luz: rgba(255, 255, 255, 0.10);
+    --m-aro: #FFFFFF;
     position: fixed;
     inset: 0;
     z-index: 200;
     flex-direction: column;
-    background: var(--m-fundo);
+    background: var(--m-gradiente);
+    background: var(--m-gradiente-img);
     color: var(--m-texto);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -1633,7 +1611,11 @@ html:not([data-tema]) .tab-btn:not(.text-gray-950) {
 }
 
 .mapa[data-tema-mapa="claro"] {
-    --m-fundo: #F5F5F7;
+    --m-fundo: #F0F0F2;
+    --m-gradiente: #F0F0F2;
+    --m-gradiente-img:
+        radial-gradient(70% 50% at 50% -6%, #FFFFFF 0%, rgba(255, 255, 255, 0) 72%),
+        radial-gradient(130% 105% at 50% 38%, #FAFAFC 0%, #EDEDF1 50%, #D2D2D9 100%);
     --m-superficie: #FFFFFF;
     --m-texto: #1D1D1F;
     --m-suave: #6E6E73;
@@ -1641,8 +1623,11 @@ html:not([data-tema]) .tab-btn:not(.text-gray-950) {
     --m-realce: #1D1D1F;
     --m-realce-texto: #F5F5F7;
     --m-vidro: rgba(245, 245, 247, 0.72);
-    --m-grade: rgba(0, 0, 0, 0.11);
+    --m-grade: rgba(0, 0, 0, 0.15);
     --m-sombra: rgba(0, 0, 0, 0.12);
+    --m-caixa: rgba(255, 255, 255, 0.5);
+    --m-caixa-luz: rgba(255, 255, 255, 0.7);
+    --m-aro: #FFFFFF;
 }
 
 .mapa.hidden {
@@ -1823,36 +1808,66 @@ html body .mapa input[type="color"] {
     touch-action: none;
     cursor: grab;
     user-select: none;
-    background-image: radial-gradient(var(--m-grade) 1px, transparent 1.6px);
-    background-size: 24px 24px;
 }
 
 .mapa-no {
     cursor: pointer;
 }
 
-.mapa-no .corpo {
-    fill: var(--m-superficie);
-    stroke: var(--m-linha);
-    stroke-width: 1;
-    filter: drop-shadow(0 6px 14px var(--m-sombra));
+.mapa-grade-ponto {
+    fill: var(--m-grade);
 }
 
-.mapa-no:hover .corpo {
+.mapa-aro-luz {
+    stop-color: var(--m-aro);
+}
+
+/* Caixa = lente de vidro (estilo "vidro líquido"): fundo desfocado por trás, tinta de vidro, aro de luz em cima e embaixo */
+
+.mapa-no .vidro {
+    fill: var(--m-caixa);
+    stroke: none;
+    filter: drop-shadow(0 8px 16px var(--m-sombra));
+}
+
+.mapa-no .brilho-interno {
+    fill: none;
+    stroke: var(--m-caixa-luz);
+    stroke-width: 7;
+    pointer-events: none;
+}
+
+.mapa-no .contorno {
+    fill: none;
+    stroke: var(--m-linha);
+    stroke-width: 1;
+    pointer-events: none;
+}
+
+.mapa-no .aro {
+    fill: none;
+    stroke: url(#mapa-aro);
+    stroke-width: 1.6;
+    pointer-events: none;
+}
+
+.mapa-no .lente {
+    pointer-events: none;
+}
+
+.mapa-no:hover .contorno {
     stroke: var(--m-suave);
 }
 
-.mapa-no.sel .corpo {
+.mapa-no.sel .contorno,
+.mapa-no.origem .contorno {
     stroke: var(--m-texto);
     stroke-width: 2;
 }
 
-.mapa-no.origem .corpo {
-    stroke: var(--m-texto);
-    stroke-width: 2;
+.mapa-no.origem .contorno {
     stroke-dasharray: 6 4;
 }
-
 .mapa-no text {
     fill: var(--m-texto);
     font: 600 14px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
@@ -1924,7 +1939,8 @@ html body .mapa input[type="color"] {
     font: 500 12px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
     paint-order: stroke;
     stroke: var(--m-fundo);
-    stroke-width: 5px;
+    stroke-opacity: 0.55; /* fundo em gradiente: o halo do rótulo fica sutil */
+    stroke-width: 4px;
     stroke-linejoin: round;
     pointer-events: none;
 }
@@ -2090,5 +2106,171 @@ html body .mapa select.mapa-sel:disabled {
     .mapa-pop {
         left: 0.75rem;
         width: auto;
+    }
+}
+
+/* ==========================================================================================================
+   SITE INTEIRO (escuro e claro): fundo e caixas no estilo do MAPA DE SISTEMAS
+   - Fundo: os mesmos gradientes do mapa (grafite com "luz de estúdio" no escuro; pérola no claro) + pontinhos.
+   - Caixas principais (.shadow-lg / .hero-panel): vidro com aro de luz em cima e embaixo, laterais quase apagadas,
+     brilho interno, contorno fino e sombra suave. O tema VIDRO (roxo) não muda.
+   ========================================================================================================== */
+
+html {
+    --ponto-fundo: rgba(255, 255, 255, 0.11);
+    --caixa-topo: rgba(255, 255, 255, 0.55);
+    --caixa-base: rgba(255, 255, 255, 0.26);
+    --caixa-lado: rgba(255, 255, 255, 0.07);
+    --caixa-brilho: rgba(255, 255, 255, 0.06);
+    --caixa-linha: rgba(255, 255, 255, 0.09);
+}
+
+html[data-tema="claro"] {
+    --ponto-fundo: rgba(0, 0, 0, 0.15);
+    --caixa-topo: rgba(255, 255, 255, 1);
+    --caixa-base: rgba(255, 255, 255, 0.9);
+    --caixa-lado: rgba(255, 255, 255, 0.55);
+    --caixa-brilho: rgba(255, 255, 255, 0.55);
+    --caixa-linha: rgba(15, 23, 42, 0.10);
+}
+
+html:not([data-tema]) body {
+    background-color: #0C0C0E;
+    background-image:
+        radial-gradient(65% 50% at 50% -6%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 72%),
+        radial-gradient(45% 35% at 50% 108%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 70%),
+        radial-gradient(130% 105% at 50% 38%, #212125 0%, #101013 50%, #030304 100%);
+    background-attachment: fixed;
+}
+
+html[data-tema="claro"] body {
+    background-color: #F0F0F2;
+    background-image:
+        radial-gradient(70% 50% at 50% -6%, #FFFFFF 0%, rgba(255, 255, 255, 0) 72%),
+        radial-gradient(130% 105% at 50% 38%, #FAFAFC 0%, #EDEDF1 50%, #D2D2D9 100%);
+    background-attachment: fixed;
+}
+
+html:not([data-tema]) body::before,
+html[data-tema="claro"] body::before {
+    background-image: radial-gradient(var(--ponto-fundo) 1px, transparent 1.6px);
+    background-size: 24px 24px;
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+html .shadow-lg,
+html .hero-panel {
+    border-radius: 1rem;
+    box-shadow:
+        inset 0 1.5px 0 var(--caixa-topo),
+        inset 0 -1.5px 0 var(--caixa-base),
+        inset 1.5px 0 0 var(--caixa-lado),
+        inset -1.5px 0 0 var(--caixa-lado),
+        inset 0 0 26px var(--caixa-brilho),
+        0 0 0 1px var(--caixa-linha),
+        0 18px 42px -18px var(--sombra-card) !important;
+}
+
+html .bg-gray-800.shadow-lg {
+    border-color: transparent !important;
+}
+
+/* Caixas limpas: sem os reflexos diagonais nos cantos (as duas camadas de gradiente de `html .bg-gray-800` /
+   `.hero-panel`) e sem o halo do canto do painel do topo. O volume vem só do aro de luz, do brilho interno e da sombra. */
+
+html .bg-gray-800,
+html .hero-panel {
+    background-image: none;
+}
+
+.hero-panel::before {
+    display: none;
+}
+
+/* Caixas que REFLETEM o fundo da página: quase sem preenchimento e com desfoque leve, então o gradiente e os pontinhos do
+   fundo aparecem através do vidro (como a lente do mapa). Vale para as caixas principais (.shadow-lg / .hero-panel) nos
+   temas escuro e claro. Aparelho fraco ou "reduzir transparência" volta a um fundo sólido (legibilidade). */
+
+html:not([data-tema]) .bg-gray-800.shadow-lg,
+html:not([data-tema]) .hero-panel {
+    background-color: rgba(255, 255, 255, 0.03);
+    -webkit-backdrop-filter: blur(3px) saturate(140%);
+    backdrop-filter: blur(3px) saturate(140%);
+}
+
+html[data-tema="claro"] .bg-gray-800.shadow-lg,
+html[data-tema="claro"] .hero-panel {
+    background-color: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(3px) saturate(140%);
+    backdrop-filter: blur(3px) saturate(140%);
+}
+
+html.sem-blur:not([data-tema]) .bg-gray-800.shadow-lg,
+html.sem-blur:not([data-tema]) .hero-panel {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: rgb(var(--gray-800) / 0.8);
+}
+
+html.sem-blur[data-tema="claro"] .bg-gray-800.shadow-lg,
+html.sem-blur[data-tema="claro"] .hero-panel {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: rgb(var(--gray-800) / 0.85);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    html:not([data-tema]) .bg-gray-800.shadow-lg,
+    html:not([data-tema]) .hero-panel {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background-color: rgb(var(--gray-800) / 0.92);
+    }
+
+    html[data-tema="claro"] .bg-gray-800.shadow-lg,
+    html[data-tema="claro"] .hero-panel {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background-color: rgb(var(--gray-800) / 0.92);
+    }
+}
+
+/* Botão hambúrguer (celular/tablet): fica à esquerda, na MESMA linha do seletor de tema, com o mesmo vidro; o cabeçalho
+   com a barra de cima só existe a partir de 1024px (lg). */
+
+.menu-hamb {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 46px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    color: rgb(var(--gray-200));
+    background: rgb(var(--gray-100) / 0.07);
+    -webkit-backdrop-filter: blur(14px) saturate(170%);
+    backdrop-filter: blur(14px) saturate(170%);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.35),
+        inset 0 -6px 10px -6px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgb(var(--gray-100) / 0.14),
+        0 8px 20px -10px var(--sombra-card);
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.menu-hamb:hover,
+.menu-hamb:focus-visible {
+    color: rgb(var(--emerald-400));
+    outline: none;
+    transform: scale(1.05);
+}
+
+@media (min-width: 1024px) {
+    .menu-hamb {
+        display: none;
     }
 }
