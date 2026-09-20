@@ -60,7 +60,7 @@ function carregarLibs(...nomes) {
     return Promise.all(nomes.map(carregarLib));
 }
 
-// (O fundo da página é uma aurora boreal ESTÁTICA feita só em CSS — ver ody no style.css. A antiga névoa animada
+// (O fundo da página é uma aurora boreal ESTÁTICA feita só em CSS — ver o body no style.css. A antiga névoa animada
 // do Vanta.js foi removida: deixava as páginas mais pesadas e não é mais usada.)
 
 
@@ -171,7 +171,7 @@ function closeMobileMenu() {
     drawer.classList.add('hidden');
 }
 
-// Botão flutuante "não clique": a legenda só muda ao CLICAR; na última mensagem o Modo Viagem abre
+// Botão flutuante "não clique": a legenda só muda ao CLICAR (5 frases); o 6º clique abre o Modo Viagem
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('troll-btn');
     const label = document.getElementById('troll-label');
@@ -181,20 +181,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const frases = ['não clique', 'sério, não clique', 'você foi avisado', 'último aviso...', 'ok, você pediu 🌀'];
     let i = 0;
     let timerLegenda = null;
-    let abrindo = false; // depois da última frase, cliques extras não cancelam a abertura
     const voltar = () => { label.classList.remove('mostrar'); label.innerText = inicial; i = 0; };
+    // Já baixa o js/viagem.js quando o mouse chega no botão e 3s após abrir a página (arquivo pequeno): o 6º clique abre na hora
+    const preparar = () => { carregarLib('viagem').catch(() => {}); };
+    setTimeout(preparar, 3000);
+    btn.addEventListener('pointerenter', preparar, { once: true });
+    btn.addEventListener('pointerdown', preparar, { once: true });
+    // Cada clique mostra a próxima frase (5 no total); o clique seguinte à última leva ao Modo Viagem (6º clique)
     btn.addEventListener('click', () => {
-        if (abrindo) return;
-        label.innerText = frases[i];
-        label.classList.add('mostrar');
         clearTimeout(timerLegenda);
-        if (i < frases.length - 1) {
+        if (i < frases.length) {
+            label.innerText = frases[i];
+            label.classList.add('mostrar');
             i++;
             timerLegenda = setTimeout(voltar, 8000); // 8s para dar o próximo clique antes de recomeçar
         } else {
-            abrindo = true; // abre NA HORA do último clique (a frase fica visível enquanto o Modo Viagem carrega)
+            voltar();
             abrirViagem();
-            timerLegenda = setTimeout(() => { abrindo = false; voltar(); }, 2500);
         }
     });
     // Botão iridescente: o brilho, o filme colorido e o ícone acompanham o ponteiro (ou a inclinação do celular).
