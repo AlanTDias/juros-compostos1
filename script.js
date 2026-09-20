@@ -211,6 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dica = document.getElementById('viagem-dica');
     const nuvemEl = document.getElementById('viagem-nuvem');
     const DICA_PADRAO = dica.innerText;
+    // Nas nuvens o clique não gera onda de choque (o Vanta cuida do mouse), então a dica muda
+    const DICA_NUVEM = 'Mova o mouse para mudar o céu · teclas 1, 2, 3 trocam o efeito · Esc sai';
     const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const velocidadeGlobal = reduzMovimento ? 0.4 : 1; // quem pede menos movimento recebe tudo mais devagar
     const FUNDO = '#05030f'; // mesmo valor de --viagem-bg no style.css
@@ -220,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let rodando = false;
     let rafId = 0;
     let t = 0;
-    let velCores = 1; // multiplicador da troca de cor
     let timerBarra = null;
 
     // ---------- Ponteiro (mouse/toque) com piloto automático quando parado ----------
@@ -291,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
             n.x += n.vx * velocidadeGlobal; n.y += n.vy * velocidadeGlobal;
             if (n.x < 0 || n.x > W) { n.vx *= -1; n.x = Math.max(0, Math.min(W, n.x)); }
             if (n.y < 0 || n.y > H) { n.vy *= -1; n.y = Math.max(0, Math.min(H, n.y)); }
-            n.hue = (n.hue + 0.15 * velCores) % 360;
+            n.hue = (n.hue + 0.15) % 360;
         }
 
         const ligacoes = [];
@@ -376,14 +377,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 minHeight: 200,
                 minWidth: 200,
                 speed: reduzMovimento ? 0.4 : 1.2,
-                skyColor: 0x0a2a5e,         // céu azul-navy
-                cloudColor: 0xa9c4ee,       // nuvens azuladas claras
-                cloudShadowColor: 0x0b1120, // sombras no navy do site
+                skyColor: 0x0c3271,         // céu azul-navy (20% mais claro que o original 0x0a2a5e)
+                cloudColor: 0x92aedb,       // nuvens 15% mais translúcidas: 15% da cor do céu misturado em 0xa9c4ee
+                cloudShadowColor: 0x0b162c, // sombras no navy do site (mesma mistura de 15% com o céu)
                 sunColor: 0x22d3ee,         // "sol" ciano (cor de destaque do site)
                 sunGlareColor: 0x0e7490,
                 sunlightColor: 0x67e8f9
             });
-            dica.innerText = DICA_PADRAO;
+            dica.innerText = DICA_NUVEM;
         } catch (erro) {
             console.warn('Nuvens indisponíveis:', erro && erro.message);
             dica.innerText = 'Não foi possível carregar as nuvens. Verifique a conexão e tente de novo.';
@@ -426,9 +427,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.translate(W / 2, H / 2);
                 ctx.rotate(k * (Math.PI * 2 / SEGMENTOS) + giro);
                 if (espelho) ctx.scale(1, -1);
-                ctx.strokeStyle = `hsla(${(t * 40 * velCores + k * 25 + vel * 3) % 360}, 100%, 62%, 0.7)`;
+                ctx.strokeStyle = `hsla(${(t * 40 + k * 25 + vel * 3) % 360}, 100%, 62%, 0.7)`;
                 ctx.beginPath(); ctx.moveTo(caleido.px, caleido.py); ctx.lineTo(caleido.x, caleido.y); ctx.stroke();
-                ctx.fillStyle = `hsla(${(t * 40 * velCores + k * 25 + 180) % 360}, 100%, 75%, 0.5)`;
+                ctx.fillStyle = `hsla(${(t * 40 + k * 25 + 180) % 360}, 100%, 75%, 0.5)`;
                 ctx.beginPath(); ctx.arc(caleido.x, caleido.y, 1.5 + vel * 0.1, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
             }
@@ -474,6 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modo = novo;
         caleido.ok = false;
         const ehNuvem = novo === 'nuvem';
+        dica.innerText = ehNuvem ? DICA_NUVEM : DICA_PADRAO;
         canvas.style.display = ehNuvem ? 'none' : 'block';
         if (nuvemEl) nuvemEl.style.display = ehNuvem ? 'block' : 'none';
         if (ehNuvem) {
@@ -503,8 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(timerBarra);
         timerBarra = setTimeout(() => bar.classList.add('oculta'), 3500);
     }
-
-    function alternarCores() { velCores = velCores === 1 ? 6 : (velCores === 6 ? 0 : 1); }
 
     function alternarTelaCheia() {
         if (!document.fullscreenElement) {
@@ -557,11 +557,9 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (e.key === '2') trocarModo('neural');
         else if (e.key === '3') trocarModo('nuvem');
         else if (e.key.toLowerCase() === 'f') alternarTelaCheia();
-        else if (e.key.toLowerCase() === 'c') alternarCores();
         else if (e.key === 'Escape' && !document.fullscreenElement) window.fecharViagem();
     });
     overlay.querySelectorAll('[data-viagem-modo]').forEach(b => b.addEventListener('click', () => trocarModo(b.dataset.viagemModo)));
-    document.getElementById('viagem-cores').addEventListener('click', alternarCores);
     document.getElementById('viagem-tela').addEventListener('click', alternarTelaCheia);
 })();
 

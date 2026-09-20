@@ -4,10 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Favicon: SVG (nítido em qualquer tamanho) + PNG de reserva; ?v=2 força o navegador a trocar o ícone antigo -->
-    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
-    <link rel="icon" type="image/png" sizes="256x256" href="favicon.png?v=2">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+    <!-- Favicon (PNG com fundo transparente); ?v=3 força o navegador a trocar o ícone antigo -->
+    <link rel="icon" type="image/png" sizes="256x256" href="favicon.png?v=3">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
     <!-- Ajuste de segurança HTTPS para forçar requisições seguras -->
     <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
@@ -2336,7 +2335,6 @@ Gestão do plano de cargos e salários, avaliação de desempenho e mediação d
             <button type="button" class="viagem-btn" data-viagem-modo="caleido">🔮 Caleidoscópio</button>
             <button type="button" class="viagem-btn" data-viagem-modo="neural">🕸️ Neural</button>
             <button type="button" class="viagem-btn" data-viagem-modo="nuvem">☁️ Nuvens</button>
-            <button type="button" class="viagem-btn" id="viagem-cores" title="Alterna a velocidade de troca de cores">🎨 Cores</button>
             <button type="button" class="viagem-btn" id="viagem-tela">⛶ Tela cheia</button>
             <button type="button" class="viagem-btn viagem-sair" onclick="fecharViagem()">✕ Sair</button>
         </div>
