@@ -18,7 +18,7 @@ for (const [f, t] of Object.entries(src)) {
     set.forEach(n => (todosNomes[n] = todosNomes[n] || []).push(f));
 }
 // nomes definidos em bibliotecas externas ou no navegador: ignorar
-const ignorar = new Set(['Chart', 'VANTA', 'THREE', 'PDFLib', 'pdfjsLib', 'XLSX', 'docx', 'mammoth', 'html2pdf', 'QRCode']);
+const ignorar = new Set(['Chart', 'PDFLib', 'pdfjsLib', 'XLSX', 'docx', 'mammoth', 'html2pdf', 'QRCode']);
 
 let problemas = 0;
 for (const p of cfg.paginas) {

@@ -51,6 +51,8 @@
     --vidro-linha: rgba(255, 255, 255, 0.07);       /* linhas finas (divisórias, bordas comuns) */
     --vidro-luz: rgba(255, 255, 255, 0.28);         /* reflexo de luz na quina de cima */
     --vidro-sombra-int: rgba(0, 0, 0, 0.4);         /* sombra interna dos campos afundados */
+    --vidro-realce: rgba(255, 255, 255, 0.5);       /* reflexo de luz nas quinas do vidro */
+    --vidro-borda-int: rgba(0, 0, 0, 0.55);         /* linha escura interna que dá volume */
     --texto-grafico: #ECECE8;
     --grade-grafico: rgba(148, 163, 184, 0.15);
 }
@@ -65,8 +67,8 @@ html[data-tema="claro"] {
     --gray-600: 208 208 214;
     --gray-700: 230 230 235;
     --gray-800: 255 255 255;
-    --gray-900: 255 255 255;
-    --gray-950: 244 244 247;    --emerald-50: 28 32 70;
+    --gray-900: 240 240 244;
+    --gray-950: 229 229 234;    --emerald-50: 28 32 70;
     --emerald-100: 46 55 120;
     --emerald-200: 58 70 160;
     --emerald-300: 68 84 190;
@@ -89,10 +91,12 @@ html[data-tema="claro"] {
     --aurora-1: rgba(167, 139, 250, 0.34);
     --aurora-2: rgba(143, 163, 251, 0.34);
     --aurora-3: rgba(232, 121, 249, 0.2);
-    --vidro-fundo: rgb(var(--gray-800) / 0.55);
+    --vidro-fundo: rgb(255 255 255 / 0.3);
     --vidro-linha: rgba(15, 23, 42, 0.08);
     --vidro-luz: rgba(255, 255, 255, 0.95);
     --vidro-sombra-int: rgba(15, 23, 42, 0.13);
+    --vidro-realce: rgba(255, 255, 255, 0.95);
+    --vidro-borda-int: rgba(15, 23, 42, 0.2);
     --texto-grafico: #3A3A40;
     --grade-grafico: rgba(15, 23, 42, 0.1);
 }
@@ -1007,9 +1011,7 @@ html.sem-blur .tema-thumb {
     transition: opacity 0.15s ease;
 }
 
-.troll-label.mostrar,
-.troll-btn:hover .troll-label,
-.troll-btn:focus-visible .troll-label {
+.troll-label.mostrar {
     opacity: 1;
 }
 @media print {
@@ -1163,7 +1165,9 @@ html.sem-blur .tema-thumb {
 }
 
 
-/* ---------- VIDRO (glassmorphism): superfícies ----------`r`n   Valem para TODOS os temas (escuro, claro e vidro): as cores vêm das variáveis --vidro-* de cada tema.`r`n   Só o fundo "aurora" é exclusivo do tema vidro. */
+/* ---------- VIDRO (glassmorphism): superfícies ----------
+   Valem para TODOS os temas (escuro, claro e vidro): as cores vêm das variáveis --vidro-* de cada tema.
+   O fundo boreal (aurora) também é de todos os temas, com cores próprias. */
 
 /* Fundo "aurora": manchas de cor fixas; é o que os painéis de vidro desfocam. */
 
@@ -1188,7 +1192,9 @@ html[data-tema="vidro"] body {
 html .bg-gray-800,
 html .hero-panel {
     background-color: var(--vidro-fundo);
-    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.02) 42%, rgba(255, 255, 255, 0) 70%);
+    background-image:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.16) 0%, transparent 16%, transparent 84%, rgba(255, 255, 255, 0.16) 100%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.02) 42%, rgba(255, 255, 255, 0) 70%);
     -webkit-backdrop-filter: blur(var(--vidro-desfoque)) saturate(175%) brightness(1.06);
     backdrop-filter: blur(var(--vidro-desfoque)) saturate(175%) brightness(1.06);
 }
@@ -1196,9 +1202,12 @@ html .hero-panel {
 html .shadow-lg,
 html .shadow-md {
     box-shadow:
+        inset 2px -2px 1px -1px var(--vidro-realce),
+        inset -2px 2px 1px -1px var(--vidro-realce),
+        inset 6px -6px 1px -6px var(--vidro-realce),
+        inset -6px 6px 1px -6px var(--vidro-realce),
+        inset 0 0 2px var(--vidro-borda-int),
         0 14px 40px -14px var(--sombra-card),
-        inset 0 1px 0 var(--vidro-luz),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
         0 0 40px -10px var(--accent-soft) !important;
 }
 
@@ -1228,15 +1237,15 @@ html .bg-gray-900:not(body) {
 
 html .bg-emerald-500 {
     background-image: linear-gradient(135deg, rgb(var(--emerald-300)), rgb(var(--emerald-500)) 55%, rgb(var(--emerald-600)));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 8px 22px -8px var(--accent-soft);
+    box-shadow: inset 2px -2px 1px -1px rgba(255, 255, 255, 0.6), inset -2px 2px 1px -1px rgba(255, 255, 255, 0.6), inset 0 0 2px rgba(0, 0, 0, 0.35), 0 8px 22px -8px var(--accent-soft);
 }
 
 /* Abas do menu em vidro */
 
 html .tab-btn:not(.text-gray-950) {
     background-color: rgb(var(--gray-100) / 0.05);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
 }
 
 /* Modais e caixas flutuantes também viram vidro */
@@ -1327,7 +1336,11 @@ html .bg-gray-700\/40,
 html .bg-gray-700\/30,
 html .bg-gray-700\/50 {
     border-color: transparent;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -10px 24px -12px var(--vidro-sombra-int);
+    box-shadow:
+        inset 2px -2px 1px -1px var(--vidro-realce),
+        inset -2px 2px 1px -1px var(--vidro-realce),
+        inset 0 0 2px var(--vidro-borda-int),
+        inset 0 -10px 24px -12px var(--vidro-sombra-int);
 }
 
 /* Campos: fundo fundo (afundado), sem linha; o foco acende um halo */
@@ -1350,8 +1363,16 @@ html textarea:focus {
 
 html .tab-btn:not(.text-gray-950) {
     border-color: var(--vidro-linha);
-    background-image: linear-gradient(180deg, var(--vidro-luz), rgba(255, 255, 255, 0));
-    box-shadow: inset 0 1px 0 var(--vidro-luz), 0 4px 10px -8px var(--sombra-card);
+    background-image:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.28) 0%, transparent 18%, transparent 82%, rgba(255, 255, 255, 0.28) 100%),
+        linear-gradient(180deg, var(--vidro-luz), rgba(255, 255, 255, 0));
+    box-shadow:
+        inset 2px -2px 1px -1px var(--vidro-realce),
+        inset -2px 2px 1px -1px var(--vidro-realce),
+        inset 6px -6px 1px -6px var(--vidro-realce),
+        inset -6px 6px 1px -6px var(--vidro-realce),
+        inset 0 0 2px var(--vidro-borda-int),
+        0 4px 10px -6px var(--sombra-card);
 }
 
 html .tab-btn.text-gray-950 {
@@ -1465,7 +1486,7 @@ button.start-btn {
 
 .start-btn:hover .circle-overlay,
 .start-btn:focus-visible .circle-overlay {
-    transform: scale(14);
+    transform: scale(32); /* o círculo (raio ~21px) precisa cobrir o botão inteiro, mesmo com 100% de largura */
 }
 
 .start-btn:hover .text,
@@ -1521,5 +1542,89 @@ button.start-btn {
 @media print {
     .toasty {
         display: none;
+    }
+}
+
+
+/* ---------- Tema CLARO: mais transparência (menu, rodapé, tiles, campos e menu lateral do celular) ---------- */
+
+html[data-tema="claro"] header,
+html[data-tema="claro"] footer {
+    background-color: rgb(255 255 255 / 0.074);
+}
+
+html[data-tema="claro"] #drawer-nav {
+    background-color: rgb(255 255 255 / 0.54);
+}
+
+html[data-tema="claro"] .bg-gray-700\/40,
+html[data-tema="claro"] .bg-gray-700\/50,
+html[data-tema="claro"] .bg-gray-700\/30,
+html[data-tema="claro"] .bg-gray-900:not(body):not(#doc-printable-area *) {
+    background-color: rgb(var(--gray-950) / 0.4);
+}
+
+html[data-tema="claro"] input,
+html[data-tema="claro"] select,
+html[data-tema="claro"] textarea {
+    background-color: rgb(var(--gray-950) / 0.5);
+}
+
+html[data-tema="claro"] .tab-btn:not(.text-gray-950) {
+    background-color: rgb(var(--gray-950) / 0.6);
+}
+
+/* Blocos e botões cinza sólidos (bg-gray-700/600) também ficam translúcidos, em todos os temas */
+
+html .bg-gray-700:not(#doc-printable-area *),
+html .bg-gray-600:not(#doc-printable-area *) {
+    background-color: rgb(var(--gray-700) / 0.5);
+    box-shadow: inset 2px -2px 1px -1px var(--vidro-realce), inset -2px 2px 1px -1px var(--vidro-realce), inset 0 0 2px var(--vidro-borda-int);
+}
+
+html[data-tema="claro"] .bg-gray-700:not(#doc-printable-area *),
+html[data-tema="claro"] .bg-gray-600:not(#doc-printable-area *) {
+    background-color: rgb(var(--gray-950) / 0.45);
+    box-shadow: inset 2px -2px 1px -1px var(--vidro-realce), inset -2px 2px 1px -1px var(--vidro-realce), inset 0 0 2px var(--vidro-borda-int);
+}
+
+/* Início (claro): as duas caixas de indicadores e os quadros de dentro ficam 35% mais transparentes */
+
+html[data-tema="claro"] body[data-aba="home"] section.bg-gray-800,
+html[data-tema="claro"] body[data-aba="home"] .hero-panel {
+    background-color: rgb(255 255 255 / 0.08);
+}
+
+html[data-tema="claro"] body[data-aba="home"] section.bg-gray-800 [class*="bg-gray-700/"] {
+    background-color: rgb(255 255 255 / 0.058);
+}
+
+/* Início (escuro): as mesmas caixas ficam 35% + 12% mais transparentes (o claro já foi feito acima) */
+
+html:not([data-tema]) body[data-aba="home"] section.bg-gray-800 {
+    background-color: rgb(var(--gray-800) / 0.286);
+}
+
+html:not([data-tema]) body[data-aba="home"] section.bg-gray-800 [class*="bg-gray-700/"] {
+    background-color: rgb(var(--gray-950) / 0.183);
+}
+
+
+/* Menu do topo: desfoque 25% menor que o dos demais painéis de vidro (segue as regras de aparelho fraco / reduzir transparência) */
+
+html header.bg-gray-800 {
+    -webkit-backdrop-filter: blur(calc(var(--vidro-desfoque) * 0.75)) saturate(175%) brightness(1.06);
+    backdrop-filter: blur(calc(var(--vidro-desfoque) * 0.75)) saturate(175%) brightness(1.06);
+}
+
+html.sem-blur header.bg-gray-800 {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    html header.bg-gray-800 {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
     }
 }

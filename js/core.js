@@ -178,19 +178,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!btn || !label) return;
 
     const inicial = label.innerText;
-    const frases = ['sério, não clique', 'você foi avisado', 'último aviso...', 'ok, você pediu 🌀'];
+    const frases = ['não clique', 'sério, não clique', 'você foi avisado', 'último aviso...', 'ok, você pediu 🌀'];
     let i = 0;
     let timerLegenda = null;
+    let abrindo = false; // depois da última frase, cliques extras não cancelam a abertura
+    const voltar = () => { label.classList.remove('mostrar'); label.innerText = inicial; i = 0; };
     btn.addEventListener('click', () => {
+        if (abrindo) return;
         label.innerText = frases[i];
         label.classList.add('mostrar');
         clearTimeout(timerLegenda);
         if (i < frases.length - 1) {
             i++;
-            timerLegenda = setTimeout(() => { label.classList.remove('mostrar'); label.innerText = inicial; i = 0; }, 3500);
+            timerLegenda = setTimeout(voltar, 8000); // 8s para dar o próximo clique antes de recomeçar
         } else {
-            i = 0;
-            timerLegenda = setTimeout(() => { label.classList.remove('mostrar'); label.innerText = inicial; abrirViagem(); }, 900);
+            abrindo = true; // abre NA HORA do último clique (a frase fica visível enquanto o Modo Viagem carrega)
+            abrirViagem();
+            timerLegenda = setTimeout(() => { abrindo = false; voltar(); }, 2500);
         }
     });
     // Botão iridescente: o brilho, o filme colorido e o ícone acompanham o ponteiro (ou a inclinação do celular).
@@ -303,7 +307,7 @@ function alternarTema() {
 }
 
 function corDoNavegadorPorTema(tema) {
-    if (tema === 'claro') return '#FFFFFF';
+    if (tema === 'claro') return '#F0F0F4';
     if (tema === 'neon') return '#0D0221';
     if (tema === 'vidro') return '#1B123A';
     return '#060607';
@@ -538,6 +542,19 @@ document.addEventListener('keydown', e => {
         teclasDigitadas = '';
         mostrarToasty();
     }
+});
+
+// No celular não há teclado: 5 toques seguidos no título da página (<h1>) também chamam o Toasty
+document.addEventListener('DOMContentLoaded', () => {
+    const titulo = document.querySelector('h1');
+    if (!titulo) return;
+    let toques = 0, timerToques = null;
+    titulo.addEventListener('click', () => {
+        toques++;
+        clearTimeout(timerToques);
+        timerToques = setTimeout(() => { toques = 0; }, 2000);
+        if (toques >= 5) { toques = 0; mostrarToasty(); }
+    });
 });
 
 document.addEventListener('keydown', e => {

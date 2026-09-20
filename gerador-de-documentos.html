@@ -146,14 +146,15 @@
             </nav>
         </div>
 
-        <!-- Drawer mobile (abre/fecha com hambúrguer) -->
-        <div id="mobile-drawer" class="hidden fixed inset-0 z-40 lg:hidden">
-            <div class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm" onclick="closeMobileMenu()"></div>
-            <nav id="drawer-nav" class="absolute top-0 left-0 h-full w-72 bg-gray-800 border-r border-gray-700 overflow-y-auto space-y-2 p-4 flex flex-col">
-                <button onclick="closeMobileMenu()" class="self-end text-gray-400 hover:text-gray-100 text-2xl leading-none mb-4">✕</button>
-            </nav>
-        </div>
     </header>
+    <!-- Drawer mobile (abre/fecha com hambúrguer). Fica FORA do <header>: o header tem backdrop-filter (vidro), e um
+         filtro faz o "position: fixed" de quem está dentro se prender ao tamanho do header (o menu não aparecia). -->
+    <div id="mobile-drawer" class="hidden fixed inset-0 z-[60] lg:hidden">
+        <div class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm" onclick="closeMobileMenu()"></div>
+        <nav id="drawer-nav" class="absolute top-0 left-0 h-full w-72 bg-gray-800 border-r border-gray-700 overflow-y-auto space-y-2 p-4 flex flex-col">
+            <button onclick="closeMobileMenu()" class="self-end text-gray-400 hover:text-gray-100 text-2xl leading-none mb-4">✕</button>
+        </nav>
+    </div>
 
     <!-- 💻 CONTEÚDO PRINCIPAL -->
     <main id="conteudo" tabindex="-1" class="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
@@ -612,8 +613,8 @@ Gestão do plano de cargos e salários, avaliação de desempenho e mediação d
         </div>
     </div>
     <!-- Scripts: só o que esta página usa. O núcleo (core.js) vem primeiro. -->
-    <script src="js/core.js?v=630bae0f"></script>
-    <script src="js/documentos.js?v=630bae0f"></script>
+    <script src="js/core.js?v=3cf65ac1"></script>
+    <script src="js/documentos.js?v=3cf65ac1"></script>
 </body>
 
 </html>
