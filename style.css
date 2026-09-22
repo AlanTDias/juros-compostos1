@@ -23,25 +23,25 @@
     --gray-800: 18 18 20;
     --gray-900: 6 6 7;
     --gray-950: 0 0 0;
-    --emerald-50: 238 241 255;
-    --emerald-100: 224 230 254;
-    --emerald-200: 199 210 253;
-    --emerald-300: 171 187 252;
-    --emerald-400: 143 163 251;
-    --emerald-500: 143 163 251;
-    --emerald-600: 99 118 240;
-    --emerald-700: 74 90 205;
-    --emerald-800: 58 70 160;
-    --emerald-900: 46 55 120;
-    --emerald-950: 28 32 70;
-    --accent: #8FA3FB;
-    --accent-soft: rgba(143, 163, 251, 0.35);
-    --accent-glow: rgba(143, 163, 251, 0.18);
+    --emerald-50: 236 254 255;
+    --emerald-100: 207 250 254;
+    --emerald-200: 165 243 252;
+    --emerald-300: 103 232 249;
+    --emerald-400: 34 211 238;
+    --emerald-500: 34 211 238;
+    --emerald-600: 14 165 199;
+    --emerald-700: 12 122 148;
+    --emerald-800: 11 92 112;
+    --emerald-900: 10 70 87;
+    --emerald-950: 6 32 39;
+    --accent: #22D3EE;
+    --accent-soft: rgba(34, 211, 238, 0.35);
+    --accent-glow: rgba(34, 211, 238, 0.18);
     --grid-line: rgba(148, 163, 184, 0.06);
-    --border-card: rgba(143, 163, 251, 0.15);
-    --border-card-hover: rgba(143, 163, 251, 0.45);
-    --border-tile: rgba(143, 163, 251, 0.1);
-    --border-divider: rgba(143, 163, 251, 0.09);
+    --border-card: rgba(34, 211, 238, 0.15);
+    --border-card-hover: rgba(34, 211, 238, 0.45);
+    --border-tile: rgba(34, 211, 238, 0.1);
+    --border-divider: rgba(34, 211, 238, 0.09);
     --sombra-card: rgba(0, 0, 0, 0.55);
     --aurora-1: rgba(139, 92, 246, 0.2);            /* aurora boreal: violeta */
     --aurora-2: rgba(143, 163, 251, 0.2);            /* azul-lavanda */
@@ -1039,7 +1039,7 @@ html.sem-blur .tema-thumb {
     padding: 0.4rem 0.75rem;
     border-radius: 0.6rem;
     border: 1px solid var(--border-card);
-    background: rgba(143, 163, 251, 0.14);
+    background: rgba(34, 211, 238, 0.14);
     color: var(--accent);
     font-size: 0.8rem;
     font-weight: 600;
@@ -1049,12 +1049,12 @@ html.sem-blur .tema-thumb {
 
 .viagem-btn:hover,
 .viagem-btn:focus-visible {
-    background: rgba(143, 163, 251, 0.25);
+    background: rgba(34, 211, 238, 0.25);
     box-shadow: 0 0 16px -2px var(--accent);
 }
 
 .viagem-btn.ativo {
-    background: rgba(143, 163, 251, 0.3);
+    background: rgba(34, 211, 238, 0.3);
     box-shadow: 0 0 14px -2px var(--accent);
 }
 
@@ -1580,19 +1580,19 @@ html:not([data-tema]) .tab-btn:not(.text-gray-950) {
    que aparece é o pontinho de departamento de cada caixa. */
 
 .mapa {
-    --m-fundo: #0C0C0E;
-    --m-gradiente: #0C0C0E;
+    --m-fundo: #08080A;
+    --m-gradiente: #08080A;
     --m-gradiente-img:
         radial-gradient(65% 50% at 50% -6%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 72%),
         radial-gradient(45% 35% at 50% 108%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 70%),
-        radial-gradient(130% 105% at 50% 38%, #212125 0%, #101013 50%, #030304 100%);
-    --m-superficie: #1C1C1E;
+        radial-gradient(130% 105% at 50% 38%, #171719 0%, #0B0B0D 50%, #020203 100%); /* 25% e depois +10% mais escuro (RGB x0,75 x0,9) */
+    --m-superficie: #131315;
     --m-texto: #F5F5F7;
     --m-suave: #98989D;
     --m-linha: #3A3A3C;
     --m-realce: #F5F5F7;
     --m-realce-texto: #000000;
-    --m-vidro: rgba(16, 16, 18, 0.66);
+    --m-vidro: rgba(11, 11, 13, 0.66);
     --m-grade: rgba(255, 255, 255, 0.11);
     --m-sombra: rgba(0, 0, 0, 0.5);
     --m-caixa: rgba(255, 255, 255, 0.07);

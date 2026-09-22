@@ -576,7 +576,7 @@ function lancarConfete(duracaoMs = 3800) {
     canvas.width = W * dpr; canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const cores = ['#8FA3FB', '#818CF8', '#FBBF24', '#F472B6', '#34D399', '#F87171'];
+    const cores = ['#22D3EE', '#818CF8', '#FBBF24', '#F472B6', '#34D399', '#F87171'];
     const pecas = Array.from({ length: 170 }, () => ({
         x: Math.random() * W, y: -20 - Math.random() * H * 0.5,
         vx: (Math.random() - 0.5) * 4, vy: 2 + Math.random() * 4,
