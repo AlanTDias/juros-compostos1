@@ -314,7 +314,7 @@ function alternarTema() {
 function corDoNavegadorPorTema(tema) {
     if (tema === 'claro') return '#F0F0F4';
     if (tema === 'vidro') return '#1B123A';
-    return '#060607';
+    return '#070014';
 }
 
 // Seletor de tema em "vidro líquido" (3 opções): marca a opção certa e move a peça de vidro até ela.

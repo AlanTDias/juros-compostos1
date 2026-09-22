@@ -2135,11 +2135,8 @@ html[data-tema="claro"] {
 }
 
 html:not([data-tema]) body {
-    background-color: #0C0C0E;
-    background-image:
-        radial-gradient(65% 50% at 50% -6%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 72%),
-        radial-gradient(45% 35% at 50% 108%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 70%),
-        radial-gradient(130% 105% at 50% 38%, #212125 0%, #101013 50%, #030304 100%);
+    background-color: #070014;
+    background-image: linear-gradient(181deg, rgba(7, 0, 20, 1) 0%, rgba(5, 5, 5, 1) 95%, rgba(0, 0, 0, 1) 100%); /* cor final escolhida pelo dono no seletor provisório */
     background-attachment: fixed;
 }
 
@@ -2151,12 +2148,15 @@ html[data-tema="claro"] body {
     background-attachment: fixed;
 }
 
-html:not([data-tema]) body::before,
 html[data-tema="claro"] body::before {
     background-image: radial-gradient(var(--ponto-fundo) 1px, transparent 1.6px);
     background-size: 24px 24px;
     -webkit-mask-image: none;
     mask-image: none;
+}
+
+html:not([data-tema]) body::before {
+    display: none; /* sem pontinhos no fundo do tema escuro (pedido do dono) */
 }
 
 html .shadow-lg,
@@ -2272,5 +2272,99 @@ html.sem-blur[data-tema="claro"] .hero-panel {
 @media (min-width: 1024px) {
     .menu-hamb {
         display: none;
+    }
+}
+
+/* Menu do topo SEM caixa: o cabeçalho deixa de ser um painel de vidro (sem fundo, borda, sombra nem a linha "scanner") e os
+   botões das abas ficam TRANSPARENTES (só o contorno/aro de luz), mostrando o fundo da página. A aba ativa e o hover mantêm cor. */
+
+html header,
+html header.bg-gray-800,
+html:not([data-tema]) header,
+html[data-tema="claro"] header {
+    background: transparent !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+header::after {
+    display: none;
+}
+
+html .tab-btn:not(.text-gray-950):not(:hover),
+html:not([data-tema]) .tab-btn:not(.text-gray-950):not(:hover),
+html[data-tema="claro"] .tab-btn:not(.text-gray-950):not(:hover) {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* Blur de 50px nas caixas principais do menu (os botões das abas), para o texto ficar legível sobre o fundo colorido */
+
+html .tab-btn:not(.text-gray-950) {
+    -webkit-backdrop-filter: blur(50px) saturate(140%);
+    backdrop-filter: blur(50px) saturate(140%);
+}
+
+html.sem-blur .tab-btn:not(.text-gray-950) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+/* Rodapé SEM caixa (como o menu do topo): sem fundo, borda, sombra nem desfoque; os links e o texto ficam direto sobre o fundo. */
+
+html footer,
+html footer.bg-gray-800,
+html:not([data-tema]) footer,
+html[data-tema="claro"] footer {
+    background: transparent !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Botões do menu: borda SÓLIDA e cantos mais QUADRADOS (raio 6px), sem o aro de luz/vidro. A aba ativa mantém a cor e o brilho. */
+
+html {
+    --menu-borda: rgba(255, 255, 255, 0.30);
+}
+
+html[data-tema="claro"] {
+    --menu-borda: rgba(15, 23, 42, 0.28);
+}
+
+html .tab-btn {
+    border-radius: 6px !important;
+}
+
+html .tab-btn:not(.text-gray-950) {
+    border: 1px solid var(--menu-borda) !important;
+    box-shadow: none !important;
+}
+
+html .tab-btn:not(.text-gray-950):hover,
+html .tab-btn:not(.text-gray-950):focus-visible {
+    border-color: rgb(var(--emerald-400)) !important;
+}
+
+/* Página Início: as caixas MAIORES (painel do topo e as duas seções de indicadores) com desfoque de 5px atrás do vidro
+   (as demais caixas ficam com 3px). Respeita aparelho fraco e "reduzir transparência". */
+
+@media (prefers-reduced-transparency: no-preference) {
+    html:not(.sem-blur) body[data-aba="home"] .hero-panel,
+    html:not(.sem-blur) body[data-aba="home"] section.bg-gray-800.shadow-lg {
+        -webkit-backdrop-filter: blur(5px) saturate(140%);
+        backdrop-filter: blur(5px) saturate(140%);
+    }
+}
+
+/* Início: os cartões "Todas as ferramentas" com blur de 80px atrás do vidro (o desfoque deixa o texto bem legível sobre o fundo). */
+
+@media (prefers-reduced-transparency: no-preference) {
+    html:not(.sem-blur) body[data-aba="home"] #todas-ferramentas ~ div a.shadow-lg {
+        -webkit-backdrop-filter: blur(80px) saturate(140%);
+        backdrop-filter: blur(80px) saturate(140%);
     }
 }
