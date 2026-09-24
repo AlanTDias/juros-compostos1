@@ -95,7 +95,7 @@
                 }
             }
         }    </script>
-    <link rel="stylesheet" href="style.min.css?v=81502169">
+    <link rel="stylesheet" href="style.min.css?v=ba83363b">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7396895814435111" crossorigin="anonymous"></script>
 </head>
 
@@ -194,11 +194,11 @@
                             <p id="drop-zone-text" class="text-sm text-gray-300">
                                 <span class="font-semibold text-emerald-400">Clique para selecionar</span> ou arraste e solte o arquivo aqui
                             </p>
-                            <p class="text-[11px] text-gray-400">Suporta DOCX, XLSX, XLS, PPTX, PPT, PDF, CSV e TXT</p>
+                            <p class="text-[11px] text-gray-400">Suporta DOCX, XLSX, XLS, PPTX, PPT, PDF, CSV, TXT e JSON</p>
                         </div>
 
                         <!-- Input oculto manipulado pela caixa acima -->
-                        <input type="file" id="file-input-universal" accept=".docx, .xlsx, .xls, .pptx, .ppt, .pdf, .csv, .txt" onchange="handleFileSelect()" class="hidden">
+                        <input type="file" id="file-input-universal" accept=".docx, .xlsx, .xls, .pptx, .ppt, .pdf, .csv, .txt, .json" onchange="handleFileSelect()" class="hidden">
                     </div>
 
                     <div>
@@ -206,6 +206,7 @@
                         <select id="conversion-target-format" class="w-full bg-gray-700 text-sm text-gray-100 rounded p-3 outline-none focus:ring-2 focus:ring-emerald-500">
                             <option value="" disabled selected>Selecione um arquivo primeiro...</option>
                         </select>
+                        <p class="text-[11px] text-gray-500 mt-1">PDF → Excel/CSV reconstrói as colunas pelo espaçamento do texto: funciona bem em tabelas comuns, mas confira o resultado (PDFs digitalizados, só imagem, não têm texto para extrair).</p>
                     </div>
                 </div>
 
@@ -657,8 +658,8 @@
         <input type="file" id="mapa-arquivo" accept=".json,application/json" hidden>
     </div>
     <!-- Scripts: só o que esta página usa. O núcleo (core.js) vem primeiro. -->
-    <script src="js/core.js?v=9dc1fc38"></script>
-    <script src="js/arquivos.js?v=9dc1fc38"></script>
+    <script src="js/core.js?v=53461fce"></script>
+    <script src="js/arquivos.js?v=53461fce"></script>
 </body>
 
 </html>

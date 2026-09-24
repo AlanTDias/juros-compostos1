@@ -404,7 +404,7 @@ button:focus-visible {
 /* ---------- Pop-up de novidades: entrada leve (evento único, não repetitivo) ---------- */
 
 .novidades-pop {
-    animation: novidades-in 0.25s ease-out;
+    animation: novidades-in 2.025s ease-out;
 }
 
 @keyframes novidades-in {

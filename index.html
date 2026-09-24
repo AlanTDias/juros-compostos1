@@ -95,7 +95,7 @@
                 }
             }
         }    </script>
-    <link rel="stylesheet" href="style.min.css?v=81502169">
+    <link rel="stylesheet" href="style.min.css?v=ba83363b">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7396895814435111" crossorigin="anonymous"></script>
 </head>
 
@@ -242,29 +242,29 @@
                             <span class="text-xs text-gray-400">Dólar / Real</span>
                             <span id="merc-usdbrl-badge" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-600/50 text-gray-300">—</span>
                         </div>
-                        <span id="merc-usdbrl-valor" class="block text-base font-bold text-white mt-1">Carregando...</span>
-                        <div class="h-14 mt-1"><canvas id="merc-usdbrl-chart"></canvas></div>
+                        <span id="merc-usdbrl-valor" class="block text-base font-bold text-white mt-1 animate-pulse">Carregando...</span>
+                        <div class="h-14 mt-1 relative"><div id="merc-usdbrl-skeleton" class="absolute inset-0 bg-gray-600/40 rounded animate-pulse"></div><canvas id="merc-usdbrl-chart"></canvas></div>
                     </div>
                     <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-gray-400">Bitcoin</span>
                             <span id="merc-btc-badge" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-600/50 text-gray-300">—</span>
                         </div>
-                        <span id="merc-btc-valor" class="block text-base font-bold text-white mt-1">Carregando...</span>
-                        <div class="h-14 mt-1"><canvas id="merc-btc-chart"></canvas></div>
+                        <span id="merc-btc-valor" class="block text-base font-bold text-white mt-1 animate-pulse">Carregando...</span>
+                        <div class="h-14 mt-1 relative"><div id="merc-btc-skeleton" class="absolute inset-0 bg-gray-600/40 rounded animate-pulse"></div><canvas id="merc-btc-chart"></canvas></div>
                     </div>
                     <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-gray-400">Euro / Dólar</span>
                             <span id="merc-eurusd-badge" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-600/50 text-gray-300">—</span>
                         </div>
-                        <span id="merc-eurusd-valor" class="block text-base font-bold text-white mt-1">Carregando...</span>
-                        <div class="h-14 mt-1"><canvas id="merc-eurusd-chart"></canvas></div>
+                        <span id="merc-eurusd-valor" class="block text-base font-bold text-white mt-1 animate-pulse">Carregando...</span>
+                        <div class="h-14 mt-1 relative"><div id="merc-eurusd-skeleton" class="absolute inset-0 bg-gray-600/40 rounded animate-pulse"></div><canvas id="merc-eurusd-chart"></canvas></div>
                     </div>
                 </div>
 
                 <div class="mt-3 flex items-center justify-between">
-                    <span id="merc-ipca-total" class="text-xs text-gray-400">Inflação acumulada no ano (IPCA): calculando...</span>
+                    <span id="merc-ipca-total" class="text-xs text-gray-400 animate-pulse">Inflação acumulada no ano (IPCA): calculando...</span>
                     <p id="merc-ipca-status" class="hidden text-[11px] text-gray-500">Não foi possível buscar o IPCA agora.</p>
                 </div>
 
@@ -280,19 +280,19 @@
                     <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
                         <span class="block text-xs text-gray-400 mb-2">CDB 100% do CDI (12 meses): líquido x Imposto de Renda</span>
                         <div class="flex items-center gap-3">
-                            <div class="w-24 h-24 shrink-0 grafico-pizza-gloss"><canvas id="merc-pizza-ir"></canvas></div>
+                            <div class="w-24 h-24 shrink-0 grafico-pizza-gloss relative"><div id="merc-pizza-ir-skeleton" class="absolute inset-0 rounded-full bg-gray-600/40 animate-pulse"></div><canvas id="merc-pizza-ir"></canvas></div>
                             <ul id="merc-pizza-ir-legenda" class="text-[11px] text-gray-300 space-y-1"></ul>
                         </div>
                         <p id="merc-pizza-ir-status" class="hidden mt-2 text-[11px] text-gray-500">Não foi possível calcular agora.</p>
                         <p id="merc-pizza-ir-nota" class="mt-2 text-[11px] text-gray-500">Calculado com o CDI de agora e o IR regressivo de 12 meses (20%).</p>
                     </div>
                     <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
-                        <span class="block text-xs text-gray-400 mb-2">Salário de R$ 5.000: para onde vai</span>
+                        <span class="block text-xs text-gray-400 mb-2">iPhone 18 Fold (R$ 21.999): quanto é imposto</span>
                         <div class="flex items-center gap-3">
-                            <div class="w-24 h-24 shrink-0 grafico-pizza-gloss"><canvas id="merc-pizza-salario"></canvas></div>
-                            <ul id="merc-pizza-salario-legenda" class="text-[11px] text-gray-300 space-y-1"></ul>
+                            <div class="w-24 h-24 shrink-0 grafico-pizza-gloss"><canvas id="merc-pizza-iphone"></canvas></div>
+                            <ul id="merc-pizza-iphone-legenda" class="text-[11px] text-gray-300 space-y-1"></ul>
                         </div>
-                        <p class="mt-2 text-[11px] text-gray-500">Exemplo com as regras de 2026 (INSS e IRRF); não é buscado em tempo real. <a href="salario-liquido.html" class="text-emerald-400 hover:underline">Simule o seu →</a></p>
+                        <p class="mt-2 text-[11px] text-gray-500">Estimativa: ~62% do preço de um iPhone no Brasil são tributos (Imposto de Importação, ICMS, IPI, PIS/COFINS, IOF), que incidem em cascata; não é um cálculo fiscal exato nem é buscado em tempo real. Nos EUA, o iPhone 18 Pro sai por US$ 1.199.</p>
                     </div>
                 </div>
 
@@ -696,9 +696,9 @@
     </div>
     <!-- Scripts: só o que esta página usa. O núcleo (core.js) vem primeiro. -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="js/core.js?v=9dc1fc38"></script>
-    <script src="js/indicadores.js?v=9dc1fc38"></script>
-    <script src="js/mercado.js?v=9dc1fc38"></script>
+    <script src="js/core.js?v=53461fce"></script>
+    <script src="js/indicadores.js?v=53461fce"></script>
+    <script src="js/mercado.js?v=53461fce"></script>
 </body>
 
 </html>

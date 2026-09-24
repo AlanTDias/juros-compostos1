@@ -11,6 +11,8 @@ const CONVERSION_MATRIX = {
     ],
     'pdf': [
         { value: 'docx', label: 'Documento Word (.docx)' },
+        { value: 'xlsx', label: 'Planilha Excel (.xlsx)' },
+        { value: 'csv', label: 'Planilha CSV (.csv)' },
         { value: 'txt', label: 'Texto Extraído (.txt)' },
         { value: 'json', label: 'Estrutura JSON (.json)' }
     ],
@@ -107,6 +109,7 @@ async function convertFile() {
         if (['xlsx', 'xls', 'csv'].includes(ext)) libsNecessarias.push('xlsx');
         if (ext === 'json' && ['csv', 'xlsx'].includes(targetFormat)) libsNecessarias.push('xlsx');
         if (ext === 'pdf') libsNecessarias.push('pdfjs');
+        if (ext === 'pdf' && ['xlsx', 'csv'].includes(targetFormat)) libsNecessarias.push('xlsx');
         if (targetFormat === 'pdf') libsNecessarias.push('html2pdf');
         if (targetFormat === 'docx') libsNecessarias.push('docx');
         await carregarLibs(...libsNecessarias);
@@ -124,6 +127,8 @@ async function convertFile() {
             if (targetFormat === 'docx') await convertPdfToDocx(file, statusEl);
             else if (targetFormat === 'txt') await convertPdfToText(file, statusEl);
             else if (targetFormat === 'json') await convertPdfToJson(file, statusEl);
+            else if (targetFormat === 'xlsx') await convertPdfToXlsx(file, statusEl);
+            else if (targetFormat === 'csv') await convertPdfToCsv(file, statusEl);
         } else if (ext === 'csv') {
             if (targetFormat === 'json') await convertCsvToJson(file, statusEl);
             else if (targetFormat === 'txt') await convertCsvToTxt(file, statusEl);
@@ -245,6 +250,79 @@ async function convertPdfToDocx(file, statusEl) {
 
     await exportParagraphsToDocx(docParagraphs, file.name);
     updateStatus(statusEl, "✅ Conversão para Word (.docx) concluída!");
+}
+
+// PDF -> planilha (Excel/CSV): tenta reconstruir TABELAS, não só texto corrido. Heurística por posição:
+// agrupa os itens de texto por linha (mesmo Y, como em extractPdfPagesText) e, dentro de cada linha,
+// abre uma coluna nova sempre que o espaço horizontal até o próximo item for maior que PDF_GAP_COLUNA
+// (em pontos PDF; espaço entre palavras normais é bem menor que isso). Funciona bem para tabelas com
+// colunas bem separadas (a maioria dos PDFs gerados por sistema); tabelas sem espaçamento claro entre
+// colunas, ou PDFs digitalizados (só imagem), não têm como ser reconstruídos — mostra aviso nesse caso.
+const PDF_GAP_COLUNA = 12;
+
+async function extractPdfTableRows(file) {
+    const buffer = await readFileAsArrayBuffer(file);
+    const pdf = await pdfjsLib.getDocument(new Uint8Array(buffer)).promise;
+
+    const linhas = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+
+        // Agrupa itens da página em linhas (mesmo critério de Y usado na extração de texto simples)
+        const itensPorLinha = [];
+        let lastY = null;
+        let linhaAtual = [];
+        textContent.items.forEach(item => {
+            if (!item.str || !item.str.trim()) return;
+            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+                itensPorLinha.push(linhaAtual);
+                linhaAtual = [];
+            }
+            linhaAtual.push(item);
+            lastY = item.transform[5];
+        });
+        if (linhaAtual.length) itensPorLinha.push(linhaAtual);
+
+        itensPorLinha.forEach(itens => {
+            itens.sort((a, b) => a.transform[4] - b.transform[4]);
+            const celulas = [];
+            let celulaAtual = '';
+            let fimAnterior = null;
+            itens.forEach(item => {
+                const inicio = item.transform[4];
+                if (fimAnterior !== null && (inicio - fimAnterior) > PDF_GAP_COLUNA) {
+                    celulas.push(celulaAtual.trim());
+                    celulaAtual = '';
+                }
+                celulaAtual += (celulaAtual ? ' ' : '') + item.str;
+                fimAnterior = inicio + (item.width || 0);
+            });
+            if (celulaAtual) celulas.push(celulaAtual.trim());
+            if (celulas.length) linhas.push(celulas);
+        });
+    }
+    return linhas;
+}
+
+async function convertPdfToXlsx(file, statusEl) {
+    const linhas = await extractPdfTableRows(file);
+    if (!linhas.length) throw new Error('Não encontrei texto para montar uma tabela neste PDF.');
+    const worksheet = XLSX.utils.aoa_to_sheet(linhas);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados');
+    const xlsxBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    downloadBlob(xlsxBuffer, getBaseFileName(file.name) + ".xlsx", 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    updateStatus(statusEl, "✅ PDF convertido para Excel! As colunas são reconstruídas pelo espaçamento do texto — confira o resultado.");
+}
+
+async function convertPdfToCsv(file, statusEl) {
+    const linhas = await extractPdfTableRows(file);
+    if (!linhas.length) throw new Error('Não encontrei texto para montar uma tabela neste PDF.');
+    const worksheet = XLSX.utils.aoa_to_sheet(linhas);
+    const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+    downloadBlob(csvOutput, getBaseFileName(file.name) + ".csv", 'text/csv;charset=utf-8;');
+    updateStatus(statusEl, "✅ PDF convertido para CSV! As colunas são reconstruídas pelo espaçamento do texto — confira o resultado.");
 }
 
 async function convertCsvToJson(file, statusEl) {

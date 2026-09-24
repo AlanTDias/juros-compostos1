@@ -1,9 +1,12 @@
 // MERCADO EM TEMPO REAL (só a página Início): 3 "osciladores" (mini-gráficos) de câmbio — Dólar/Real, Bitcoin/Real,
 // Euro/Dólar —, o texto do IPCA acumulado no ano e 3 gráficos de pizza (regra 50/30/20, líquido x Imposto de Renda
-// de um CDB e para onde vai um salário de R$5.000). Cada um busca os próprios dados (AwesomeAPI e Banco Central, os
-// mesmos domínios já usados pelos indicadores) e falha "grácil": se uma cotação não vier, aquele cartão mostra
-// "indisponível" sem travar os outros. Só roda se os elementos existirem na página (`#mercado-painel`).
+// de um CDB e quanto do preço do iPhone 18 Fold é imposto). Cada um busca os próprios dados (AwesomeAPI e Banco
+// Central, os mesmos domínios já usados pelos indicadores) e falha "grácil": se uma cotação não vier, aquele cartão
+// mostra "indisponível" sem travar os outros. Só roda se os elementos existirem na página (`#mercado-painel`).
 // Precisa do Chart.js (script externo só nesta página) e de coresDoGrafico()/aliquotaIRRegressivo() (core.js).
+// Enquanto busca dados na rede (osciladores, pizza do CDB/IR e texto do IPCA), o HTML já nasce com
+// `animate-pulse` (Tailwind) no valor/skeleton; `pararPulso()` tira a classe assim que o dado chega (sucesso
+// ou erro) — as 2 pizzas estáticas (503020 e iPhone) não esperam rede, então não precisam de pulso.
 
 const PARES_CAMBIO = [
     { par: 'USD-BRL', id: 'usdbrl', formatar: v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) },
@@ -13,19 +16,20 @@ const PARES_CAMBIO = [
 
 // Três pizzas 2D, cada uma sobre um assunto diferente (nenhuma sobre o IPCA — esse fica só como texto, abaixo dos
 // osciladores). 1) Regra 50/30/20 (referência de planejamento pessoal, sem busca). 2) Líquido x Imposto de Renda de
-// um CDB 100% do CDI em 12 meses (com o CDI de agora). 3) Para onde vai um salário de R$ 5.000 (regras de 2026).
+// um CDB 100% do CDI em 12 meses (com o CDI de agora). 3) Quanto do preço do iPhone 18 Fold é imposto (estimativa).
 const PIZZA_503020 = [
     { nome: 'Necessidades (50%)', valor: 50, cor: '#8FA3FB' },
-    { nome: 'Desejos (30%)', valor: 30, cor: '#22D3EE' },
-    { nome: 'Poupança/investimentos (20%)', valor: 20, cor: '#34D399' }
+    { nome: 'Desejos (30%)', valor: 30, cor: '#FBBF24' },
+    { nome: 'Poupança/investimentos (20%)', valor: 20, cor: '#F87171' }
 ];
-// Exemplo de salário de R$ 5.000/mês pelas regras de 2026 (INSS_2026/IRRF_2026 em js/financeiro.js): INSS R$501,51,
-// IRRF R$0,00 (zerado pela redução da Lei 15.270/2025) e líquido R$4.498,49. Não é calculado aqui de novo (evita
-// duplicar a fórmula em dois arquivos); se as tabelas de 2026 mudarem, atualizar os dois lugares juntos.
-const PIZZA_SALARIO = [
-    { nome: 'Líquido (R$ 4.498,49)', valor: 4498.49, cor: '#34D399' },
-    { nome: 'INSS (R$ 501,51)', valor: 501.51, cor: '#F59E0B' },
-    { nome: 'IRRF (R$ 0,00)', valor: 0.01, cor: '#F87171' } // 0,01 só pra fatia mínima aparecer na legenda/tooltip
+// ESTIMATIVA (não é cálculo fiscal exato): iPhone 18 Fold a R$ 21.999 (preço oficial no Brasil, set/2026). ~62,1% do
+// preço são tributos (proporção real do iPhone Air: R$ 6.520 de R$ 10.499, Blog do iPhone), repartidos pelo peso das
+// alíquotas: II 60 : ICMS 19 : outros 31,03 (IPI 15 + PIS/COFINS 9,65 + IOF 6,38). Atualizar à mão se o preço mudar.
+const PIZZA_IPHONE = [
+    { nome: 'Aparelho (R$ 8.337)', valor: 8337, cor: '#8FA3FB' },
+    { nome: 'Imposto de Importação (R$ 7.446)', valor: 7446, cor: '#F87171' },
+    { nome: 'ICMS (R$ 2.360)', valor: 2360, cor: '#FBBF24' },
+    { nome: 'Outros: IPI, PIS/COFINS, IOF (R$ 3.856)', valor: 3856, cor: '#A78BFA' }
 ];
 
 let graficosMercado = []; // guarda as instâncias do Chart.js para não recriar em cima (evita "canvas já em uso")
@@ -37,7 +41,7 @@ function montarMercado() {
     PARES_CAMBIO.forEach(carregarOscilador);
     carregarIpcaAcumulado();
     montarPizza('merc-pizza-503020', PIZZA_503020);
-    montarPizza('merc-pizza-salario', PIZZA_SALARIO);
+    montarPizza('merc-pizza-iphone', PIZZA_IPHONE);
     montarPizzaIR();
 }
 
@@ -143,14 +147,25 @@ async function montarPizzaIR() {
         const liquido = dados.cdi * (1 - aliq);
         const imposto = dados.cdi * aliq;
         montarPizza('merc-pizza-ir', [
-            { nome: `Líquido (${liquido.toFixed(2)}% a.a.)`, valor: liquido, cor: '#34D399' },
+            { nome: `Líquido (${liquido.toFixed(2)}% a.a.)`, valor: liquido, cor: '#8FA3FB' },
             { nome: `Imposto de Renda (${imposto.toFixed(2)}% a.a.)`, valor: imposto, cor: '#F87171' }
         ]);
         if (statusEl) statusEl.classList.add('hidden');
     } catch (erro) {
         console.warn('Aviso: Não foi possível montar a pizza de líquido x Imposto de Renda.');
         if (statusEl) statusEl.classList.remove('hidden');
+    } finally {
+        pararPulso('merc-pizza-ir-skeleton');
     }
+}
+
+// Tira o bloco "skeleton" (retângulo/círculo cinza pulsando) de cima do gráfico assim que o dado chega —
+// no sucesso ou no erro. Precisa REMOVER o elemento, não só a classe `animate-pulse`: ele é opaco
+// (`bg-gray-600/40`) e cobre o canvas por cima (`absolute inset-0`), então só parar de pulsar deixava
+// o retângulo cinza parado ali para sempre, escondendo o gráfico por baixo.
+function pararPulso(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
 }
 
 // Um "oscilador": mini-gráfico de linha dos últimos dias + valor atual + variação do dia, tudo a partir do
@@ -176,6 +191,8 @@ async function carregarOscilador(cfg) {
         const subiu = variacao >= 0;
 
         valorEl.innerText = cfg.formatar(atual);
+        valorEl.classList.remove('animate-pulse');
+        pararPulso('merc-' + cfg.id + '-skeleton');
         if (badgeEl) {
             badgeEl.innerText = (subiu ? '▲ +' : '▼ ') + variacao.toFixed(2) + '%';
             badgeEl.className = 'text-[10px] font-semibold px-1.5 py-0.5 rounded-full ' +
@@ -201,6 +218,8 @@ async function carregarOscilador(cfg) {
     } catch (erro) {
         console.warn(`Aviso: Não foi possível atualizar o oscilador ${cfg.par}.`);
         valorEl.innerText = 'Indisponível agora';
+        valorEl.classList.remove('animate-pulse');
+        pararPulso('merc-' + cfg.id + '-skeleton');
         if (badgeEl) badgeEl.classList.add('hidden');
     }
 }
@@ -231,6 +250,8 @@ async function carregarIpcaAcumulado() {
         console.warn('Aviso: Não foi possível atualizar o IPCA acumulado no ano.');
         totalEl.innerText = 'IPCA no ano: indisponível';
         if (statusEl) statusEl.classList.remove('hidden');
+    } finally {
+        totalEl.classList.remove('animate-pulse');
     }
 }
 
