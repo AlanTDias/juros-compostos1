@@ -1199,14 +1199,6 @@ html .bg-emerald-500 {
     box-shadow: inset 2px -2px 1px -1px rgba(255, 255, 255, 0.6), inset -2px 2px 1px -1px rgba(255, 255, 255, 0.6), inset 0 0 2px rgba(0, 0, 0, 0.35), 0 8px 22px -8px var(--accent-soft);
 }
 
-/* Abas do menu em vidro */
-
-html .tab-btn:not(.text-gray-950) {
-    background-color: rgb(var(--gray-100) / 0.05);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-}
-
 /* Modais e caixas flutuantes também viram vidro */
 
 html .sala-secreta-card {
@@ -1318,21 +1310,7 @@ html textarea:focus {
     box-shadow: 0 0 0 2px var(--accent-soft), 0 0 22px -4px var(--accent-soft);
 }
 
-/* Menu: abas em vidro, sem contorno colorido; a ativa vira uma "gema" */
-
-html .tab-btn:not(.text-gray-950) {
-    border-color: var(--vidro-linha);
-    background-image:
-        linear-gradient(45deg, rgba(255, 255, 255, 0.28) 0%, transparent 18%, transparent 82%, rgba(255, 255, 255, 0.28) 100%),
-        linear-gradient(180deg, var(--vidro-luz), rgba(255, 255, 255, 0));
-    box-shadow:
-        inset 2px -2px 1px -1px var(--vidro-realce),
-        inset -2px 2px 1px -1px var(--vidro-realce),
-        inset 6px -6px 1px -6px var(--vidro-realce),
-        inset -6px 6px 1px -6px var(--vidro-realce),
-        inset 0 0 2px var(--vidro-borda-int),
-        0 4px 10px -6px var(--sombra-card);
-}
+/* Menu: a aba ativa vira uma "gema" */
 
 html .tab-btn.text-gray-950 {
     background-image: linear-gradient(135deg, rgb(var(--emerald-300)), rgb(var(--emerald-500)) 55%, rgb(var(--emerald-600)));
@@ -1529,10 +1507,6 @@ html[data-tema="claro"] textarea {
     background-color: rgb(var(--gray-950) / 0.5);
 }
 
-html[data-tema="claro"] .tab-btn:not(.text-gray-950) {
-    background-color: rgb(var(--gray-950) / 0.6);
-}
-
 /* Blocos e botões cinza sólidos (bg-gray-700/600) também ficam translúcidos, em todos os temas */
 
 html .bg-gray-700:not(#doc-printable-area *),
@@ -1566,14 +1540,6 @@ html.sem-blur header.bg-gray-800 {
     }
 }
 
-
-/* Menu (tema escuro): botões menos "esbranquiçados" — sem o degradê branco de cima para baixo, brilho diagonal mais fraco
-   e fundo mais escuro, para o contorno e os reflexos das quinas aparecerem sem névoa cinza. */
-
-html:not([data-tema]) .tab-btn:not(.text-gray-950) {
-    background-color: rgb(var(--gray-950) / 0.4);
-    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 18%, transparent 82%, rgba(255, 255, 255, 0.1) 100%);
-}
 
 /* ---------- Mapa de sistemas (easter egg do botão flutuante): minimalista, preto e off-white, estilo Apple ----------
    Tem tema PRÓPRIO (claro/escuro pelo botão da barra), independente do tema do site. Só tons de cinza; a única cor
@@ -2367,4 +2333,10 @@ html .tab-btn:not(.text-gray-950):focus-visible {
         -webkit-backdrop-filter: blur(80px) saturate(140%);
         backdrop-filter: blur(80px) saturate(140%);
     }
+}
+
+/* Início: sombra suave sob o gráfico de pizza do IPCA, para dar profundidade ao efeito "gloss" das fatias */
+
+.grafico-pizza-gloss canvas {
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
 }

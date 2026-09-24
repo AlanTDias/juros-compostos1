@@ -7,7 +7,9 @@
 //   - gera sitemap.xml e robots.txt;
 //   - carimba os arquivos de js/ com uma versão (?v=...) para o navegador buscar sempre a mais nova;
 //   - confere que as listas de páginas do paginas.json e do js/core.js batem e que não sobrou {{marcador}}.
-// O CSS e o JS (style.css, js/*.js) são editados direto; só o HTML é gerado.
+//   - minifica o style.css (comentários e espaços fora) num style.min.css, o arquivo que as páginas realmente
+//     carregam (o style.css continua sendo o original, editado à mão — ver "minificarCSS" abaixo).
+// O CSS e o JS (style.css, js/*.js) são editados direto; só o HTML (e o style.min.css) é gerado.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -15,6 +17,18 @@ const crypto = require('crypto');
 const raiz = path.resolve(__dirname, '..');
 const lerArq = p => fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
 const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// Minificador simples e conservador: só tira comentários e espaço "decorativo" (indentação, quebras de linha, espaço
+// em volta de { } : ; ,). Nunca mexe no espaço DENTRO de valores (ex.: "143 163 251" das variáveis de cor, ou os
+// espaços em calc(... - ...), obrigatórios). Não usa nenhuma lib: o site não tem bundler nem node_modules.
+function minificarCSS(css) {
+    return css
+        .replace(/\/\*[\s\S]*?\*\//g, '')   // remove comentários /* ... */
+        .replace(/\s+/g, ' ')               // várias linhas/espaços em branco viram um espaço só
+        .replace(/ ?([{}:;,]) ?/g, '$1')    // tira o espaço em volta de { } : ; ,
+        .replace(/;}/g, '}')                // o ; antes de } é opcional
+        .trim();
+}
 
 const config = JSON.parse(lerArq(path.join(__dirname, 'paginas.json')));
 const base = lerArq(path.join(__dirname, 'base.html'));
@@ -30,6 +44,16 @@ const jsDir = path.join(raiz, 'js');
 const hash = crypto.createHash('md5');
 fs.readdirSync(jsDir).filter(f => f.endsWith('.js')).sort().forEach(f => hash.update(fs.readFileSync(path.join(jsDir, f))));
 const versao = hash.digest('hex').slice(0, 8);
+
+// ---------- style.min.css: gerado a partir do style.css (fonte); versão própria, só muda quando o CSS muda ----------
+const styleCssPath = path.join(raiz, 'style.css');
+const cssOriginal = fs.readFileSync(styleCssPath, 'utf8');
+const versaoCss = crypto.createHash('md5').update(cssOriginal).digest('hex').slice(0, 8);
+fs.writeFileSync(path.join(raiz, 'style.min.css'), minificarCSS(cssOriginal), 'utf8');
+if (!base.includes('<link rel="stylesheet" href="style.css">')) {
+    problemas.push('base.html: não achei a tag <link> do style.css para trocar por style.min.css');
+}
+const baseComCss = base.replace('<link rel="stylesheet" href="style.css">', `<link rel="stylesheet" href="style.min.css?v=${versaoCss}">`);
 
 // ---------- confere o menu do core.js com o paginas.json ----------
 const core = lerArq(path.join(jsDir, 'core.js'));
@@ -150,7 +174,7 @@ for (const p of paginas) {
     if (nomes.has(p.arquivo)) problemas.push(`arquivo repetido: ${p.arquivo}`);
     nomes.add(p.arquivo);
 
-    const pagina = base
+    const pagina = baseComCss
         .replace('{{TITLE}}', esc(p.titulo))
         .replace('{{META}}', metaDa(p))
         .replace('{{ABA}}', p.id)
@@ -183,7 +207,10 @@ fs.writeFileSync(path.join(raiz, 'robots.txt'), `User-agent: *\nAllow: /\n\nSite
 const dep = require('child_process').spawnSync(process.execPath, [path.join(__dirname, 'verificar-dependencias.js'), raiz], { encoding: 'utf8' });
 if (dep.status !== 0) problemas.push('Dependências de script:\n' + dep.stdout.trim());
 
-console.log(`Páginas geradas: ${paginas.length} | versão dos scripts: ${versao} | sitemap.xml e robots.txt atualizados`);
+const tamanhoCss = fs.statSync(path.join(raiz, 'style.css')).size;
+const tamanhoCssMin = fs.statSync(path.join(raiz, 'style.min.css')).size;
+const economiaCss = Math.round((1 - tamanhoCssMin / tamanhoCss) * 100);
+console.log(`Páginas geradas: ${paginas.length} | versão dos scripts: ${versao} | style.min.css: ${(tamanhoCssMin / 1024).toFixed(1)} KB (${economiaCss}% menor que o style.css) | sitemap.xml e robots.txt atualizados`);
 if (problemas.length) {
     console.log('\nATENÇÃO:\n - ' + problemas.join('\n - '));
     process.exitCode = 1;

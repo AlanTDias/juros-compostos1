@@ -747,6 +747,15 @@ function updateFooterAndCounter() {
 // UTILITÁRIOS E IMAGENS
 // ==========================================
 
+// Alíquota de IR regressivo da renda fixa, pelo prazo em dias (usada pelo Comparador de Investimentos e pelo
+// painel comparativo da Início, em indicadores.js)
+function aliquotaIRRegressivo(dias) {
+    if (dias <= 180) return 0.225;
+    if (dias <= 360) return 0.20;
+    if (dias <= 720) return 0.175;
+    return 0.15;
+}
+
 // Nomes de arquivo (usados por conversores, editor de PDF, imagens...)
 function getFileExtension(filename) {
     return filename.split('.').pop().toLowerCase();

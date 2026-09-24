@@ -4,6 +4,7 @@
 // elementos da tela SE eles existirem (a página Início os tem) e guarda o resultado em `indicadoresMercado`
 // para outras ferramentas usarem (o Comparador de Investimentos lê CDI e Selic daqui).
 // Cada indicador que falhar mantém um valor padrão marcado como "⚠️ estimado" (ok[nome] = false).
+// (Euro e Bitcoin saíram daqui a pedido do dono; o Bitcoin continua como oscilador em js/mercado.js.)
 
 const INDICADORES_PADRAO = { selic: 14.00, cdi: 13.90, ipca: 4.44, poupanca: 8.34, dolar: 5.50 };
 let indicadoresMercado = null;      // { selic, cdi, ipca, poupanca, dolar, ok: { selic: true/false, ... } }
@@ -34,11 +35,13 @@ async function fetchMarketIndicators() {
             return dados && dados[0] && dados[0].valor ? parseFloat(dados[0].valor) : NaN;
         };
 
+        const cambio = (async () => {
+            const dados = await buscarJson('https://economia.awesomeapi.com.br/json/last/USD-BRL');
+            if (dados && dados.USDBRL && isFinite(parseFloat(dados.USDBRL.bid))) { valores.dolar = parseFloat(dados.USDBRL.bid); ok.dolar = true; }
+        })().catch(() => console.warn('Aviso: Não foi possível atualizar o dólar em tempo real.'));
+
         await Promise.all([
-            tentar('dolar', async () => {
-                const dados = await buscarJson('https://economia.awesomeapi.com.br/json/last/USD-BRL');
-                return dados && dados.USDBRL ? parseFloat(dados.USDBRL.bid) : NaN;
-            }),
+            cambio,
             tentar('selic', bcb(432)),
             tentar('cdi', bcb(4389)),
             tentar('ipca', bcb(13522)),

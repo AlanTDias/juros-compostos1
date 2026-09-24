@@ -11,7 +11,10 @@
       "resumo": "Todas as ferramentas do ExCalc reunidas em um só lugar.",
       "categoria": "FinanceApplication",
       "prioridade": "1.0",
-      "scripts": ["indicadores.js"]
+      "externos": [
+        "https://cdn.jsdelivr.net/npm/chart.js"
+      ],
+      "scripts": ["indicadores.js", "mercado.js"]
     },
     {
       "id": "juros-compostos",

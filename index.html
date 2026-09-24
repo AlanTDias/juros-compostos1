@@ -95,7 +95,7 @@
                 }
             }
         }    </script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.min.css?v=81502169">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7396895814435111" crossorigin="anonymous"></script>
 </head>
 
@@ -225,6 +225,78 @@
                         <span id="ind-poupanca" class="text-base md:text-lg font-bold text-white">Carregando...</span>
                     </div>
                 </div>
+            </section>
+
+            <!-- 📈 MERCADO EM TEMPO REAL: osciladores de câmbio + IPCA acumulado no ano (js/mercado.js) -->
+            <section id="mercado-painel" class="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg">
+                <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 mb-3 border-b border-gray-700">
+                    <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>📈</span> Mercado em Tempo Real
+                    </h3>
+                    <span class="text-xs text-gray-400 mt-1 md:mt-0">Câmbio dos últimos 30 dias</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400">Dólar / Real</span>
+                            <span id="merc-usdbrl-badge" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-600/50 text-gray-300">—</span>
+                        </div>
+                        <span id="merc-usdbrl-valor" class="block text-base font-bold text-white mt-1">Carregando...</span>
+                        <div class="h-14 mt-1"><canvas id="merc-usdbrl-chart"></canvas></div>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400">Bitcoin</span>
+                            <span id="merc-btc-badge" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-600/50 text-gray-300">—</span>
+                        </div>
+                        <span id="merc-btc-valor" class="block text-base font-bold text-white mt-1">Carregando...</span>
+                        <div class="h-14 mt-1"><canvas id="merc-btc-chart"></canvas></div>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400">Euro / Dólar</span>
+                            <span id="merc-eurusd-badge" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-600/50 text-gray-300">—</span>
+                        </div>
+                        <span id="merc-eurusd-valor" class="block text-base font-bold text-white mt-1">Carregando...</span>
+                        <div class="h-14 mt-1"><canvas id="merc-eurusd-chart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="mt-3 flex items-center justify-between">
+                    <span id="merc-ipca-total" class="text-xs text-gray-400">Inflação acumulada no ano (IPCA): calculando...</span>
+                    <p id="merc-ipca-status" class="hidden text-[11px] text-gray-500">Não foi possível buscar o IPCA agora.</p>
+                </div>
+
+                <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <span class="block text-xs text-gray-400 mb-2">Regra 50/30/20: para onde deveria ir seu salário</span>
+                        <div class="flex items-center gap-3">
+                            <div class="w-24 h-24 shrink-0 grafico-pizza-gloss"><canvas id="merc-pizza-503020"></canvas></div>
+                            <ul id="merc-pizza-503020-legenda" class="text-[11px] text-gray-300 space-y-1"></ul>
+                        </div>
+                        <p class="mt-2 text-[11px] text-gray-500">Regra clássica de planejamento pessoal (não é buscada em tempo real).</p>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <span class="block text-xs text-gray-400 mb-2">CDB 100% do CDI (12 meses): líquido x Imposto de Renda</span>
+                        <div class="flex items-center gap-3">
+                            <div class="w-24 h-24 shrink-0 grafico-pizza-gloss"><canvas id="merc-pizza-ir"></canvas></div>
+                            <ul id="merc-pizza-ir-legenda" class="text-[11px] text-gray-300 space-y-1"></ul>
+                        </div>
+                        <p id="merc-pizza-ir-status" class="hidden mt-2 text-[11px] text-gray-500">Não foi possível calcular agora.</p>
+                        <p id="merc-pizza-ir-nota" class="mt-2 text-[11px] text-gray-500">Calculado com o CDI de agora e o IR regressivo de 12 meses (20%).</p>
+                    </div>
+                    <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700">
+                        <span class="block text-xs text-gray-400 mb-2">Salário de R$ 5.000: para onde vai</span>
+                        <div class="flex items-center gap-3">
+                            <div class="w-24 h-24 shrink-0 grafico-pizza-gloss"><canvas id="merc-pizza-salario"></canvas></div>
+                            <ul id="merc-pizza-salario-legenda" class="text-[11px] text-gray-300 space-y-1"></ul>
+                        </div>
+                        <p class="mt-2 text-[11px] text-gray-500">Exemplo com as regras de 2026 (INSS e IRRF); não é buscado em tempo real. <a href="salario-liquido.html" class="text-emerald-400 hover:underline">Simule o seu →</a></p>
+                    </div>
+                </div>
+
+                <p class="mt-2 text-[11px] text-gray-500">Fontes: AwesomeAPI (câmbio) e Banco Central (IPCA, série 433). Cotações de mercado, só para acompanhamento; não é recomendação de investimento.</p>
             </section>
             <!-- 📘 GUIA EXPLICATIVO DOS INDICADORES ECONÔMICOS -->
             <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg mt-6">
@@ -623,8 +695,10 @@
         <input type="file" id="mapa-arquivo" accept=".json,application/json" hidden>
     </div>
     <!-- Scripts: só o que esta página usa. O núcleo (core.js) vem primeiro. -->
-    <script src="js/core.js?v=dcb2cec8"></script>
-    <script src="js/indicadores.js?v=dcb2cec8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="js/core.js?v=9dc1fc38"></script>
+    <script src="js/indicadores.js?v=9dc1fc38"></script>
+    <script src="js/mercado.js?v=9dc1fc38"></script>
 </body>
 
 </html>

@@ -87,12 +87,7 @@ function preencherIndicadoresInvestimentos() {
     invPreenchido = true;
     usarIndicadoresNoComparador(); // dispara a busca e preenche CDI/Selic quando chegarem (se falhar, ficam os valores padrão)
 }
-function aliquotaIRRegressivo(dias) {
-    if (dias <= 180) return 0.225;
-    if (dias <= 360) return 0.20;
-    if (dias <= 720) return 0.175;
-    return 0.15;
-}
+// aliquotaIRRegressivo(dias) foi para o core.js: também é usada pelo painel comparativo da Início (indicadores.js)
 
 function calculateInvestimentos() {
     const valor = lerNumero('inv-valor');
