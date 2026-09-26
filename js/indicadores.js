@@ -64,7 +64,7 @@ function mostrarIndicadoresNaTela() {
     const dateSpan = document.getElementById('indicadores-data');
     if (!dados || !dateSpan) return;
 
-    const pct = v => `${v.toFixed(2)}% a.a.`;
+    const pct = v => `${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}% a.a.`;
     const linhas = [
         ['ind-selic', pct(dados.selic), dados.ok.selic],
         ['ind-cdi', pct(dados.cdi), dados.ok.cdi],

@@ -69,7 +69,7 @@ function updateDocumentPreview() {
             const desc = item.querySelector('.orc-desc').value || 'Item sem descrição';
             const qtd = parseInt(item.querySelector('.orc-qtd').value) || 0;
             let valorStr = item.querySelector('.orc-valor').value;
-            let valorUnitario = parseFloat(valorStr.replace(/\./g, '').replace(',', '.')) || 0;
+            let valorUnitario = parseNumeroBR(valorStr);
             let subtotal = qtd * valorUnitario;
             totalGeral += subtotal;
 

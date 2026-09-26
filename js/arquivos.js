@@ -253,11 +253,17 @@ async function convertPdfToDocx(file, statusEl) {
 }
 
 // PDF -> planilha (Excel/CSV): tenta reconstruir TABELAS, não só texto corrido. Heurística por posição:
-// agrupa os itens de texto por linha (mesmo Y, como em extractPdfPagesText) e, dentro de cada linha,
-// abre uma coluna nova sempre que o espaço horizontal até o próximo item for maior que PDF_GAP_COLUNA
-// (em pontos PDF; espaço entre palavras normais é bem menor que isso). Funciona bem para tabelas com
-// colunas bem separadas (a maioria dos PDFs gerados por sistema); tabelas sem espaçamento claro entre
-// colunas, ou PDFs digitalizados (só imagem), não têm como ser reconstruídos — mostra aviso nesse caso.
+// agrupa os itens de texto por linha (mesmo Y, como em extractPdfPagesText) e, dentro de cada linha, abre
+// uma coluna nova em dois sinais: (1) o item é um ESPAÇO digitado como item de texto próprio — muitos
+// geradores de tabela (ex.: PDFs de sistema/governo) desenham cada célula com um `Tj` separado e preenchem
+// o vão entre colunas com um glifo de espaço "esticado" em vez de só pular a posição; nesse caso o vão
+// medido entre o fim de uma célula e o início da próxima é pequeno ou até negativo (o espaço "engole" a
+// lacuna), então SEM esse sinal a coluna nunca quebra — CONFIRMADO num PDF real de tabela de impostos do
+// IRS, onde nenhuma coluna era separada porque a lacuna real (8-14pt) ficava abaixo do limiar antigo (12pt)
+// só de posição. (2) mesmo sem espaço próprio, um salto de posição maior que PDF_GAP_COLUNA (PDFs que só
+// pulam a posição, sem desenhar espaço). Funciona bem para tabelas com colunas separadas por um desses dois
+// jeitos (a maioria dos PDFs gerados por sistema); tabelas sem NENHUM sinal de separação, ou PDFs
+// digitalizados (só imagem), não têm como ser reconstruídas — mostra aviso nesse caso.
 const PDF_GAP_COLUNA = 12;
 
 async function extractPdfTableRows(file) {
@@ -269,18 +275,24 @@ async function extractPdfTableRows(file) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
 
-        // Agrupa itens da página em linhas (mesmo critério de Y usado na extração de texto simples)
+        // Agrupa itens da página em linhas (mesmo critério de Y usado na extração de texto simples). Itens
+        // vazios (largura 0, marcador interno do pdf.js entre chamadas de desenho) são ignorados por completo;
+        // itens só de espaço ENTRAM na linha (viram sinal de coluna no passo seguinte), mas não decidem quebra
+        // de linha sozinhos — só o conteúdo real move `lastY`, senão um espaço "torto" quebraria a linha errado.
         const itensPorLinha = [];
         let lastY = null;
         let linhaAtual = [];
         textContent.items.forEach(item => {
-            if (!item.str || !item.str.trim()) return;
-            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
-                itensPorLinha.push(linhaAtual);
-                linhaAtual = [];
+            if (!item.str) return;
+            const ehEspaco = !item.str.trim();
+            if (!ehEspaco) {
+                if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+                    itensPorLinha.push(linhaAtual);
+                    linhaAtual = [];
+                }
+                lastY = item.transform[5];
             }
             linhaAtual.push(item);
-            lastY = item.transform[5];
         });
         if (linhaAtual.length) itensPorLinha.push(linhaAtual);
 
@@ -291,7 +303,14 @@ async function extractPdfTableRows(file) {
             let fimAnterior = null;
             itens.forEach(item => {
                 const inicio = item.transform[4];
-                if (fimAnterior !== null && (inicio - fimAnterior) > PDF_GAP_COLUNA) {
+                const ehEspaco = !item.str.trim();
+                if (ehEspaco) {
+                    // espaço como item próprio = fronteira de coluna garantida (não entra no texto da célula)
+                    if (celulaAtual) { celulas.push(celulaAtual.trim()); celulaAtual = ''; }
+                    fimAnterior = inicio + (item.width || 0);
+                    return;
+                }
+                if (fimAnterior !== null && (inicio - fimAnterior) > PDF_GAP_COLUNA && celulaAtual) {
                     celulas.push(celulaAtual.trim());
                     celulaAtual = '';
                 }
@@ -489,13 +508,21 @@ async function extractPdfPagesText(file) {
         let pageLines = [];
         let currentLine = "";
 
+        // Itens vazios (marcador interno do pdf.js entre chamadas de desenho, largura 0) são ignorados por
+        // completo; itens só de espaço entram no texto normalmente, mas não decidem quebra de linha nem
+        // movem `lastY` sozinhos — só conteúdo real faz isso (mesma guarda de extractPdfTableRows, sem ela
+        // um espaço com Y "torto" quebrava a linha no lugar errado e bagunçava a ordem do texto extraído).
         textContent.items.forEach(item => {
-            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
-                pageLines.push(currentLine);
-                currentLine = "";
+            if (!item.str) return;
+            const ehEspaco = !item.str.trim();
+            if (!ehEspaco) {
+                if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+                    pageLines.push(currentLine);
+                    currentLine = "";
+                }
+                lastY = item.transform[5];
             }
             currentLine += item.str + " ";
-            lastY = item.transform[5];
         });
         if (currentLine) pageLines.push(currentLine);
 
@@ -714,7 +741,8 @@ async function compressPDF() {
         // Reconverter as páginas em imagem pode aumentar PDFs que já eram leves (só texto/vetor).
         // Nesse caso, entrega o original em vez de um arquivo maior.
         const jaOtimizado = finalBlob.size >= initialSize;
-        if (jaOtimizado) finalBlob = new Blob([arrayBuffer], { type: 'application/pdf' });
+        // Usa o próprio arquivo: o pdf.js esvazia (transfere) o `arrayBuffer` que recebeu, então ele já está com 0 bytes aqui.
+        if (jaOtimizado) finalBlob = file;
         const finalSize = finalBlob.size;
 
         const savedPercent = (((initialSize - finalSize) / initialSize) * 100).toFixed(1);

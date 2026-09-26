@@ -32,6 +32,9 @@ const PIZZA_IPHONE = [
     { nome: 'Outros: IPI, PIS/COFINS, IOF (R$ 3.856)', valor: 3856, cor: '#A78BFA' }
 ];
 
+// Número com 2 casas no padrão brasileiro (vírgula), como no resto do site
+const fmtPct2 = v => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 let graficosMercado = []; // guarda as instâncias do Chart.js para não recriar em cima (evita "canvas já em uso")
 
 function montarMercado() {
@@ -147,8 +150,8 @@ async function montarPizzaIR() {
         const liquido = dados.cdi * (1 - aliq);
         const imposto = dados.cdi * aliq;
         montarPizza('merc-pizza-ir', [
-            { nome: `Líquido (${liquido.toFixed(2)}% a.a.)`, valor: liquido, cor: '#8FA3FB' },
-            { nome: `Imposto de Renda (${imposto.toFixed(2)}% a.a.)`, valor: imposto, cor: '#F87171' }
+            { nome: `Líquido (${fmtPct2(liquido)}% a.a.)`, valor: liquido, cor: '#8FA3FB' },
+            { nome: `Imposto de Renda (${fmtPct2(imposto)}% a.a.)`, valor: imposto, cor: '#F87171' }
         ]);
         if (statusEl) statusEl.classList.add('hidden');
     } catch (erro) {
@@ -194,7 +197,7 @@ async function carregarOscilador(cfg) {
         valorEl.classList.remove('animate-pulse');
         pararPulso('merc-' + cfg.id + '-skeleton');
         if (badgeEl) {
-            badgeEl.innerText = (subiu ? '▲ +' : '▼ ') + variacao.toFixed(2) + '%';
+            badgeEl.innerText = (subiu ? '▲ +' : '▼ ') + fmtPct2(variacao) + '%';
             badgeEl.className = 'text-[10px] font-semibold px-1.5 py-0.5 rounded-full ' +
                 (subiu ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400');
         }
@@ -244,7 +247,7 @@ async function carregarIpcaAcumulado() {
         if (!meses.length) throw new Error('sem meses do ano corrente ainda');
 
         const acumulado = (meses.reduce((prod, m) => prod * (1 + m.valor / 100), 1) - 1) * 100;
-        totalEl.innerText = 'IPCA no ano: ' + (acumulado >= 0 ? '+' : '') + acumulado.toFixed(2) + '%';
+        totalEl.innerText = 'IPCA no ano: ' + (acumulado >= 0 ? '+' : '') + fmtPct2(acumulado) + '%';
         if (statusEl) statusEl.classList.add('hidden');
     } catch (erro) {
         console.warn('Aviso: Não foi possível atualizar o IPCA acumulado no ano.');

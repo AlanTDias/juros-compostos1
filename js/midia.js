@@ -105,19 +105,25 @@ async function compressImage() {
             }
 
             const originalName = file.name.substring(0, file.name.lastIndexOf('.')) || 'imagem';
-            const newFileName = `${originalName}_comprimida${extension}`;
 
-            downloadFile(blob, newFileName);
+            // Recomprimir pode ENTREGAR UM ARQUIVO MAIOR que o original (ex.: imagem já otimizada, ou PNG
+            // com transparência virando JPEG com fundo branco preenchido) — nesse caso baixa o original em
+            // vez do blob novo, mesma proteção que já existe no compressor de PDF (compressPDF).
+            const jaOtimizada = blob.size >= file.size;
+            const arquivoFinal = jaOtimizada ? file : blob;
+            const newFileName = jaOtimizada ? file.name : `${originalName}_comprimida.${extensaoDoBlob(blob, extension.slice(1))}`;
+
+            downloadFile(arquivoFinal, newFileName);
 
             const origSize = formatFileSize(file.size);
             const newSize = formatFileSize(blob.size);
             const reduction = (((file.size - blob.size) / file.size) * 100).toFixed(1);
 
-            if (blob.size < file.size) {
+            if (!jaOtimizada) {
                 statusEl.innerText = `✅ Concluído! ${origSize} ➔ ${newSize} (${reduction}% menor)`;
                 statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
             } else {
-                statusEl.innerText = `✅ Concluído! (${newSize}). Imagem já estava otimizada.`;
+                statusEl.innerText = `ℹ️ Esta imagem já é leve (${origSize}): comprimir aumentaria o arquivo, então o original foi mantido.`;
                 statusEl.className = 'text-xs text-center text-yellow-400 mt-3 min-h-[1rem]';
             }
         }, mimeType, quality);
@@ -188,6 +194,185 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Extensão pelo tipo REAL que o navegador gerou: `canvas.toBlob` cai para PNG, sem avisar, quando não sabe gerar
+// o formato pedido (ex.: WEBP no Safari) — sem isso o arquivo saía PNG com extensão .webp.
+function extensaoDoBlob(blob, pedida) {
+    return { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }[blob.type] || pedida;
+}
+
+// Nenhum navegador gera BMP/TIFF/GIF pelo canvas (toBlob devolvia PNG com a extensão trocada); os 3 abaixo montam
+// o arquivo byte a byte a partir dos pixels do canvas.
+
+// BMP 24 bits sem compressão: linhas de baixo para cima, cada uma completada até múltiplo de 4 bytes.
+function canvasParaBmp(canvas) {
+    const w = canvas.width, h = canvas.height;
+    const px = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+    const linha = Math.ceil(w * 3 / 4) * 4;
+    const tamDados = linha * h;
+    const buf = new ArrayBuffer(54 + tamDados);
+    const v = new DataView(buf);
+    v.setUint8(0, 0x42); v.setUint8(1, 0x4D);
+    v.setUint32(2, 54 + tamDados, true);
+    v.setUint32(10, 54, true);
+    v.setUint32(14, 40, true);
+    v.setInt32(18, w, true);
+    v.setInt32(22, h, true);
+    v.setUint16(26, 1, true);
+    v.setUint16(28, 24, true);
+    v.setUint32(34, tamDados, true);
+    v.setInt32(38, 2835, true);
+    v.setInt32(42, 2835, true);
+    const bytes = new Uint8Array(buf);
+    for (let y = 0; y < h; y++) {
+        let o = 54 + (h - 1 - y) * linha;
+        for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4;
+            bytes[o++] = px[i + 2];
+            bytes[o++] = px[i + 1];
+            bytes[o++] = px[i];
+        }
+    }
+    return new Blob([buf], { type: 'image/bmp' });
+}
+
+// TIFF baseline little-endian, RGBA 8 bits sem compressão, 1 faixa; ExtraSamples=2 (alfa não associado, que é o
+// que o getImageData devolve) mantém a transparência. As tags do IFD precisam estar em ordem crescente.
+function canvasParaTiff(canvas) {
+    const w = canvas.width, h = canvas.height;
+    const px = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+    const entradas = 14, ifd = 8;
+    const offBits = ifd + 2 + entradas * 12 + 4, offXRes = offBits + 8, offYRes = offXRes + 8, offDados = offYRes + 8;
+    const buf = new ArrayBuffer(offDados + px.length);
+    const v = new DataView(buf);
+    v.setUint16(0, 0x4949, true);
+    v.setUint16(2, 42, true);
+    v.setUint32(4, ifd, true);
+    v.setUint16(ifd, entradas, true);
+    let p = ifd + 2;
+    const tag = (id, tipo, qtd, valor) => {
+        v.setUint16(p, id, true);
+        v.setUint16(p + 2, tipo, true);
+        v.setUint32(p + 4, qtd, true);
+        if (tipo === 3 && qtd === 1) v.setUint16(p + 8, valor, true);
+        else v.setUint32(p + 8, valor, true);
+        p += 12;
+    };
+    tag(256, 4, 1, w);          // ImageWidth
+    tag(257, 4, 1, h);          // ImageLength
+    tag(258, 3, 4, offBits);    // BitsPerSample 8,8,8,8
+    tag(259, 3, 1, 1);          // Compression: nenhuma
+    tag(262, 3, 1, 2);          // Photometric: RGB
+    tag(273, 4, 1, offDados);   // StripOffsets
+    tag(277, 3, 1, 4);          // SamplesPerPixel
+    tag(278, 4, 1, h);          // RowsPerStrip
+    tag(279, 4, 1, px.length);  // StripByteCounts
+    tag(282, 5, 1, offXRes);    // XResolution
+    tag(283, 5, 1, offYRes);    // YResolution
+    tag(284, 3, 1, 1);          // PlanarConfiguration
+    tag(296, 3, 1, 2);          // ResolutionUnit: polegada
+    tag(338, 3, 1, 2);          // ExtraSamples: alfa não associado
+    v.setUint32(p, 0, true);
+    for (let i = 0; i < 4; i++) v.setUint16(offBits + i * 2, 8, true);
+    v.setUint32(offXRes, 72, true); v.setUint32(offXRes + 4, 1, true);
+    v.setUint32(offYRes, 72, true); v.setUint32(offYRes + 4, 1, true);
+    new Uint8Array(buf, offDados).set(px);
+    return new Blob([buf], { type: 'image/tiff' });
+}
+
+// Compressão LZW do GIF (tamanho de código variável até 12 bits, com código de limpeza quando a tabela enche).
+function lzwGif(indices, minCode) {
+    const limpar = 1 << minCode, fim = limpar + 1;
+    let tamCodigo = minCode + 1, proximo = fim + 1;
+    let tabela = new Map();
+    const saida = [];
+    let acum = 0, bits = 0;
+    const emitir = c => {
+        acum |= c << bits;
+        bits += tamCodigo;
+        while (bits >= 8) { saida.push(acum & 255); acum >>>= 8; bits -= 8; }
+    };
+    emitir(limpar);
+    let atual = indices[0];
+    for (let i = 1; i < indices.length; i++) {
+        const k = indices[i];
+        const chave = (atual << 8) | k;
+        const existente = tabela.get(chave);
+        if (existente !== undefined) { atual = existente; continue; }
+        emitir(atual);
+        if (proximo === 4096) {
+            emitir(limpar);
+            tabela = new Map();
+            tamCodigo = minCode + 1;
+            proximo = fim + 1;
+        } else {
+            if (proximo >= (1 << tamCodigo)) tamCodigo++;
+            tabela.set(chave, proximo++);
+        }
+        atual = k;
+    }
+    emitir(atual);
+    emitir(fim);
+    if (bits > 0) saida.push(acum & 255);
+    return saida;
+}
+
+// GIF89a: cores exatas se a imagem tiver poucas cores; senão paleta fixa 6x7x6 (cor mais próxima por canal).
+// Pixel com alfa < 128 vira transparente (índice 0 reservado + Graphic Control Extension).
+function canvasParaGif(canvas) {
+    const w = canvas.width, h = canvas.height;
+    const px = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+    const total = w * h;
+    let temTransparente = false;
+    for (let i = 3; i < px.length; i += 4) if (px[i] < 128) { temTransparente = true; break; }
+    const base = temTransparente ? 1 : 0;
+
+    const cores = new Map();
+    let exata = true;
+    for (let i = 0; i < px.length; i += 4) {
+        if (px[i + 3] < 128) continue;
+        const c = (px[i] << 16) | (px[i + 1] << 8) | px[i + 2];
+        if (!cores.has(c)) {
+            if (cores.size + base >= 256) { exata = false; break; }
+            cores.set(c, cores.size + base);
+        }
+    }
+
+    const paleta = [];
+    if (temTransparente) paleta.push(0, 0, 0);
+    if (exata) cores.forEach((_, c) => paleta.push(c >> 16, (c >> 8) & 255, c & 255));
+    else for (let r = 0; r < 6; r++) for (let g = 0; g < 7; g++) for (let b = 0; b < 6; b++) paleta.push(r * 51, Math.round(g * 255 / 6), b * 51);
+
+    const indices = new Uint8Array(total);
+    for (let q = 0, i = 0; q < total; q++, i += 4) {
+        if (px[i + 3] < 128) { indices[q] = 0; continue; }
+        indices[q] = exata
+            ? cores.get((px[i] << 16) | (px[i + 1] << 8) | px[i + 2])
+            : base + Math.round(px[i] / 51) * 42 + Math.round(px[i + 1] * 6 / 255) * 6 + Math.round(px[i + 2] / 51);
+    }
+
+    const n = Math.max(1, Math.ceil(Math.log2(Math.max(2, paleta.length / 3))));
+    while (paleta.length < (1 << n) * 3) paleta.push(0);
+
+    const bytes = [];
+    const u16 = x => bytes.push(x & 255, (x >> 8) & 255);
+    for (const ch of 'GIF89a') bytes.push(ch.charCodeAt(0));
+    u16(w); u16(h);
+    bytes.push(0x80 | ((n - 1) << 4) | (n - 1), 0, 0);
+    for (const x of paleta) bytes.push(x);
+    if (temTransparente) bytes.push(0x21, 0xF9, 4, 1, 0, 0, 0, 0);
+    bytes.push(0x2C); u16(0); u16(0); u16(w); u16(h); bytes.push(0);
+    const minCode = Math.max(2, n);
+    bytes.push(minCode);
+    const dados = lzwGif(indices, minCode);
+    for (let i = 0; i < dados.length; i += 255) {
+        const bloco = dados.slice(i, i + 255);
+        bytes.push(bloco.length);
+        for (const x of bloco) bytes.push(x);
+    }
+    bytes.push(0, 0x3B);
+    return new Blob([new Uint8Array(bytes)], { type: 'image/gif' });
+}
+
 async function convertImage() {
     const targetFormat = document.getElementById('img-target-format').value;
     const statusEl = document.getElementById('img-convert-status');
@@ -247,6 +432,16 @@ async function convertImage() {
 
         ctx.drawImage(img, 0, 0);
 
+        const codificadores = { bmp: canvasParaBmp, tiff: canvasParaTiff, gif: canvasParaGif };
+        if (codificadores[targetFormat]) {
+            const blob = codificadores[targetFormat](canvas);
+            const nomeBase = convertSelectedFile.name.substring(0, convertSelectedFile.name.lastIndexOf('.')) || 'imagem';
+            downloadFile(blob, `${nomeBase}.${targetFormat}`);
+            statusEl.innerText = `✅ Convertida para ${targetFormat.toUpperCase()} (${formatFileSize(blob.size)})!`;
+            statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
+            return;
+        }
+
         canvas.toBlob((blob) => {
             if (!blob) {
                 statusEl.innerText = `❌ Navegador não suporta exportar para .${targetFormat.toUpperCase()}.`;
@@ -255,10 +450,16 @@ async function convertImage() {
             }
 
             const originalName = convertSelectedFile.name.substring(0, convertSelectedFile.name.lastIndexOf('.')) || 'imagem';
-            const newFileName = `${originalName}.${targetFormat}`;
+            const ext = extensaoDoBlob(blob, targetFormat);
+            const newFileName = `${originalName}.${ext}`;
 
             downloadFile(blob, newFileName);
 
+            if (ext !== targetFormat) {
+                statusEl.innerText = `ℹ️ Seu navegador não gera ${targetFormat.toUpperCase()}; a imagem foi salva como ${ext.toUpperCase()} (${formatFileSize(blob.size)}).`;
+                statusEl.className = 'text-xs text-center text-yellow-400 mt-3 min-h-[1rem]';
+                return;
+            }
             statusEl.innerText = `✅ Convertida para ${targetFormat.toUpperCase()} (${formatFileSize(blob.size)})!`;
             statusEl.className = 'text-xs text-center text-emerald-400 mt-3 min-h-[1rem]';
         }, targetMime, 0.92);
@@ -395,8 +596,11 @@ function edBaixar() {
     edDesenhar(cv, w, h, formato === 'jpg'); // JPG não tem transparência: fundo branco
     cv.toBlob(blob => {
         if (!blob) { status.textContent = '❌ Não foi possível gerar a imagem (tente um tamanho menor).'; return; }
-        downloadFile(blob, `${ed.nome}_editada.${formato}`);
-        status.textContent = `✅ Imagem salva (${w} × ${h} px, ${formatFileSize(blob.size)}).`;
+        const ext = extensaoDoBlob(blob, formato);
+        downloadFile(blob, `${ed.nome}_editada.${ext}`);
+        status.textContent = ext === formato
+            ? `✅ Imagem salva (${w} × ${h} px, ${formatFileSize(blob.size)}).`
+            : `ℹ️ Seu navegador não gera ${formato.toUpperCase()}; a imagem foi salva como ${ext.toUpperCase()} (${w} × ${h} px, ${formatFileSize(blob.size)}).`;
     }, mime, qualidade);
 }
 

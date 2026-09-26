@@ -85,6 +85,9 @@ async function usarIndicadoresNoComparador() {
 function preencherIndicadoresInvestimentos() {
     if (invPreenchido) return;
     invPreenchido = true;
+    // Link compartilhado com CDI/Selic próprios: mantém os valores de quem enviou (o botão ainda busca os de hoje)
+    const doLink = new URLSearchParams(location.hash.slice(1));
+    if (doLink.get('aba') === 'investimentos' && (doLink.has('inv-cdi') || doLink.has('inv-selic'))) return;
     usarIndicadoresNoComparador(); // dispara a busca e preenche CDI/Selic quando chegarem (se falhar, ficam os valores padrão)
 }
 // aliquotaIRRegressivo(dias) foi para o core.js: também é usada pelo painel comparativo da Início (indicadores.js)
@@ -307,8 +310,15 @@ function calculateMilhao() {
         months++;
     }
 
-    document.getElementById('milhao-resultado').innerText = `${Math.floor(months / 12)} anos e ${months % 12} meses`;
-    document.getElementById('milhao-detalhes').innerText = `Aproximadamente ${months} meses de aportes.`;
+    if (currentTotal < target) {
+        // Estourou o teto de segurança do loop (100 anos) sem bater a meta — não é "resultado em 100 anos",
+        // é "não atinge nesse horizonte" (aporte/taxa baixos demais). Evita mostrar como se fosse alcançado.
+        document.getElementById('milhao-resultado').innerText = "Mais de 100 anos";
+        document.getElementById('milhao-detalhes').innerText = "Com esses valores, a simulação não atinge R$ 1.000.000 num prazo razoável. Aumente o aporte mensal ou a taxa.";
+    } else {
+        document.getElementById('milhao-resultado').innerText = `${Math.floor(months / 12)} anos e ${months % 12} meses`;
+        document.getElementById('milhao-detalhes').innerText = `Aproximadamente ${months} meses de aportes.`;
+    }
     if (!calculoAutomatico && !exageroMilhao && currentTotal >= target) celebrar('Meta de R$ 1.000.000 alcançada na simulação! 🎉');
 }
 
@@ -318,7 +328,7 @@ function calculateFinanciamento() {
     let entrada = getVal('fin-entrada');
     let taxaAnual = parseFloat(document.getElementById('fin-taxa').value) / 100 || 0;
     if (!calculoAutomatico && taxaAnual >= 1) avisarExagero('Vá com calma! 🐎 Juros de mais de 100% ao ano num financiamento? Confira a taxa.');
-    let anos = parseInt(document.getElementById('fin-anos').value) || 0;
+    let anos = parseInt(document.getElementById('fin-anos').value) || 1;
 
     let pv = valorImovel - entrada;
     let n = anos * 12;
@@ -334,7 +344,12 @@ function calculateFinanciamento() {
         saldoDevedor -= amortizacao;
     }
 
-    let pPrice = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1 || 1);
+    let pPrice = 0;
+    if (i === 0) {
+        pPrice = pv / (n || 1);
+    } else {
+        pPrice = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+    }
     let totalprice = pPrice * n;
 
     document.getElementById('sac-p1').innerText = p1Sac.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -351,7 +366,7 @@ function calculateVeiculo() {
     let entrada = getVal('vei-entrada');
     let taxaMensal = parseFloat(document.getElementById('vei-taxa').value) / 100 || 0;
     if (!calculoAutomatico && taxaMensal >= 0.2) avisarExagero('Vá com calma! 🐎 Juros de 20% ao mês ou mais? Isso já é agiotagem. Confira a taxa.');
-    let meses = parseInt(document.getElementById('vei-meses').value) || 0;
+    let meses = parseInt(document.getElementById('vei-meses').value) || 1;
 
     let pv = valor - entrada;
     let i = taxaMensal;
@@ -375,7 +390,7 @@ function calculateAmortizacao() {
     let saldoDevedor = getVal('amo-saldo');
     let taxa = parseFloat(document.getElementById('amo-taxa').value) / 100 || 0;
     if (!calculoAutomatico && taxa >= 0.2) avisarExagero('Vá com calma! 🐎 Uma taxa dessas não existe. Confira o valor.');
-    let mesesRestantes = parseInt(document.getElementById('amo-meses').value) || 0;
+    let mesesRestantes = parseInt(document.getElementById('amo-meses').value) || 1;
     let extra = getVal('amo-extra');
     let tipo = document.getElementById('amo-tipo').value;
 
@@ -523,13 +538,20 @@ function calculateComparador() {
     }
 }
 
+// Aviso prévio proporcional (Lei 12.506/2011): 30 dias + 3 por ano completo de casa, no máximo 90 dias
+function diasAvisoPrevio(mesesDeCasa) {
+    return Math.min(90, 30 + 3 * Math.floor(mesesDeCasa / 12));
+}
+
 // 10. Cálculo Rescisão e FGTS
 function calculateFGTS() {
     let salario = getVal('fgts-salario');
     let saldoFgts = getVal('fgts-saldo');
 
+    let meses = Math.max(0, parseInt(document.getElementById('fgts-meses').value) || 0);
+
     let multaFgts = saldoFgts * 0.40;
-    let avisoPrevio = salario;
+    let avisoPrevio = (salario / 30) * diasAvisoPrevio(meses);
     let totalRescisao = saldoFgts + multaFgts + avisoPrevio;
 
     document.getElementById('fgts-res-saldo').innerText = saldoFgts.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -567,7 +589,8 @@ function calculateRescisaoCLT() {
         }
     } else if (motivo === 'sem-justa-causa') {
         if (tipoAviso === 'indenizado') {
-            valorAviso = salario;
+            const mesesCasa = Math.max(0, parseInt(document.getElementById('clt-meses-casa').value) || 0);
+            valorAviso = (salario / 30) * diasAvisoPrevio(mesesCasa);
         }
     }
 

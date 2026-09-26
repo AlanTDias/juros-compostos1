@@ -250,7 +250,7 @@ function parseNumeroBR(texto) {
     } else {
         const pontos = (s.match(/\./g) || []).length;
         // "1.234" ou "1.234.567" = milhares (pt-BR); "12.5" = decimal
-        if (pontos > 1 || /^\d{1,3}\.\d{3}$/.test(s)) s = s.replace(/\./g, '');
+        if (pontos > 1 || /^-?\d{1,3}\.\d{3}$/.test(s)) s = s.replace(/\./g, '');
     }
     const n = parseFloat(s);
     return isFinite(n) ? n : 0;
