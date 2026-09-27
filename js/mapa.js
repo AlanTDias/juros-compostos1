@@ -25,6 +25,7 @@
     const btnInverter = overlay.querySelector('[data-mapa-acao="inverter"]');
     const editor = $('mapa-editor');
     const entradaArquivo = $('mapa-arquivo');
+    const campoStatus = $('mapa-status');
 
     // ---------- Estado ----------
     let estado = mapaExemplo();
@@ -37,6 +38,11 @@
     let campoAtivo = null;                // agrupa a digitação de um campo em UM passo de desfazer
     let pendente = false;
     let editando = null;                  // { tipo, id, antes, multi } enquanto o editor de texto está aberto
+    // Arquivo atual (File System Access API, Chrome/Edge): Salvar grava no MESMO arquivo e cada edição é salva sozinha.
+    let arquivoAtual = null;              // FileSystemFileHandle do arquivo aberto/salvo (null = ainda não salvo)
+    let gravando = false, regravar = false, promessaGravacao = null;
+    let timerAuto = null, falhou = false, versaoEdicao = 0, nomeBaixado = '';
+    let soLeitura = false, nomeAberto = '';  // soLeitura: arquivo aberto sem permissão de gravação (só grava com Ctrl+S); nomeAberto: importado sem a API
     let temaMapa = document.documentElement.getAttribute('data-tema') === 'claro' ? 'claro' : 'escuro';
     overlay.setAttribute('data-tema-mapa', temaMapa);
 
@@ -268,7 +274,7 @@
         desfazerPilha.push(JSON.stringify(estado));
         if (desfazerPilha.length > 100) desfazerPilha.shift();
         refazerPilha = [];
-        sujo = true;
+        marcarSujo();
         atualizarBotoes();
     }
 
@@ -281,7 +287,7 @@
         estado = JSON.parse(json);
         if (sel && !(sel.tipo === 'no' ? no(sel.id) : ligSel())) sel = null;
         if (origemLigar && !no(origemLigar)) sairModoLigar();
-        sujo = true;
+        marcarSujo();
         campoTituloMapa.value = estado.titulo;
         montarDeps();
         atualizarContexto();
@@ -358,8 +364,8 @@
             rem.className = 'mapa-btn mapa-mini';
             rem.textContent = '✕';
             rem.setAttribute('aria-label', 'Remover departamento');
-            cor.addEventListener('input', () => { coalescer(cor); d.cor = cor.value.toUpperCase(); agendar(); });
-            nome.addEventListener('input', () => { coalescer(nome); d.nome = nome.value.slice(0, 40); atualizarSelectDep(); const n = noSel(); if (n) selDep.value = n.dep || ''; agendar(); });
+            cor.addEventListener('input', () => { coalescer(cor); d.cor = cor.value.toUpperCase(); marcarSujo(); agendar(); });
+            nome.addEventListener('input', () => { coalescer(nome); d.nome = nome.value.slice(0, 40); marcarSujo(); atualizarSelectDep(); const n = noSel(); if (n) selDep.value = n.dep || ''; agendar(); });
             rem.addEventListener('click', () => {
                 registrarUndo();
                 estado.departamentos = estado.departamentos.filter(x => x !== d);
@@ -435,6 +441,15 @@
     editor.addEventListener('blur', () => fecharEditor(true));
     editor.addEventListener('keydown', e => {
         e.stopPropagation(); // atalhos do mapa (Delete, N, L, setas...) não valem enquanto se escreve
+        const k = e.key.toLowerCase();
+        if ((e.ctrlKey || e.metaKey) && (k === 's' || k === 'o')) {
+            // salvar/salvar como/abrir valem também aqui (senão o navegador abre "Salvar página como")
+            e.preventDefault();
+            if (e.repeat) return;
+            fecharEditor(true);
+            if (k === 'o') acoes.abrir(); else if (e.shiftKey) salvarComo(); else salvar();
+            return;
+        }
         if (e.key === 'Escape') { e.preventDefault(); fecharEditor(false); return; }
         if (e.key === 'Enter') {
             if (!editando || !editando.multi || e.ctrlKey || e.metaKey) { e.preventDefault(); fecharEditor(true); }
@@ -510,13 +525,180 @@
         return (base || 'mapa') + '.excalc-mapa.json';
     }
 
+    function serializar() {
+        const dados = { formato: 'excalc-mapa', versao: 1, titulo: estado.titulo, departamentos: estado.departamentos, nos: estado.nos, ligacoes: estado.ligacoes };
+        return JSON.stringify(dados, null, 2);
+    }
+
+    // "Exportar cópia": baixa o .json (comportamento antigo). Não troca o arquivo atual. Sem arquivo atual, o download É o salvamento.
     function exportar() {
         fecharEditor(true);
-        const dados = { formato: 'excalc-mapa', versao: 1, titulo: estado.titulo, departamentos: estado.departamentos, nos: estado.nos, ligacoes: estado.ligacoes };
-        const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-        downloadFile(blob, nomeDeArquivo(estado.titulo));
-        sujo = false;
-        aviso('Mapa salvo em arquivo. Guarde-o: é a única cópia.');
+        const blob = new Blob([serializar()], { type: 'application/json' });
+        const nome = nomeDeArquivo(estado.titulo);
+        downloadFile(blob, nome);
+        if (!arquivoAtual) {
+            sujo = false;
+            nomeBaixado = nome;
+            aviso('Mapa salvo em arquivo. Guarde-o: é a única cópia.');
+        } else aviso('Cópia exportada: ' + nome);
+        atualizarStatus();
+    }
+
+    // ---------- Salvar no mesmo arquivo + salvamento automático ----------
+    const temApiSalvar = 'showSaveFilePicker' in window;
+    const temApiAbrir = 'showOpenFilePicker' in window;
+    const TIPOS_JSON = [{ description: 'Mapa do ExCalc (.json)', accept: { 'application/json': ['.json'] } }];
+    const ESPERA_AUTO = 800;
+
+    function atualizarStatus() {
+        if (!campoStatus) return;
+        let t, erro = false;
+        if (arquivoAtual) {
+            const nome = arquivoAtual.name;
+            if (gravando) t = 'Salvando…';
+            else if (falhou && sujo) { t = 'Não salvo · ' + nome; erro = true; }
+            else if (soLeitura && sujo) t = 'Não salvo · ' + nome + ' — Ctrl+S para gravar';
+            else if (sujo) t = 'Salvando…';
+            else if (soLeitura) t = 'Aberto · ' + nome + ' — alterações só são gravadas com Ctrl+S';
+            else t = 'Salvo · ' + nome;
+        } else if (!sujo && nomeBaixado) t = 'Salvo · ' + nomeBaixado;
+        else if (!sujo && nomeAberto) t = 'Aberto · ' + nomeAberto + (temApiSalvar ? ' — Ctrl+S para escolher onde salvar' : ' — Ctrl+S baixa uma cópia');
+        else t = 'Não salvo — Ctrl+S para escolher onde salvar';
+        campoStatus.textContent = t;
+        campoStatus.title = t;
+        campoStatus.toggleAttribute('data-erro', erro);
+    }
+
+    // Ponto central: toda alteração passa por aqui (registrarUndo, desfazer/refazer, título, departamentos, soltar a caixa arrastada).
+    function marcarSujo() {
+        sujo = true;
+        versaoEdicao++;
+        agendarAutosave();
+        atualizarStatus();
+    }
+
+    function agendarAutosave() {
+        if (!arquivoAtual || soLeitura) return;
+        clearTimeout(timerAuto);
+        timerAuto = setTimeout(gravarAuto, ESPERA_AUTO);
+    }
+
+    function gravarAuto() {
+        timerAuto = null;
+        if (!arquivoAtual || !sujo) return;
+        if (gesto && gesto.tipo === 'no' && gesto.moveu) return; // arrastando: grava ao soltar
+        const jaFalhou = falhou, nome = arquivoAtual.name;
+        gravarAgora().then(ok => {
+            if (!ok && !jaFalhou) aviso('Não foi possível salvar automaticamente em ' + nome + '. Pressione Ctrl+S para salvar.');
+        });
+    }
+
+    // Grava o estado no arquivo atual. Nunca duas gravações ao mesmo tempo: se chegar pedido durante uma, grava de novo ao terminar.
+    function gravarAgora() {
+        if (!arquivoAtual) return Promise.resolve(false);
+        if (gravando) { regravar = true; return promessaGravacao; }
+        gravando = true;
+        atualizarStatus();
+        promessaGravacao = (async () => {
+            let ok = true;
+            try {
+                do {
+                    regravar = false;
+                    const alvo = arquivoAtual, versao = versaoEdicao, texto = serializar();
+                    try {
+                        if (alvo.queryPermission && await alvo.queryPermission({ mode: 'readwrite' }) !== 'granted') throw new Error('sem permissão');
+                        const w = await alvo.createWritable();
+                        try {
+                            await w.write(texto);
+                            await w.close();
+                        } catch (e) {
+                            try { await w.abort(); } catch (x) { /* já fechado ou inválido */ }
+                            throw e;
+                        }
+                        if (alvo === arquivoAtual) { falhou = false; if (versao === versaoEdicao) sujo = false; }
+                    } catch (e) {
+                        if (alvo === arquivoAtual) { ok = false; falhou = true; sujo = true; break; }
+                        // falhou o arquivo antigo (houve troca durante a gravação): segue para gravar o atual, se houver pendência
+                        if (arquivoAtual && sujo) regravar = true;
+                    }
+                } while (regravar && arquivoAtual);
+            } finally {
+                gravando = false;
+                regravar = false;
+                atualizarStatus();
+            }
+            return ok;
+        })();
+        return promessaGravacao;
+    }
+
+    async function salvar() {
+        fecharEditor(true);
+        if (!arquivoAtual) {
+            if (temApiSalvar) await salvarComo();
+            else exportar();
+            return;
+        }
+        const alvo = arquivoAtual;
+        try {
+            // dentro do clique/atalho o navegador pode pedir a permissão de novo (ex.: depois de recarregar)
+            if (alvo.queryPermission && await alvo.queryPermission({ mode: 'readwrite' }) !== 'granted' &&
+                await alvo.requestPermission({ mode: 'readwrite' }) !== 'granted') {
+                falhou = true;
+                atualizarStatus();
+                aviso('Sem permissão para gravar em ' + alvo.name + '. Use "Salvar como".');
+                return;
+            }
+        } catch (e) {
+            aviso('Sem permissão para gravar em ' + alvo.name + '. Use "Salvar como".');
+            return;
+        }
+        if (alvo === arquivoAtual) soLeitura = false; // permissão concedida: volta o salvamento automático
+        clearTimeout(timerAuto);
+        timerAuto = null;
+        if (!await gravarAgora()) aviso('Não foi possível salvar em ' + alvo.name + '. Tente "Salvar como".');
+    }
+
+    async function salvarComo() {
+        fecharEditor(true);
+        if (!temApiSalvar) { exportar(); return; }
+        let h;
+        try {
+            h = await window.showSaveFilePicker({ suggestedName: nomeDeArquivo(estado.titulo), types: TIPOS_JSON });
+        } catch (e) {
+            if (e && e.name === 'AbortError') return; // cancelou o seletor: silêncio
+            aviso('Não foi possível abrir o seletor de arquivo.');
+            return;
+        }
+        arquivoAtual = h;
+        falhou = false;
+        soLeitura = false;
+        nomeAberto = '';
+        nomeBaixado = '';
+        clearTimeout(timerAuto);
+        timerAuto = null;
+        versaoEdicao++;
+        sujo = true;
+        if (await gravarAgora()) aviso('Mapa salvo em ' + h.name + '. As próximas alterações são salvas sozinhas.');
+        else aviso('Não foi possível salvar em ' + h.name + '.');
+    }
+
+    async function abrirArquivo() {
+        if (!temApiAbrir) { entradaArquivo.click(); return; }
+        let h;
+        try {
+            [h] = await window.showOpenFilePicker({ types: TIPOS_JSON, multiple: false });
+        } catch (e) {
+            if (e && e.name === 'AbortError') return;
+            aviso('Não foi possível abrir o seletor de arquivo.');
+            return;
+        }
+        // o seletor de abrir dá só leitura: pede a gravação já, ainda dentro do gesto do usuário
+        let podeGravar = false;
+        try { podeGravar = !h.requestPermission || await h.requestPermission({ mode: 'readwrite' }) === 'granted'; } catch (e) { /* segue só leitura */ }
+        let arquivo;
+        try { arquivo = await h.getFile(); } catch (e) { aviso('Não foi possível ler o arquivo.'); return; }
+        importarArquivo(arquivo, h, podeGravar);
     }
 
     // O arquivo importado é entrada NÃO confiável: só campos conhecidos, com tipos e tamanhos verificados.
@@ -561,7 +743,7 @@
         return window.confirm('Há alterações que ainda não foram salvas em arquivo. Continuar mesmo assim?');
     }
 
-    function trocarMapa(novo, mensagem) {
+    function trocarMapa(novo, mensagem, arquivo) {
         cancelarEditor();
         estado = novo;
         sel = null;
@@ -569,6 +751,16 @@
         desfazerPilha = [];
         refazerPilha = [];
         sujo = false;
+        arquivoAtual = arquivo || null;
+        clearTimeout(timerAuto);
+        timerAuto = null;
+        regravar = false;
+        falhou = false;
+        soLeitura = false;
+        nomeAberto = '';
+        nomeBaixado = '';
+        versaoEdicao++;
+        atualizarStatus();
         campoTituloMapa.value = estado.titulo;
         montarDeps();
         atualizarContexto();
@@ -578,7 +770,7 @@
         if (mensagem) aviso(mensagem);
     }
 
-    async function importarArquivo(arquivo) {
+    async function importarArquivo(arquivo, handle, podeGravar) {
         if (!arquivo) return;
         if (arquivo.size > MAX_ARQUIVO) { aviso('Arquivo grande demais (máximo 5 MB).'); return; }
         if (!confirmarPerda()) return;
@@ -586,14 +778,20 @@
         try { obj = JSON.parse(await arquivo.text()); } catch (e) { aviso('Este arquivo não é um JSON válido.'); return; }
         const r = validar(obj);
         if (!r.ok) { aviso('Arquivo de mapa inválido: ' + r.erro); return; }
-        trocarMapa(r.dados, 'Mapa aberto: ' + arquivo.name);
+        const semGravar = !!handle && !podeGravar;
+        trocarMapa(r.dados, 'Mapa aberto: ' + arquivo.name + (semGravar ? '. As alterações só serão gravadas quando você usar Ctrl+S.' : ''), handle || null);
+        if (semGravar) soLeitura = true;
+        if (!handle) nomeAberto = arquivo.name;
+        if (semGravar || !handle) atualizarStatus();
     }
 
     // ---------- Ações da barra ----------
     const acoes = {
         novo() { if (confirmarPerda()) trocarMapa(mapaNovo(), 'Mapa novo.'); },
-        abrir() { entradaArquivo.click(); },
-        salvar: exportar,
+        abrir: abrirArquivo,
+        salvar,
+        'salvar-como': salvarComo,
+        exportar,
         desfazer,
         refazer,
         caixa() {
@@ -635,7 +833,7 @@
     });
     entradaArquivo.addEventListener('change', () => { const f = entradaArquivo.files[0]; entradaArquivo.value = ''; importarArquivo(f); });
 
-    campoTituloMapa.addEventListener('input', () => { coalescer(campoTituloMapa); estado.titulo = campoTituloMapa.value.slice(0, 80); });
+    campoTituloMapa.addEventListener('input', () => { coalescer(campoTituloMapa); estado.titulo = campoTituloMapa.value.slice(0, 80); marcarSujo(); });
     selDep.addEventListener('change', () => {
         const n = noSel();
         if (!n) return;
@@ -671,6 +869,7 @@
             const [a, b] = [...ponteiros.values()];
             const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, r = svg.getBoundingClientRect();
             pinca = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, k0: vista.k, wx: (mx - r.left - vista.x) / vista.k, wy: (my - r.top - vista.y) / vista.k };
+            if (gesto && gesto.tipo === 'no' && gesto.moveu) marcarSujo(); // a caixa já tinha sido arrastada: reagenda o salvamento
             gesto = null;
             return;
         }
@@ -747,6 +946,7 @@
             if (alvo) criarLigacao(g.de, alvo.getAttribute('data-no'));
             return;
         }
+        if (g.tipo === 'no' && g.moveu) { marcarSujo(); return; } // soltou a caixa arrastada: agenda o salvamento automático
         if (g.tipo === 'no' && !g.moveu) {
             if (modoLigar) {
                 if (!origemLigar) { origemLigar = g.id; desenhar(); aviso('Agora clique na caixa de destino.'); }
@@ -772,7 +972,11 @@
     }
 
     svg.addEventListener('pointerup', terminarGesto);
-    svg.addEventListener('pointercancel', e => { gesto = null; pinca = null; ponteiros.delete(e.pointerId); gTemp.replaceChildren(); });
+    svg.addEventListener('pointercancel', e => {
+        const arrastava = gesto && gesto.tipo === 'no' && gesto.moveu;
+        gesto = null; pinca = null; ponteiros.delete(e.pointerId); gTemp.replaceChildren();
+        if (arrastava) marcarSujo();
+    });
     svg.addEventListener('wheel', e => {
         e.preventDefault();
         fecharEditor(true);
@@ -799,8 +1003,8 @@
             if (k === 'z' && !e.shiftKey) { e.preventDefault(); desfazer(); return; }
             if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); refazer(); return; }
         }
-        if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); exportar(); return; }
-        if (ctrl && e.key.toLowerCase() === 'o') { e.preventDefault(); acoes.abrir(); return; }
+        if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); if (e.repeat) return; if (e.shiftKey) salvarComo(); else salvar(); return; }
+        if (ctrl && e.key.toLowerCase() === 'o') { e.preventDefault(); if (e.repeat) return; acoes.abrir(); return; }
         if (escrevendo || ctrl || e.altKey) return;
         const emBotao = e.target && e.target.tagName === 'BUTTON';
         if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); excluirSelecao(); }
@@ -838,6 +1042,7 @@
         montarDeps();
         atualizarContexto();
         atualizarBotoes();
+        atualizarStatus();
         if (!jaAjustou) { ajustar(); jaAjustou = true; } else aplicarVista();
         desenhar();
         dica.classList.remove('oculta');

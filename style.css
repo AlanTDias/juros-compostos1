@@ -2053,6 +2053,22 @@ html body .mapa select.mapa-sel:disabled {
     opacity: 0;
 }
 
+/* Indicador de salvamento na barra ("Salvo · arquivo.json", "Salvando…", "Não salvo…") */
+.mapa-status {
+    max-width: 260px;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    color: var(--m-suave);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mapa-status[data-erro] {
+    color: var(--m-texto);
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .mapa-barra {
         padding: 0.4rem 0.6rem;
