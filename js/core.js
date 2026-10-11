@@ -268,10 +268,10 @@ const arredonda2 = v => Math.round((v + 1e-9) * 100) / 100;
 // ---------- Salário líquido (tabelas 2026: INSS e IRRF) ----------
 // Fontes: Portaria Interministerial MPS/MF nº 13/2026 (INSS) e Receita Federal / Lei 15.270/2025 (IRRF).
 
-// TEMA CLARO / ESCURO / VIDRO
+// TEMA CLARO / ESCURO
 // ==========================================
 // O tema é o atributo data-tema no <html>; as cores vêm das variáveis do style.css.
-// Claro/escuro/vidro ficam salvos no localStorage.
+// Claro/escuro ficam salvos no localStorage. (O tema "vidro" foi removido em 2026-10 a pedido do dono.)
 const TEMA_KEY = 'excalc_tema';
 
 function temaAtual() {
@@ -284,11 +284,12 @@ function aplicarTema(tema, salvar) {
     else raiz.setAttribute('data-tema', tema);
 
     if (salvar) {
-        try { localStorage.setItem(TEMA_KEY, tema === 'claro' || tema === 'vidro' ? tema : 'escuro'); } catch (e) { /* modo privado: tudo bem */ }
+        try { localStorage.setItem(TEMA_KEY, tema === 'claro' ? 'claro' : 'escuro'); } catch (e) { /* modo privado: tudo bem */ }
     }
     atualizarBotaoDeTema();
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', corDoNavegadorPorTema(tema));
+    if (typeof atualizarCoresDoFundo === 'function') atualizarCoresDoFundo();
 
     // o gráfico depende do tema: refaz
     if (typeof calculateJC === 'function' && document.getElementById('growthChart')) {
@@ -299,8 +300,8 @@ function aplicarTema(tema, salvar) {
     }
 }
 
-// Ciclo dos temas: escuro -> claro -> vidro -> escuro
-const TEMAS_CICLO = ['escuro', 'claro', 'vidro'];
+// Ciclo dos temas: escuro -> claro -> escuro
+const TEMAS_CICLO = ['escuro', 'claro'];
 
 function proximoTema() {
     const i = TEMAS_CICLO.indexOf(temaAtual());
@@ -312,9 +313,8 @@ function alternarTema() {
 }
 
 function corDoNavegadorPorTema(tema) {
-    if (tema === 'claro') return '#F0F0F4';
-    if (tema === 'vidro') return '#1B123A';
-    return '#070014';
+    if (tema === 'claro') return '#F3F5FB';
+    return '#05070D';
 }
 
 // Seletor de tema em "vidro líquido" (3 opções): marca a opção certa e move a peça de vidro até ela.
@@ -915,4 +915,181 @@ document.addEventListener('DOMContentLoaded', function () {
     // Só a página Início mostra os cartões de indicadores (o Comparador busca os seus por conta própria)
     if (typeof fetchMarketIndicators === 'function' && document.getElementById('indicadores-data')) fetchMarketIndicators();
     updateFooterAndCounter();
+});
+
+// ==========================================
+// TEMA TECH (out/2026): fundo de partículas (#fundo-rede) + entrada escalonada (.anim/.ativo)
+// ==========================================
+// Visual aprovado na maquete "Benefícios RH" do dono. Não toca em cálculo/função nenhuma; só desenho.
+// Exposto fora da IIFE: só atualizarCoresDoFundo (chamado por aplicarTema ao trocar de tema).
+(function () {
+    const canvas = document.getElementById('fundo-rede');
+    const calmo = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const semBlur = () => document.documentElement.classList.contains('sem-blur');
+
+    let pontos = [];
+    let largura = 0, altura = 0, dpr = 1;
+    let larguraCssAnterior = -1;
+    let corPonto = 'rgba(56,189,248,.55)', corLinhaBase = '99 102 241';
+    let rodando = false;
+    let resizeTimer = null;
+
+    function lerCores() {
+        const estilo = getComputedStyle(document.documentElement);
+        corPonto = (estilo.getPropertyValue('--rede-ponto') || corPonto).trim();
+        corLinhaBase = (estilo.getPropertyValue('--rede-linha') || corLinhaBase).trim();
+    }
+
+    // Exposta globalmente: aplicarTema() chama isso ao trocar de tema (relê as cores do CSS, já cacheadas aqui).
+    window.atualizarCoresDoFundo = function () {
+        if (!canvas) return;
+        lerCores();
+    };
+
+    if (!canvas) return; // página sem o fundo (não deveria acontecer, mas protege)
+
+    function pausado() {
+        const mapa = document.getElementById('mapa');
+        const viagem = document.getElementById('viagem');
+        if (mapa && !mapa.classList.contains('hidden')) return true;
+        if (viagem && !viagem.classList.contains('hidden')) return true;
+        if (document.hidden) return true;
+        return false;
+    }
+
+    function redimensiona() {
+        dpr = Math.min(devicePixelRatio || 1, 2);
+        const larguraMudou = innerWidth !== larguraCssAnterior;
+        larguraCssAnterior = innerWidth;
+        largura = canvas.width = Math.round(innerWidth * dpr);
+        altura = canvas.height = Math.round(innerHeight * dpr);
+        canvas.style.width = innerWidth + 'px';
+        canvas.style.height = innerHeight + 'px';
+        if (larguraMudou || !pontos.length) {
+            // largura mudou (ou 1ª vez): sorteia as partículas de novo
+            const qtd = Math.min(90, Math.round((innerWidth * innerHeight) / 22000));
+            pontos = Array.from({ length: qtd }, () => ({
+                x: Math.random() * largura, y: Math.random() * altura,
+                vx: (Math.random() - 0.5) * 0.3 * dpr, vy: (Math.random() - 0.5) * 0.3 * dpr
+            }));
+        } else {
+            // só a altura mudou (barra de endereço do celular aparecendo/sumindo): mantém as
+            // partículas existentes, só limita à nova área para não ficarem fora do canvas
+            for (let i = 0; i < pontos.length; i++) {
+                const p = pontos[i];
+                if (p.x > largura) p.x = largura;
+                if (p.y > altura) p.y = altura;
+            }
+        }
+    }
+
+    function desenhaQuadro() {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.clearRect(0, 0, largura, altura);
+        const lim = 130 * dpr;
+        for (let i = 0; i < pontos.length; i++) {
+            const a = pontos[i];
+            ctx.fillStyle = corPonto;
+            ctx.beginPath(); ctx.arc(a.x, a.y, 1.5 * dpr, 0, Math.PI * 2); ctx.fill();
+            for (let j = i + 1; j < pontos.length; j++) {
+                const b = pontos[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+                if (d < lim) {
+                    ctx.strokeStyle = 'rgb(' + corLinhaBase + ' / ' + ((1 - d / lim) * 0.25).toFixed(3) + ')';
+                    ctx.lineWidth = dpr;
+                    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function laco() {
+        if (!rodando) return;
+        if (!pausado()) {
+            if (!calmo()) {
+                for (let i = 0; i < pontos.length; i++) {
+                    const p = pontos[i];
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < 0 || p.x > largura) p.vx *= -1;
+                    if (p.y < 0 || p.y > altura) p.vy *= -1;
+                }
+            }
+            desenhaQuadro();
+        }
+        if (calmo()) return; // 1 quadro estático: não agenda o próximo
+        requestAnimationFrame(laco);
+    }
+
+    function iniciar() {
+        if (semBlur()) return; // aparelho fraco/economia de dados: canvas desligado
+        lerCores();
+        redimensiona();
+        desenhaQuadro();
+        if (!calmo()) {
+            rodando = true;
+            requestAnimationFrame(laco);
+        }
+    }
+
+    addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => { redimensiona(); if (!rodando) desenhaQuadro(); }, 150);
+    });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && rodando && calmo()) desenhaQuadro();
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', iniciar);
+    } else {
+        iniciar();
+    }
+})();
+
+// Entrada escalonada (.anim/.ativo): só nos cartões visíveis da página (caixas .shadow-lg). Não toca em
+// main, abas (.tab-content) nem nos overlays de tela cheia — só nos próprios cartões internos.
+// O .hero-panel da Início fica de fora desse sistema de propósito (dono, 2026-10-11): ele nunca recebia
+// .ativo de forma confiável e corria risco de ficar invisível (opacity:0 preso); sem .anim ele sempre
+// aparece normal (opacity:1 por padrão em .hero-panel), só sem a animação de entrada escalonada.
+document.addEventListener('DOMContentLoaded', function () {
+    const raiz = document.documentElement;
+    if (!raiz.classList.contains('entrada')) return;
+    const conteudo = document.getElementById('conteudo');
+    if (!conteudo) return;
+
+    const candidatos = Array.from(conteudo.querySelectorAll('.shadow-lg'))
+        .filter(el => el.offsetParent !== null);
+
+    candidatos.forEach((el, i) => {
+        el.classList.add('anim');
+        if (!el.style.getPropertyValue('--d')) el.style.setProperty('--d', String(i % 8));
+    });
+
+    if (!candidatos.length) return;
+
+    const limpa = (el) => {
+        el.classList.remove('anim');
+        el.classList.remove('ativo');
+    };
+
+    if (typeof IntersectionObserver === 'function') {
+        const obs = new IntersectionObserver((entradas) => {
+            entradas.forEach(entrada => {
+                if (entrada.isIntersecting) {
+                    entrada.target.classList.add('ativo');
+                    obs.unobserve(entrada.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        candidatos.forEach(el => obs.observe(el));
+    } else {
+        candidatos.forEach(el => el.classList.add('ativo'));
+    }
+
+    candidatos.forEach(el => {
+        el.addEventListener('animationend', () => limpa(el), { once: true });
+    });
+
+    // Segurança: se algo impedir a animação de rodar (reduced-motion mudou depois, etc.), libera transform/filter.
+    setTimeout(() => candidatos.forEach(limpa), 4500);
 });

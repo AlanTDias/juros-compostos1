@@ -18,18 +18,18 @@ const PARES_CAMBIO = [
 // osciladores). 1) Regra 50/30/20 (referência de planejamento pessoal, sem busca). 2) Líquido x Imposto de Renda de
 // um CDB 100% do CDI em 12 meses (com o CDI de agora). 3) Quanto do preço do iPhone 18 Fold é imposto (estimativa).
 const PIZZA_503020 = [
-    { nome: 'Necessidades (50%)', valor: 50, cor: '#8FA3FB' },
-    { nome: 'Desejos (30%)', valor: 30, cor: '#FBBF24' },
-    { nome: 'Poupança/investimentos (20%)', valor: 20, cor: '#F87171' }
+    { nome: 'Necessidades (50%)', valor: 50, cor: '#6366f1' },
+    { nome: 'Desejos (30%)', valor: 30, cor: '#38bdf8' },
+    { nome: 'Poupança/investimentos (20%)', valor: 20, cor: '#34d399' }
 ];
 // ESTIMATIVA (não é cálculo fiscal exato): iPhone 18 Fold a R$ 21.999 (preço oficial no Brasil, set/2026). ~62,1% do
 // preço são tributos (proporção real do iPhone Air: R$ 6.520 de R$ 10.499, Blog do iPhone), repartidos pelo peso das
 // alíquotas: II 60 : ICMS 19 : outros 31,03 (IPI 15 + PIS/COFINS 9,65 + IOF 6,38). Atualizar à mão se o preço mudar.
 const PIZZA_IPHONE = [
-    { nome: 'Aparelho (R$ 8.337)', valor: 8337, cor: '#8FA3FB' },
-    { nome: 'Imposto de Importação (R$ 7.446)', valor: 7446, cor: '#F87171' },
-    { nome: 'ICMS (R$ 2.360)', valor: 2360, cor: '#FBBF24' },
-    { nome: 'Outros: IPI, PIS/COFINS, IOF (R$ 3.856)', valor: 3856, cor: '#A78BFA' }
+    { nome: 'Aparelho (R$ 8.337)', valor: 8337, cor: '#6366f1' },
+    { nome: 'Imposto de Importação (R$ 7.446)', valor: 7446, cor: '#a78bfa' },
+    { nome: 'ICMS (R$ 2.360)', valor: 2360, cor: '#34d399' },
+    { nome: 'Outros: IPI, PIS/COFINS, IOF (R$ 3.856)', valor: 3856, cor: '#38bdf8' }
 ];
 
 // Número com 2 casas no padrão brasileiro (vírgula), como no resto do site
@@ -114,6 +114,7 @@ function montarPizza(id, itens) {
         },
         options: {
             responsive: true, maintainAspectRatio: false,
+            cutout: '62%',
             animation: { duration: 400 },
             plugins: {
                 legend: { display: false },
@@ -150,8 +151,8 @@ async function montarPizzaIR() {
         const liquido = dados.cdi * (1 - aliq);
         const imposto = dados.cdi * aliq;
         montarPizza('merc-pizza-ir', [
-            { nome: `Líquido (${fmtPct2(liquido)}% a.a.)`, valor: liquido, cor: '#8FA3FB' },
-            { nome: `Imposto de Renda (${fmtPct2(imposto)}% a.a.)`, valor: imposto, cor: '#F87171' }
+            { nome: `Líquido (${fmtPct2(liquido)}% a.a.)`, valor: liquido, cor: '#38bdf8' },
+            { nome: `Imposto de Renda (${fmtPct2(imposto)}% a.a.)`, valor: imposto, cor: '#f472b6' }
         ]);
         if (statusEl) statusEl.classList.add('hidden');
     } catch (erro) {
@@ -202,8 +203,9 @@ async function carregarOscilador(cfg) {
                 (subiu ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400');
         }
 
-        const corLinha = subiu ? (getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#22D3EE') : '#F87171';
-        const corArea = subiu ? 'rgba(34,211,238,0.12)' : 'rgba(248,113,113,0.12)';
+        const estiloRaiz = getComputedStyle(document.documentElement);
+        const corLinha = (subiu ? estiloRaiz.getPropertyValue('--sobe').trim() : estiloRaiz.getPropertyValue('--desce').trim()) || (subiu ? '#34d399' : '#f472b6');
+        const corArea = subiu ? 'rgba(52,211,153,0.12)' : 'rgba(244,114,182,0.12)';
         const grafico = new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {

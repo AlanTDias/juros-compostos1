@@ -8,40 +8,40 @@
 
 /* ==========================================================
    TEMAS: cada paleta é um conjunto de variáveis "R G B" (usadas pelo tailwind.config no index.html).
-   Padrão = escuro. <html data-tema="claro"> = claro; <html data-tema="vidro"> = vidro.
+   Padrão = escuro. <html data-tema="claro"> = claro. (Tema "vidro" removido em 2026-10: decisão do dono, substituído pelo visual "TEMA TECH".)
    ========================================================== */
 
 :root {
-    --gray-50: 244 244 241;
-    --gray-100: 236 236 232;
-    --gray-200: 212 212 209;
-    --gray-300: 176 176 175;
-    --gray-400: 140 140 142;
-    --gray-500: 98 98 102;
-    --gray-600: 58 58 62;
-    --gray-700: 36 36 40;
-    --gray-800: 18 18 20;
-    --gray-900: 6 6 7;
-    --gray-950: 0 0 0;
-    --emerald-50: 236 254 255;
-    --emerald-100: 207 250 254;
-    --emerald-200: 165 243 252;
-    --emerald-300: 103 232 249;
-    --emerald-400: 34 211 238;
-    --emerald-500: 34 211 238;
-    --emerald-600: 14 165 199;
-    --emerald-700: 12 122 148;
-    --emerald-800: 11 92 112;
-    --emerald-900: 10 70 87;
-    --emerald-950: 6 32 39;
-    --accent: #22D3EE;
-    --accent-soft: rgba(34, 211, 238, 0.35);
-    --accent-glow: rgba(34, 211, 238, 0.18);
-    --grid-line: rgba(148, 163, 184, 0.06);
-    --border-card: rgba(34, 211, 238, 0.15);
-    --border-card-hover: rgba(34, 211, 238, 0.45);
-    --border-tile: rgba(34, 211, 238, 0.1);
-    --border-divider: rgba(34, 211, 238, 0.09);
+    --gray-50: 245 249 255;
+    --gray-100: 232 238 252;
+    --gray-200: 204 213 233;
+    --gray-300: 176 188 214;
+    --gray-400: 147 163 196;
+    --gray-500: 108 123 155;
+    --gray-600: 69 83 114;
+    --gray-700: 29 43 74;
+    --gray-800: 17 26 46;
+    --gray-900: 10 15 28;
+    --gray-950: 5 7 13;
+    --emerald-50: 240 249 255;
+    --emerald-100: 224 242 254;
+    --emerald-200: 186 230 253;
+    --emerald-300: 125 211 252;
+    --emerald-400: 56 189 248;
+    --emerald-500: 56 189 248;
+    --emerald-600: 2 132 199;
+    --emerald-700: 3 105 161;
+    --emerald-800: 7 89 133;
+    --emerald-900: 12 74 110;
+    --emerald-950: 8 47 73;
+    --accent: #38BDF8;
+    --accent-soft: rgba(56, 189, 248, 0.35);
+    --accent-glow: rgba(56, 189, 248, 0.18);
+    --grid-line: rgba(147, 163, 196, 0.06);
+    --border-card: rgba(56, 189, 248, 0.15);
+    --border-card-hover: rgba(56, 189, 248, 0.45);
+    --border-tile: rgba(56, 189, 248, 0.1);
+    --border-divider: rgba(56, 189, 248, 0.09);
     --sombra-card: rgba(0, 0, 0, 0.55);
     --aurora-1: rgba(139, 92, 246, 0.2);            /* aurora boreal: violeta */
     --aurora-2: rgba(143, 163, 251, 0.2);            /* azul-lavanda */
@@ -53,40 +53,52 @@
     --vidro-sombra-int: rgba(0, 0, 0, 0.4);         /* sombra interna dos campos afundados */
     --vidro-realce: rgba(255, 255, 255, 0.5);       /* reflexo de luz nas quinas do vidro */
     --vidro-borda-int: rgba(0, 0, 0, 0.55);         /* linha escura interna que dá volume */
-    --texto-grafico: #ECECE8;
-    --grade-grafico: rgba(148, 163, 184, 0.15);
+    --texto-grafico: #E8EEFC;
+    --grade-grafico: rgba(147, 163, 196, 0.15);
+    /* ---- Tema TECH (out/2026): tokens novos usados no bloco final do arquivo ---- */
+    --c1: #38bdf8;
+    --c2: #6366f1;
+    --c3: #22d3ee;
+    --c4: #a78bfa;
+    --grad: linear-gradient(120deg, var(--c1), var(--c2) 55%, var(--c4));
+    --card-bg: linear-gradient(180deg, rgba(17, 26, 46, 0.85), rgba(10, 15, 28, 0.85));
+    --rede-ponto: rgba(56, 189, 248, 0.55);
+    --rede-linha: 99 102 241;
+    --sobe: #34d399;
+    --desce: #f472b6;
 }
 
 html[data-tema="claro"] {
-    --gray-50: 10 10 12;
-    --gray-100: 18 18 21;
-    --gray-200: 34 34 38;
-    --gray-300: 58 58 64;
-    --gray-400: 100 100 108;
-    --gray-500: 140 140 148;
-    --gray-600: 208 208 214;
-    --gray-700: 230 230 235;
+    --gray-50: 8 10 16;
+    --gray-100: 18 24 38;
+    --gray-200: 42 50 68;
+    --gray-300: 66 76 98;
+    --gray-400: 91 102 128;
+    --gray-500: 96 107 133;
+    --gray-600: 177 184 204;
+    --gray-700: 219 226 243;
     --gray-800: 255 255 255;
-    --gray-900: 240 240 244;
-    --gray-950: 229 229 234;    --emerald-50: 28 32 70;
-    --emerald-100: 46 55 120;
-    --emerald-200: 58 70 160;
-    --emerald-300: 68 84 190;
-    --emerald-400: 72 88 205;
-    --emerald-500: 99 118 240;
-    --emerald-600: 72 88 205;
-    --emerald-700: 68 84 190;
-    --emerald-800: 199 210 253;
-    --emerald-900: 224 230 254;
-    --emerald-950: 238 241 255;
-    --accent: #6376F0;
-    --accent-soft: rgba(99, 118, 240, 0.35);
-    --accent-glow: rgba(99, 118, 240, 0.14);
-    --grid-line: rgba(15, 23, 42, 0.05);
-    --border-card: rgba(99, 118, 240, 0.16);
-    --border-card-hover: rgba(99, 118, 240, 0.5);
-    --border-tile: rgba(99, 118, 240, 0.1);
-    --border-divider: rgba(99, 118, 240, 0.12);
+    --gray-900: 243 245 251;
+    --gray-950: 238 241 250;
+    --emerald-50: 240 249 255;
+    --emerald-100: 224 242 254;
+    --emerald-200: 186 230 253;
+    --emerald-300: 3 105 161;
+    --emerald-400: 3 105 161;
+    --emerald-500: 7 89 133;
+    --emerald-600: 12 74 110;
+    --emerald-700: 8 47 73;
+    --emerald-800: 6 37 58;
+    --emerald-900: 4 25 40;
+    --emerald-950: 3 19 30;
+    --accent: #0284C7;
+    --accent-soft: rgba(2, 132, 199, 0.35);
+    --accent-glow: rgba(2, 132, 199, 0.14);
+    --grid-line: rgba(18, 24, 38, 0.05);
+    --border-card: rgba(2, 132, 199, 0.16);
+    --border-card-hover: rgba(2, 132, 199, 0.5);
+    --border-tile: rgba(2, 132, 199, 0.1);
+    --border-divider: rgba(2, 132, 199, 0.12);
     --sombra-card: rgba(15, 23, 42, 0.16);
     --aurora-1: rgba(167, 139, 250, 0.34);
     --aurora-2: rgba(143, 163, 251, 0.34);
@@ -97,49 +109,19 @@ html[data-tema="claro"] {
     --vidro-sombra-int: rgba(15, 23, 42, 0.13);
     --vidro-realce: rgba(255, 255, 255, 0.95);
     --vidro-borda-int: rgba(15, 23, 42, 0.2);
-    --texto-grafico: #3A3A40;
-    --grade-grafico: rgba(15, 23, 42, 0.1);
-}
-
-/* Tema VIDRO (glassmorphism): painéis translúcidos com desfoque e bordas luminosas sobre um fundo de "aurora" roxa. */
-
-html[data-tema="vidro"] {
-    --gray-50: 245 243 255;
-    --gray-100: 233 228 250;
-    --gray-200: 214 205 240;
-    --gray-300: 184 172 222;
-    --gray-400: 143 130 190;
-    --gray-500: 106 94 155;
-    --gray-600: 63 52 110;
-    --gray-700: 41 31 82;
-    --gray-800: 27 18 58;
-    --gray-900: 16 10 38;
-    --gray-950: 8 5 22;
-    --emerald-50: 250 245 255;
-    --emerald-100: 243 232 255;
-    --emerald-200: 233 213 255;
-    --emerald-300: 216 180 254;
-    --emerald-400: 192 132 252;
-    --emerald-500: 168 85 247;
-    --emerald-600: 147 51 234;
-    --emerald-700: 126 34 206;
-    --emerald-800: 107 33 168;
-    --emerald-900: 88 28 135;
-    --emerald-950: 59 7 100;
-    --accent: #C084FC;
-    --accent-soft: rgba(192, 132, 252, 0.45);
-    --accent-glow: rgba(192, 132, 252, 0.26);
-    --grid-line: rgba(255, 255, 255, 0.03);
-    --border-card: rgba(255, 255, 255, 0.11);
-    --border-card-hover: rgba(255, 255, 255, 0.3);
-    --border-tile: rgba(255, 255, 255, 0.05);
-    --border-divider: rgba(255, 255, 255, 0.07);
-    --sombra-card: rgba(6, 2, 20, 0.55);
-    --vidro-fundo: rgb(27 18 58 / 0.34);
-    --vidro-desfoque: 22px;
-    --aurora-1: rgba(168, 85, 247, 0.55);
-    --aurora-2: rgba(129, 90, 250, 0.4);
-    --aurora-3: rgba(217, 70, 239, 0.38);
+    --texto-grafico: #121826;
+    --grade-grafico: rgba(18, 24, 38, 0.1);
+    /* ---- Tema TECH (out/2026) ---- */
+    --c1: #0369a1;
+    --c2: #4f46e5;
+    --c3: #0891b2;
+    --c4: #7c3aed;
+    --grad: linear-gradient(120deg, var(--c1), var(--c2) 55%, var(--c4));
+    --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(246, 248, 253, 0.95));
+    --rede-ponto: rgba(2, 132, 199, 0.45);
+    --rede-linha: 79 70 229;
+    --sobe: #047857;
+    --desce: #be185d;
 }
 /* A prévia de documentos é papel branco para impressão: sempre a paleta escura, em qualquer tema */
 
@@ -545,7 +527,8 @@ html[data-tema="claro"] [class*="bg-purple-"].text-white {
 html[data-tema="claro"] .text-blue-400 { color: #2563EB; }
 html[data-tema="claro"] .text-blue-300 { color: #1D4ED8; }
 html[data-tema="claro"] .text-purple-400 { color: #7C3AED; }
-html[data-tema="claro"] .text-red-400 { color: #DC2626; }
+html[data-tema="claro"] .text-red-400,
+html[data-tema="claro"] .text-red-500 { color: #B91C1C; }
 html[data-tema="claro"] .text-yellow-400,
 html[data-tema="claro"] .text-amber-400 { color: #B45309; }
 html[data-tema="claro"] .text-green-400 { color: #15803D; }
@@ -561,8 +544,17 @@ html[data-tema="claro"] textarea {
     color: rgb(var(--gray-100));
 }
 
+/* Placeholders no claro: cor própria (o padrão do navegador fica claro demais sobre o fundo claro, ~2,3:1). */
 
-/* ---------- Seletor de tema em VIDRO LÍQUIDO (escuro | claro | vidro), no topo do cabeçalho ----------
+html[data-tema="claro"] input::placeholder,
+html[data-tema="claro"] select::placeholder,
+html[data-tema="claro"] textarea::placeholder {
+    color: #606B85;
+    opacity: 1;
+}
+
+
+/* ---------- Seletor de tema em VIDRO LÍQUIDO (escuro | claro), no topo do cabeçalho ----------
    Uma cápsula de vidro fosco com uma "peça" de vidro que desliza até a opção escolhida, estica ao chegar
    (efeito de líquido) e, no Chrome/Edge, refrata o fundo por um filtro SVG (#vidro-liquido, no base.html).
    A posição vem do atributo data-ativo, escrito pelo core.js; funciona sem :has(). */
@@ -669,7 +661,6 @@ html[data-tema="claro"] textarea {
 
 .tema-switch[data-ativo="escuro"] .tema-thumb { transform: translateX(0); }
 .tema-switch[data-ativo="claro"] .tema-thumb { transform: translateX(var(--op-l)); }
-.tema-switch[data-ativo="vidro"] .tema-thumb { transform: translateX(calc(var(--op-l) * 2)); }
 .tema-switch[data-ativo=""] .tema-thumb { opacity: 0; }
 
 /* "Esticar" como um líquido quando a peça muda de lugar */
@@ -1142,10 +1133,6 @@ body {
     background-attachment: fixed;
 }
 
-html[data-tema="vidro"] body {
-    background-color: rgb(var(--gray-950));
-}
-
 /* Painéis: translúcidos + desfoque + brilho na borda de cima + reflexo diagonal */
 
 html .bg-gray-800,
@@ -1190,6 +1177,13 @@ html .bg-gray-700\/40,
 html .bg-gray-700\/50,
 html .bg-gray-900:not(body) {
     background-color: rgb(var(--gray-950) / 0.32);
+}
+
+/* Tela cheia do editor de PDF (#pdfedit-workspace.fixed, movido para o <body> por togglePdfEditFullscreen()
+   em js/arquivos.js): precisa de fundo OPACO, não translúcido como o bg-gray-900 comum acima. */
+
+html #pdfedit-workspace.fixed {
+    background-color: rgb(var(--gray-950)) !important;
 }
 
 /* Botões de ação: gradiente com brilho, como uma gema */
@@ -1501,6 +1495,12 @@ html[data-tema="claro"] .bg-gray-900:not(body):not(#doc-printable-area *) {
     background-color: rgb(var(--gray-950) / 0.4);
 }
 
+/* Tela cheia do editor de PDF no claro: fundo opaco usando o mesmo tom de fundo da página (--gray-900 = #F3F5FB). */
+
+html[data-tema="claro"] #pdfedit-workspace.fixed {
+    background-color: rgb(var(--gray-900)) !important;
+}
+
 html[data-tema="claro"] input,
 html[data-tema="claro"] select,
 html[data-tema="claro"] textarea {
@@ -1546,24 +1546,30 @@ html.sem-blur header.bg-gray-800 {
    que aparece é o pontinho de departamento de cada caixa. */
 
 .mapa {
-    --m-fundo: #08080A;
-    --m-gradiente: #08080A;
+    /* TEMA TECH (2026-10-11): mesma paleta ciano->índigo->lilás do site (--c1..--c4 em :root), aplicada ao
+       visual próprio do mapa (fundo com brilhos + grade de pontinhos, caixas em "vidro líquido", aro ciano/índigo). */
+    --m-fundo: #05070d;
+    --m-gradiente: #05070d;
     --m-gradiente-img:
-        radial-gradient(65% 50% at 50% -6%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 72%),
-        radial-gradient(45% 35% at 50% 108%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 70%),
-        radial-gradient(130% 105% at 50% 38%, #171719 0%, #0B0B0D 50%, #020203 100%); /* 25% e depois +10% mais escuro (RGB x0,75 x0,9) */
-    --m-superficie: #131315;
-    --m-texto: #F5F5F7;
-    --m-suave: #98989D;
-    --m-linha: #3A3A3C;
-    --m-realce: #F5F5F7;
-    --m-realce-texto: #000000;
-    --m-vidro: rgba(11, 11, 13, 0.66);
-    --m-grade: rgba(255, 255, 255, 0.11);
-    --m-sombra: rgba(0, 0, 0, 0.5);
-    --m-caixa: rgba(255, 255, 255, 0.07);
-    --m-caixa-luz: rgba(255, 255, 255, 0.10);
-    --m-aro: #FFFFFF;
+        radial-gradient(60% 45% at 16% 8%, rgba(56, 189, 248, 0.16) 0%, rgba(56, 189, 248, 0) 70%),
+        radial-gradient(50% 45% at 86% 14%, rgba(99, 102, 241, 0.16) 0%, rgba(99, 102, 241, 0) 70%),
+        radial-gradient(65% 55% at 55% 104%, rgba(167, 139, 250, 0.12) 0%, rgba(167, 139, 250, 0) 72%),
+        radial-gradient(130% 105% at 50% 38%, #0a0f1c 0%, #05070d 55%, #020306 100%);
+    --m-superficie: #111a2e;
+    --m-texto: #e8eefc;
+    --m-suave: #93a3c4;
+    --m-linha: #1d2b4a;
+    --m-realce: #38bdf8;
+    --m-realce-texto: #05070d;
+    --m-realce-fraca: rgba(56, 189, 248, 0.55);
+    --m-vidro: rgba(10, 15, 28, 0.72);
+    --m-grade: rgba(56, 189, 248, 0.14);
+    --m-sombra: rgba(2, 6, 16, 0.55);
+    --m-caixa: rgba(148, 197, 253, 0.08);
+    --m-caixa-luz: rgba(56, 189, 248, 0.18);
+    --m-aro: #38bdf8;
+    --m-aro2: #6366f1;
+    --m-erro: #f472b6;
     position: fixed;
     inset: 0;
     z-index: 200;
@@ -1571,29 +1577,33 @@ html.sem-blur header.bg-gray-800 {
     background: var(--m-gradiente);
     background: var(--m-gradiente-img);
     color: var(--m-texto);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     outline: none;
 }
 
 .mapa[data-tema-mapa="claro"] {
-    --m-fundo: #F0F0F2;
-    --m-gradiente: #F0F0F2;
+    --m-fundo: #f3f5fb;
+    --m-gradiente: #f3f5fb;
     --m-gradiente-img:
-        radial-gradient(70% 50% at 50% -6%, #FFFFFF 0%, rgba(255, 255, 255, 0) 72%),
-        radial-gradient(130% 105% at 50% 38%, #FAFAFC 0%, #EDEDF1 50%, #D2D2D9 100%);
-    --m-superficie: #FFFFFF;
-    --m-texto: #1D1D1F;
-    --m-suave: #6E6E73;
-    --m-linha: #D2D2D7;
-    --m-realce: #1D1D1F;
-    --m-realce-texto: #F5F5F7;
-    --m-vidro: rgba(245, 245, 247, 0.72);
-    --m-grade: rgba(0, 0, 0, 0.15);
-    --m-sombra: rgba(0, 0, 0, 0.12);
-    --m-caixa: rgba(255, 255, 255, 0.5);
-    --m-caixa-luz: rgba(255, 255, 255, 0.7);
-    --m-aro: #FFFFFF;
+        radial-gradient(60% 45% at 16% 8%, rgba(2, 132, 199, 0.10) 0%, rgba(2, 132, 199, 0) 70%),
+        radial-gradient(50% 45% at 86% 14%, rgba(79, 70, 229, 0.10) 0%, rgba(79, 70, 229, 0) 70%),
+        radial-gradient(130% 105% at 50% 38%, #ffffff 0%, #f3f5fb 55%, #e8ecf7 100%);
+    --m-superficie: #ffffff;
+    --m-texto: #121826;
+    --m-suave: #5b6680;
+    --m-linha: #dbe2f3;
+    --m-realce: #0284c7;
+    --m-realce-texto: #ffffff;
+    --m-realce-fraca: rgba(2, 132, 199, 0.55);
+    --m-vidro: rgba(255, 255, 255, 0.78);
+    --m-grade: rgba(2, 132, 199, 0.16);
+    --m-sombra: rgba(15, 23, 42, 0.12);
+    --m-caixa: rgba(2, 132, 199, 0.05);
+    --m-caixa-luz: rgba(2, 132, 199, 0.16);
+    --m-aro: #0284c7;
+    --m-aro2: #4f46e5;
+    --m-erro: #db2777;
 }
 
 .mapa.hidden {
@@ -1616,6 +1626,7 @@ html.sem-blur header.bg-gray-800 {
     -webkit-backdrop-filter: saturate(180%) blur(24px);
     backdrop-filter: saturate(180%) blur(24px);
     border-bottom: 1px solid var(--m-linha);
+    box-shadow: 0 1px 0 0 rgba(56, 189, 248, 0.08);
 }
 
 .mapa-grupo {
@@ -1638,7 +1649,7 @@ html body .mapa textarea {
     border: 1px solid var(--m-linha);
     border-radius: 10px;
     box-shadow: none;
-    font: 400 0.9rem -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    font: 400 0.9rem 'Inter', 'Segoe UI', system-ui, sans-serif;
     padding: 0.5rem 0.65rem;
     outline: none;
     width: 100%;
@@ -1648,8 +1659,8 @@ html body .mapa textarea {
 html body .mapa input:focus,
 html body .mapa select:focus,
 html body .mapa textarea:focus {
-    border-color: var(--m-texto);
-    box-shadow: 0 0 0 3px rgba(127, 127, 127, 0.25);
+    border-color: var(--m-realce);
+    box-shadow: 0 0 0 3px var(--m-realce-fraca);
 }
 
 html body .mapa input.mapa-titulo {
@@ -1657,6 +1668,7 @@ html body .mapa input.mapa-titulo {
     max-width: 380px;
     background: transparent;
     border-color: transparent;
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
     font-size: 1.05rem;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -1688,14 +1700,15 @@ html body .mapa input[type="color"] {
     border-radius: 999px;
     background: transparent;
     color: var(--m-texto);
-    font: 500 0.85rem -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    font: 500 0.85rem 'Inter', 'Segoe UI', system-ui, sans-serif;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
 }
 
 .mapa-btn:hover:not(:disabled),
 .mapa-btn:focus-visible {
-    background: rgba(127, 127, 127, 0.2);
+    background: var(--m-realce-fraca);
+    color: var(--m-realce-texto);
     outline: none;
 }
 
@@ -1784,8 +1797,12 @@ html body .mapa input[type="color"] {
     fill: var(--m-grade);
 }
 
-.mapa-aro-luz {
+.mapa-aro-luz-1 {
     stop-color: var(--m-aro);
+}
+
+.mapa-aro-luz-2 {
+    stop-color: var(--m-aro2);
 }
 
 /* Caixa = lente de vidro (estilo "vidro líquido"): fundo desfocado por trás, tinta de vidro, aro de luz em cima e embaixo */
@@ -1822,12 +1839,12 @@ html body .mapa input[type="color"] {
 }
 
 .mapa-no:hover .contorno {
-    stroke: var(--m-suave);
+    stroke: var(--m-realce-fraca);
 }
 
 .mapa-no.sel .contorno,
 .mapa-no.origem .contorno {
-    stroke: var(--m-texto);
+    stroke: var(--m-realce);
     stroke-width: 2;
 }
 
@@ -1836,7 +1853,7 @@ html body .mapa input[type="color"] {
 }
 .mapa-no text {
     fill: var(--m-texto);
-    font: 600 14px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    font: 600 14px 'Space Grotesk', 'Inter', system-ui, sans-serif;
     letter-spacing: -0.01em;
     pointer-events: none;
 }
@@ -1892,17 +1909,17 @@ html body .mapa input[type="color"] {
 }
 
 .mapa-lig.sel .linha {
-    stroke: var(--m-texto);
+    stroke: var(--m-realce);
     stroke-width: 2.5;
 }
 
 .mapa-lig.sel .seta {
-    fill: var(--m-texto);
+    fill: var(--m-realce);
 }
 
 .mapa-lig .rotulo {
     fill: var(--m-suave);
-    font: 500 12px -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+    font: 500 12px 'Inter', 'Segoe UI', system-ui, sans-serif;
     paint-order: stroke;
     stroke: var(--m-fundo);
     stroke-opacity: 0.55; /* fundo em gradiente: o halo do rótulo fica sutil */
@@ -1913,7 +1930,7 @@ html body .mapa input[type="color"] {
 
 .mapa-temp path {
     fill: none;
-    stroke: var(--m-texto);
+    stroke: var(--m-realce);
     stroke-width: 1.5;
     stroke-dasharray: 5 5;
     pointer-events: none;
@@ -1934,6 +1951,7 @@ html body .mapa input[type="color"] {
     background: var(--m-vidro);
     -webkit-backdrop-filter: saturate(180%) blur(24px);
     backdrop-filter: saturate(180%) blur(24px);
+    box-shadow: 0 10px 26px var(--m-sombra);
 }
 
 /* Editor de texto direto na caixa (textarea posicionado sobre a caixa; Enter pula linha) */
@@ -1948,8 +1966,9 @@ html body .mapa textarea.mapa-editor {
     overflow: hidden;
     background: var(--m-superficie);
     color: var(--m-texto);
-    border: 2px solid var(--m-texto);
-    box-shadow: 0 10px 30px var(--m-sombra);
+    border: 2px solid var(--m-realce);
+    box-shadow: 0 10px 30px var(--m-sombra), 0 0 0 3px var(--m-realce-fraca);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     font-weight: 600;
     letter-spacing: -0.01em;
     text-align: left;
@@ -2002,17 +2021,34 @@ html body .mapa select.mapa-sel:disabled {
     box-shadow: 0 16px 40px var(--m-sombra);
 }
 
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+    .mapa-pop::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(140deg, var(--m-aro) 0%, transparent 42%, transparent 58%, var(--m-aro2) 100%);
+        opacity: 0.5;
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+}
+
 .mapa-pop[hidden] {
     display: none;
 }
 
 .mapa-h {
     margin: 0 0 0.6rem;
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--m-suave);
+    color: var(--m-realce);
 }
 
 .mapa-ajuda {
@@ -2065,7 +2101,7 @@ html body .mapa select.mapa-sel:disabled {
 }
 
 .mapa-status[data-erro] {
-    color: var(--m-texto);
+    color: var(--m-erro);
     font-weight: 600;
 }
 
@@ -2095,7 +2131,7 @@ html body .mapa select.mapa-sel:disabled {
    SITE INTEIRO (escuro e claro): fundo e caixas no estilo do MAPA DE SISTEMAS
    - Fundo: os mesmos gradientes do mapa (grafite com "luz de estúdio" no escuro; pérola no claro) + pontinhos.
    - Caixas principais (.shadow-lg / .hero-panel): vidro com aro de luz em cima e embaixo, laterais quase apagadas,
-     brilho interno, contorno fino e sombra suave. O tema VIDRO (roxo) não muda.
+     brilho interno, contorno fino e sombra suave.
    ========================================================================================================== */
 
 html {
@@ -2355,4 +2391,391 @@ html .tab-btn:not(.text-gray-950):focus-visible {
 
 .grafico-pizza-gloss canvas {
     filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+}
+
+/* ==========================================================================================================
+   TEMA TECH (out/2026): visual da maquete aprovada pelo dono ("Benefícios RH" — rh-escuro/rh-claro), aplicado
+   aos temas ESCURO e CLARO. O tema VIDRO foi REMOVIDO (ver topo do arquivo). Bloco único no fim, com a mesma
+   especificidade/!important dos blocos acima que sobrescreve (html .shadow-lg, html.bg-gray-800.shadow-lg,
+   html:not([data-tema]) body, body::before…), para não precisar reescrever a cascata antiga.
+   Decisão do dono (2026-10-11): a regra antiga "não adicionar animação de entrada por seção" foi substituída
+   por uma entrada única e escalonada (.anim/.ativo), igual à maquete.
+   ========================================================================================================== */
+
+/* ---------- Fundo da página: cor base + gradiente radial suave ----------
+   body com overflow-x:clip (fallback hidden p/ navegador sem suporte, a declaração é ignorada e a
+   anterior some): os elementos decorativos fixos (.fundo-brilho, .hero-orbita) usam posições negativas/px
+   fora da caixa para "vazar" visualmente; sem isso, viram rolagem horizontal no celular. Não afeta rolagem
+   interna de tabelas/áreas com overflow-x próprio.
+   Correção do dono (2026-10-11): o seletor NÃO inclui mais "html" e usa overflow-x:clip em vez de hidden
+   — "overflow-x: hidden" no HTML/BODY vira um novo bloco de rolagem que ignora
+   document.body.style.overflow='hidden', fazendo a página voltar a rolar por trás do Mapa, do Modo Viagem
+   e da tela cheia do editor de PDF. */
+
+body {
+    overflow-x: hidden; /* fallback: navegador sem suporte a "clip" ignora a declaração abaixo */
+    overflow-x: clip;
+}
+
+html:not([data-tema]) body,
+html[data-tema="claro"] body {
+    background-image:
+        radial-gradient(60% 55% at 12% 8%, rgb(var(--emerald-500) / 0.14), transparent 70%),
+        radial-gradient(50% 50% at 92% 18%, rgba(99, 102, 241, 0.14), transparent 70%),
+        radial-gradient(65% 60% at 65% 100%, rgba(167, 139, 250, 0.1), transparent 72%) !important;
+    background-attachment: fixed;
+}
+
+html:not([data-tema]) body {
+    background-color: rgb(var(--gray-950)) !important;
+}
+
+html[data-tema="claro"] body {
+    background-color: rgb(var(--gray-900)) !important;
+}
+
+/* Fundo de partículas (rede): canvas fixo atrás de tudo, desenhado pelo core.js (atualizarCoresDoFundo) */
+
+#fundo-rede {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Brilhos difusos flutuantes (dois blobs desfocados, como na maquete) */
+
+.fundo-brilho {
+    position: fixed;
+    width: 60vmax;
+    height: 60vmax;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.16;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.fundo-brilho-a {
+    background: var(--c2);
+    top: -25vmax;
+    left: -15vmax;
+    animation: fundo-flutua 18s ease-in-out infinite alternate;
+}
+
+.fundo-brilho-b {
+    background: var(--c1);
+    bottom: -10vmax;
+    right: -20vmax;
+    animation: fundo-flutua 22s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes fundo-flutua {
+    to {
+        transform: translate(8vmax, 6vmax) scale(1.1);
+    }
+}
+
+/* Grade em movimento (substitui a grade estática do escuro e os pontinhos do claro) */
+
+html:not([data-tema]) body::before,
+html[data-tema="claro"] body::before {
+    display: block !important;
+    background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) !important;
+    background-size: 56px 56px !important;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 20%, #000 30%, transparent 75%) !important;
+    mask-image: radial-gradient(ellipse at 50% 20%, #000 30%, transparent 75%) !important;
+    animation: grade-move 30s linear infinite;
+}
+
+@keyframes grade-move {
+    to {
+        background-position: 56px 56px, 56px 56px;
+    }
+}
+
+/* ---------- Cards: painel técnico com borda-gradiente via ::after (igual à maquete) ----------
+   Não usa overflow:hidden (quebraria menus/overlays internos). Fica de fora: área de impressão, mapa e
+   qualquer caixa .absolute/.fixed (tela cheia do editor de PDF, modais etc.) */
+
+html .shadow-lg:not(#doc-printable-area *):not(.mapa *):not(.absolute):not(.fixed),
+html .hero-panel:not(.absolute):not(.fixed) {
+    background: var(--card-bg) !important;
+    background-image: none !important;
+    border-radius: 18px !important;
+    position: relative;
+    isolation: isolate;
+}
+
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+    html .shadow-lg:not(#doc-printable-area *):not(.mapa *):not(.absolute):not(.fixed)::after,
+    html .hero-panel:not(.absolute):not(.fixed)::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(140deg, rgb(var(--emerald-500) / 0.5), transparent 40%, transparent 60%, rgba(167, 139, 250, 0.4));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        z-index: 1;
+    }
+}
+
+a.shadow-lg:hover,
+button.shadow-lg:hover {
+    transform: translateY(-4px);
+    border-color: rgb(var(--emerald-500) / 0.5) !important;
+}
+
+/* ---------- Entrada escalonada (.anim/.ativo): só roda dentro de html.entrada (marcado pelo base.html) ---------- */
+
+html.entrada .anim {
+    opacity: 0;
+    transform: translateY(26px);
+    filter: blur(6px);
+}
+
+html.entrada .anim.ativo {
+    animation: entra-tech 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation-delay: calc(var(--d, 0) * 0.1s);
+}
+
+@keyframes entra-tech {
+    to {
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+}
+
+/* ---------- Tipografia/tag da maquete (hero da página Início) ---------- */
+
+.tag {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--c1);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.4rem;
+}
+
+.tag::before {
+    content: "";
+    width: 28px;
+    height: 2px;
+    background: var(--grad);
+}
+
+.texto-grad {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.chip {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12.5px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-card);
+    background: rgb(var(--gray-700) / 0.4);
+    color: rgb(var(--gray-400));
+}
+
+.chip b {
+    color: var(--c1);
+    font-weight: 600;
+}
+
+/* Órbita decorativa do hero (puramente visual; escondida abaixo de 760px) */
+
+.hero-orbita {
+    position: absolute;
+    right: -40px;
+    top: -60px;
+    width: 220px;
+    height: 220px;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.hero-orbita .anel {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px dashed rgba(56, 189, 248, 0.35);
+    animation: hero-gira 40s linear infinite;
+}
+
+.hero-orbita .anel:nth-child(2) {
+    inset: 30px;
+    border-color: rgba(167, 139, 250, 0.35);
+    animation-duration: 28s;
+    animation-direction: reverse;
+}
+
+.hero-orbita .anel:nth-child(3) {
+    inset: 62px;
+    border-style: solid;
+    border-color: rgba(99, 102, 241, 0.4);
+    animation-duration: 18s;
+}
+
+.hero-orbita .nucleo {
+    position: absolute;
+    inset: 86px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #7dd3fc, var(--c2) 60%, #1e1b4b);
+    box-shadow: 0 0 60px rgba(99, 102, 241, 0.6), 0 0 120px rgba(56, 189, 248, 0.3);
+    animation: hero-pulsa 3s ease-in-out infinite;
+}
+
+.hero-orbita .sat {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--c3);
+    box-shadow: 0 0 14px var(--c3);
+    top: -4px;
+    left: calc(50% - 4px);
+}
+
+.hero-orbita .anel:nth-child(2) .sat {
+    background: var(--c4);
+    box-shadow: 0 0 14px var(--c4);
+}
+
+@keyframes hero-gira {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes hero-pulsa {
+    50% {
+        transform: scale(1.07);
+        box-shadow: 0 0 80px rgba(99, 102, 241, 0.8), 0 0 150px rgba(56, 189, 248, 0.4);
+    }
+}
+
+@media (max-width: 760px) {
+    .hero-orbita {
+        display: none;
+    }
+}
+
+/* Início: caixa de ícone arredondada nos cartões "Todas as ferramentas" */
+
+#todas-ferramentas ~ div a.shadow-lg > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    background: rgb(var(--emerald-500) / 0.1);
+    border: 1px solid rgb(var(--emerald-500) / 0.3);
+}
+
+/* Indicadores e Mercado (Início): sem moldura externa; cada tile interno vira um card próprio */
+
+#indicadores-painel,
+#mercado-painel {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+}
+
+#indicadores-painel::after,
+#mercado-painel::after {
+    content: none !important;
+}
+
+#indicadores-painel > div:first-child,
+#mercado-painel > div:first-child {
+    padding: 1rem 0.25rem;
+}
+
+#indicadores-painel .bg-gray-700\/50,
+#mercado-painel .bg-gray-700\/50,
+#mercado-painel .bg-gray-700\/40 {
+    background: var(--card-bg);
+    border: 1px solid var(--border-card);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px -12px var(--sombra-card);
+}
+
+/* ---------- Respeito a acessibilidade/desempenho ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .fundo-brilho,
+    .fundo-brilho-a,
+    .fundo-brilho-b,
+    html:not([data-tema]) body::before,
+    html[data-tema="claro"] body::before,
+    .hero-orbita .anel,
+    .hero-orbita .nucleo {
+        animation: none !important;
+    }
+
+    html.entrada .anim {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+
+    html.entrada .anim.ativo {
+        animation: none !important;
+    }
+}
+
+html.sem-blur .fundo-brilho,
+html[data-reduzir-transparencia] .fundo-brilho {
+    filter: none;
+    opacity: 0.08;
+}
+
+html.sem-blur #fundo-rede {
+    display: none;
+}
+
+@media print {
+
+    #fundo-rede,
+    .fundo-brilho,
+    .troll-btn {
+        display: none !important;
+    }
+
+    body::before {
+        display: none !important;
+    }
+
+    html.entrada .anim {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+
+    body:not(:has(#doc-printable-area)) {
+        background: #fff !important;
+    }
 }
