@@ -76,11 +76,34 @@ for (const p of paginas) if (p.id !== 'home' && !iconesPorId[p.id]) problemas.pu
 // ---------- peças reutilizáveis ----------
 const urlDa = p => `${config.dominio}/${p.arquivo === 'index.html' ? '' : p.arquivo}`;
 
+// Páginas institucionais (Sobre, Contato, Privacidade, Termos): fora do menu de ferramentas, mas no rodapé de todas
+// as páginas e no sitemap. O conteúdo fica em _fonte/conteudo/<id>.html, como as ferramentas.
+const institucionais = config.institucionais || [];
+const contato = config.contato || {};
+
 const linksRodape = `<nav aria-label="Todas as ferramentas" class="mb-4">
                 <ul class="flex flex-wrap justify-center gap-x-4 gap-y-1">
 ${paginas.filter(p => p.id !== 'home').map(p => `                    <li><a href="${p.arquivo}" class="hover:text-emerald-400 underline-offset-2 hover:underline">${esc(p.resumo.replace(/\.$/, ''))}</a></li>`).join('\n')}
                 </ul>
+            </nav>
+            <nav aria-label="Institucional" class="mb-4">
+                <ul class="rodape-institucional flex flex-wrap justify-center gap-x-1 gap-y-1 text-gray-300">
+${institucionais.map((p, i) => `                    <li>${i ? '<span aria-hidden="true" class="mx-1 text-gray-500">|</span>' : ''}<a href="${p.arquivo}" class="hover:text-emerald-400 underline-offset-2 hover:underline">${esc(p.rotulo)}</a></li>`).join('\n')}
+                </ul>
             </nav>`;
+
+// Marcadores de contato usados nos textos institucionais (preenchidos com "contato" do paginas.json)
+// Formulário de sugestões/contato (Web3Forms): sem chave ele não envia, então os trechos entre <!--FORM--> e <!--/FORM-->
+// (botão do rodapé e botão da página Contato) saem do HTML em vez de ficarem quebrados. Com chave, só os comentários saem.
+const temFormulario = !!(config.sugestoes && config.sugestoes.accessKey);
+const tratarFormulario = html => html.replace(/[ \t]*<!--FORM-->\n?([\s\S]*?)[ \t]*<!--\/FORM-->\n?/g, (_, dentro) => temFormulario ? dentro : '');
+const blocoEmail = contato.email
+    ? `<p>${temFormulario ? 'Se preferir, escreva' : 'Escreva'} para <a href="mailto:${esc(contato.email)}" class="text-emerald-400 underline underline-offset-2 font-semibold">${esc(contato.email)}</a>.</p>`
+    : '';
+const nomeResponsavel = contato.responsavel ? esc(contato.responsavel) : 'uma equipe independente de desenvolvimento';
+if (!contato.email) problemas.push('paginas.json: "contato.email" está vazio (Contato e Política de Privacidade ficam sem e-mail; o AdSense pede um contato real)');
+if (!contato.responsavel) problemas.push('paginas.json: "contato.responsavel" está vazio (a página Sobre não diz quem mantém o site)');
+if (!temFormulario) console.log('Aviso: "sugestoes.accessKey" vazio no paginas.json — formulário de contato/sugestões escondido (só o e-mail aparece).');
 
 const cartoesHome = `
 <section aria-labelledby="todas-ferramentas" class="mt-2">
@@ -100,7 +123,10 @@ ${paginas.filter(p => p.id !== 'home').map(p => `        <a href="${p.arquivo}" 
 function jsonLd(p) {
     const url = urlDa(p);
     const grafo = [];
-    if (p.id === 'home') {
+    if (p.institucional) {
+        grafo.push({ '@type': 'WebPage', name: p.titulo.replace(/ \| ExCalc$/, ''), url, description: p.descricao, inLanguage: 'pt-BR',
+            isPartOf: { '@type': 'WebSite', name: config.nomeDoSite, url: config.dominio + '/' } });
+    } else if (p.id === 'home') {
         grafo.push({ '@type': 'WebSite', name: config.nomeDoSite, url: config.dominio + '/', inLanguage: 'pt-BR', description: p.descricao });
     } else {
         grafo.push({
@@ -154,7 +180,8 @@ function scriptsDa(p) {
 // ---------- gera cada página ----------
 const hoje = new Date().toISOString().slice(0, 10);
 const nomes = new Set();
-for (const p of paginas) {
+const todasAsPaginas = [...paginas, ...institucionais.map(p => ({ ...p, institucional: true }))];
+for (const p of todasAsPaginas) {
     const arqConteudo = path.join(__dirname, 'conteudo', p.id + '.html');
     if (!fs.existsSync(arqConteudo)) { problemas.push(`Falta _fonte/conteudo/${p.id}.html`); continue; }
     let conteudo = lerArq(arqConteudo).trimEnd();
@@ -168,20 +195,26 @@ for (const p of paginas) {
         conteudo = conteudo.replace(/(<\/h1>)/, () => `</h1>\n            ${paragrafoIntro}`);
     }
     if (p.id === 'home') conteudo = conteudo.replace(/\s*<\/section>\s*$/, `\n${cartoesHome}</section>`);
+    if (p.institucional) {
+        conteudo = conteudo
+            .replace(/\{\{CONTATO_EMAIL_BLOCO\}\}/g, () => blocoEmail)
+            .replace(/\{\{RESPONSAVEL\}\}/g, () => nomeResponsavel)
+            .replace(/\{\{ATUALIZADO_EM\}\}/g, () => hoje.split('-').reverse().join('/'));
+    }
 
     if (p.titulo.length > 70) problemas.push(`${p.id}: título com ${p.titulo.length} caracteres (ideal até ~60-70)`);
     if (p.descricao.length > 165) problemas.push(`${p.id}: descrição com ${p.descricao.length} caracteres (ideal até ~160)`);
     if (nomes.has(p.arquivo)) problemas.push(`arquivo repetido: ${p.arquivo}`);
     nomes.add(p.arquivo);
 
-    const pagina = baseComCss
+    const pagina = tratarFormulario(baseComCss)
         .replace('{{TITLE}}', esc(p.titulo))
         .replace('{{META}}', metaDa(p))
         .replace('{{ABA}}', p.id)
         .replace('{{SUGESTOES_KEY}}', esc((config.sugestoes && config.sugestoes.accessKey) || ''))
         .replace('{{RODAPE_LINKS}}', linksRodape)
         .replace('{{SCRIPTS}}', scriptsDa(p))
-        .replace('{{CONTEUDO}}', () => conteudo);
+        .replace('{{CONTEUDO}}', () => tratarFormulario(conteudo));
 
     const sobra = pagina.match(/\{\{[A-Z_]+\}\}/);
     if (sobra) problemas.push(`${p.id}: marcador sem substituir ${sobra[0]}`);
@@ -193,7 +226,7 @@ for (const p of paginas) {
 // ---------- sitemap.xml e robots.txt ----------
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${paginas.map(p => `  <url>
+${todasAsPaginas.map(p => `  <url>
     <loc>${urlDa(p)}</loc>
     <lastmod>${hoje}</lastmod>
     <priority>${p.prioridade || '0.5'}</priority>
@@ -210,7 +243,7 @@ if (dep.status !== 0) problemas.push('Dependências de script:\n' + dep.stdout.t
 const tamanhoCss = fs.statSync(path.join(raiz, 'style.css')).size;
 const tamanhoCssMin = fs.statSync(path.join(raiz, 'style.min.css')).size;
 const economiaCss = Math.round((1 - tamanhoCssMin / tamanhoCss) * 100);
-console.log(`Páginas geradas: ${paginas.length} | versão dos scripts: ${versao} | style.min.css: ${(tamanhoCssMin / 1024).toFixed(1)} KB (${economiaCss}% menor que o style.css) | sitemap.xml e robots.txt atualizados`);
+console.log(`Páginas geradas: ${todasAsPaginas.length} (${institucionais.length} institucionais) | versão dos scripts: ${versao} | style.min.css: ${(tamanhoCssMin / 1024).toFixed(1)} KB (${economiaCss}% menor que o style.css) | sitemap.xml e robots.txt atualizados`);
 if (problemas.length) {
     console.log('\nATENÇÃO:\n - ' + problemas.join('\n - '));
     process.exitCode = 1;

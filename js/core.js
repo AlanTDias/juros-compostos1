@@ -132,35 +132,58 @@ function iconeAba(id, px) {
 // (O campo color do array abas ficou só por compatibilidade e não é mais usado para pintar o menu.)
 const COR_UNICA_ABAS = 'unica';
 
-// Classes-base dos botões de aba (menu superior compacto e drawer mobile); usadas também em switchTab().
-function classeBaseAba(cor, noDrawer) {
-    return noDrawer
-        ? `tab-btn tab-${cor} p-3 rounded-lg w-full text-left flex items-center gap-2 transition-all duration-200`
-        : `tab-btn tab-${cor} px-2 py-1 rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 text-center h-8`;
+// Grupos do menu lateral e do drawer (só a ORDEM/rótulos; nomes e páginas vêm do array abas).
+// Aba que não estiver em nenhum grupo cai em "Outras" no fim, para nunca sumir do menu.
+const GRUPOS_MENU = [
+    { titulo: '', ids: ['home'] },
+    { titulo: 'Calculadoras financeiras', ids: ['juros-compostos', 'reserva', 'milhao', 'financiamento', 'veiculos', 'amortizacao', 'alugar-comprar', 'comparador', 'investimentos'] },
+    { titulo: 'Trabalho', ids: ['salario-liquido', 'fgts', 'rescisao-clt'] },
+    { titulo: 'Documentos e arquivos', ids: ['documentos', 'conversores', 'imagens', 'qrcode'] },
+    { titulo: 'Utilitários', ids: ['senha', 'porcentagem', 'unidades'] }
+];
+
+function gruposDoMenu() {
+    const usados = new Set(GRUPOS_MENU.flatMap(g => g.ids));
+    const grupos = GRUPOS_MENU.map(g => ({ titulo: g.titulo, abas: g.ids.map(id => abas.find(a => a.id === id)).filter(Boolean) }));
+    const resto = abas.filter(a => !usados.has(a.id));
+    if (resto.length) grupos.push({ titulo: 'Outras', abas: resto });
+    return grupos.filter(g => g.abas.length);
 }
 
-// Renderizar abas dinamicamente
+// Classes-base dos botões de aba; usadas também em switchTab().
+// modo: 'drawer' (menu do celular, linhas altas) ou 'lateral' (menu lateral do desktop, linhas compactas).
+function classeBaseAba(cor, modo) {
+    return modo === 'lateral'
+        ? `tab-btn tab-${cor} px-3 py-2 rounded-lg w-full text-left flex items-center gap-2.5 text-[13px] transition-all duration-200`
+        : `tab-btn tab-${cor} p-3 rounded-lg w-full text-left flex items-center gap-2 transition-all duration-200`;
+}
+
+// Modo de um botão de aba conforme o menu em que ele está
+function modoDoBotaoAba(el) {
+    return el.closest('#lateral-nav') ? 'lateral' : 'drawer';
+}
+
+// Renderizar abas dinamicamente (menu lateral do desktop + drawer do celular), agrupadas por GRUPOS_MENU
 function renderMenuTabs() {
-    const menuNav = document.getElementById('menu-nav');
+    const lateralNav = document.getElementById('lateral-nav');
     const drawerNav = document.getElementById('drawer-nav');
+    const grupos = gruposDoMenu();
 
-    menuNav.innerHTML = abas.map(aba => `
-        <a href="${aba.pagina}" id="btn-${aba.id}"
-            class="${classeBaseAba(COR_UNICA_ABAS, false)}"
-            title="${aba.nome}">
-            ${iconeAba(aba.id, 14)}
-            <span class="text-[11px] font-semibold leading-tight whitespace-nowrap">${aba.nome}</span>
-        </a>
+    const montar = (prefixo, modo, px) => grupos.map(g => `
+        <div class="menu-grupo">
+            ${g.titulo ? `<p class="menu-grupo-titulo">${g.titulo}</p>` : ''}
+            ${g.abas.map(aba => `
+            <a href="${aba.pagina}" id="${prefixo}${aba.id}"
+                class="${classeBaseAba(COR_UNICA_ABAS, modo)}"
+                title="${aba.nome}">
+                ${iconeAba(aba.id, px)}
+                <span class="font-semibold">${aba.nome}</span>
+            </a>`).join('')}
+        </div>
     `).join('');
 
-    drawerNav.innerHTML = `<button onclick="closeMobileMenu()" class="self-end text-gray-400 hover:text-gray-100 text-2xl leading-none mb-4">✕</button>` + abas.map(aba => `
-        <a href="${aba.pagina}" id="btn-drawer-${aba.id}"
-            class="${classeBaseAba(COR_UNICA_ABAS, true)}"
-            title="${aba.nome}">
-            ${iconeAba(aba.id, 18)}
-            <span class="font-semibold">${aba.nome}</span>
-        </a>
-    `).join('');
+    if (lateralNav) lateralNav.innerHTML = montar('btn-', 'lateral', 16);
+    if (drawerNav) drawerNav.innerHTML = `<button onclick="closeMobileMenu()" class="self-end text-gray-400 hover:text-gray-100 text-2xl leading-none mb-2" aria-label="Fechar menu">✕</button>` + montar('btn-drawer-', 'drawer', 18);
 }
 
 function toggleMobileMenu() {
@@ -688,7 +711,8 @@ function switchTab(tabId) {
     // Remove estilos ativos de todas as abas — mantém a classe de cor original
     document.querySelectorAll('.tab-btn').forEach(el => {
         const colorClass = Array.from(el.classList).find(c => c.startsWith('tab-') && c !== 'tab-btn');
-        el.className = classeBaseAba(colorClass.replace('tab-', ''), !!el.closest('#drawer-nav'));
+        el.className = classeBaseAba(colorClass.replace('tab-', ''), modoDoBotaoAba(el));
+        el.removeAttribute('aria-current');
         el.classList.remove('glow-emerald', 'glow-cyan', 'glow-blue', 'glow-indigo', 'glow-purple',
             'glow-rose', 'glow-amber', 'glow-sky', 'glow-violet', 'glow-teal',
             'glow-fuchsia', 'glow-lime', 'glow-green', 'glow-orange', 'glow-red', 'glow-unica',
@@ -708,9 +732,13 @@ function switchTab(tabId) {
 
     // Aplica estilo ativo à aba selecionada com a cor correta + glow + borda vibrante
     let abaInfo = abas.find(a => a.id === tabId);
-    let activeBtn = document.getElementById(`btn-${tabId}`);
-    if (activeBtn && abaInfo) {
-        activeBtn.classList.add('bg-emerald-500', 'text-gray-950', 'font-bold', 'glow-unica');
+    if (abaInfo) {
+        [`btn-${tabId}`, `btn-drawer-${tabId}`].forEach(idBtn => {
+            const activeBtn = document.getElementById(idBtn);
+            if (!activeBtn) return;
+            activeBtn.classList.add('bg-emerald-500', 'text-gray-950', 'font-bold', 'glow-unica');
+            activeBtn.setAttribute('aria-current', 'page');
+        });
     }
 
     calculoAutomatico = true;

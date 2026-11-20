@@ -107,7 +107,7 @@
                 }
             }
         }    </script>
-    <link rel="stylesheet" href="style.min.css?v=b68168ff">
+    <link rel="stylesheet" href="style.min.css?v=321feaf9">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7396895814435111" crossorigin="anonymous"></script>
 </head>
 
@@ -145,14 +145,36 @@
         </div>
     </div>
 
-    <!-- 📱 MENU SUPERIOR RESPONSIVO -->
-    <header class="hidden lg:block w-full bg-gray-800 border-b border-gray-700 relative z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 pt-3">
-            <!-- Menu de abas (desktop normal, mobile = drawer) -->
-            <nav id="menu-nav" class="hidden lg:grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-center lg:justify-center gap-2 w-full pb-3">
-            </nav>
+    <!-- 🧭 CABEÇALHO FIXO (todas as larguras): ☰ (só abaixo de lg) + marca ExCalc à esquerda, seletor de tema à direita.
+         As ferramentas ficam no MENU LATERAL (#menu-lateral, a partir de lg) e no drawer do celular (#mobile-drawer). -->
+    <header id="topo" class="topo w-full">
+        <div class="topo-faixa">
+            <button id="menu-toggle" type="button" onclick="toggleMobileMenu()" class="menu-hamb" aria-label="Abrir menu" aria-controls="mobile-drawer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+            <a href="index.html" class="topo-marca" aria-label="ExCalc — página inicial">
+                <img src="favicon.png?v=3" alt="" width="30" height="30">
+                <span class="topo-nome">
+                    <span class="topo-titulo">ExCalc</span>
+                    <span class="topo-sub">Finanças e Ferramentas</span>
+                </span>
+            </a>
+            <div class="topo-acoes">
+                <div id="tema-switch" class="tema-switch" role="radiogroup" aria-label="Tema do site" data-ativo="escuro">
+                    <span class="tema-thumb" aria-hidden="true"></span>
+                    <label class="tema-op" title="Tema escuro">
+                        <input type="radio" name="tema" value="escuro" checked>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                        <span class="sr-only">Tema escuro</span>
+                    </label>
+                    <label class="tema-op" title="Tema claro">
+                        <input type="radio" name="tema" value="claro">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                        <span class="sr-only">Tema claro</span>
+                    </label>
+                </div>
+            </div>
         </div>
-
     </header>
     <!-- Drawer mobile (abre/fecha com hambúrguer). Fica FORA do <header>: o header tem backdrop-filter (vidro), e um
          filtro faz o "position: fixed" de quem está dentro se prender ao tamanho do header (o menu não aparecia). -->
@@ -163,28 +185,14 @@
         </nav>
     </div>
 
-    <!-- 💻 CONTEÚDO PRINCIPAL -->
-    <main id="conteudo" tabindex="-1" class="flex-1 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
-        <!-- Seletor de tema em "vidro líquido" (escuro, claro, vidro): logo abaixo do menu, à direita -->
-        <div class="flex items-center justify-between lg:justify-end lg:-mt-4 -mb-2">
-        <button id="menu-toggle" type="button" onclick="toggleMobileMenu()" class="menu-hamb" aria-label="Abrir menu" aria-controls="mobile-drawer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        </button>
-        <div id="tema-switch" class="tema-switch" role="radiogroup" aria-label="Tema do site" data-ativo="escuro">
-                            <span class="tema-thumb" aria-hidden="true"></span>
-                            <label class="tema-op" title="Tema escuro">
-                                <input type="radio" name="tema" value="escuro" checked>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-                                <span class="sr-only">Tema escuro</span>
-                            </label>
-                            <label class="tema-op" title="Tema claro">
-                                <input type="radio" name="tema" value="claro">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-                                <span class="sr-only">Tema claro</span>
-                            </label>
-                        </div>
-        </div>
+    <!-- Corpo: MENU LATERAL (a partir de lg, fixo ao rolar) + CONTEÚDO PRINCIPAL -->
+    <div class="layout-app">
+    <aside id="menu-lateral" class="menu-lateral" aria-label="Ferramentas">
+        <nav id="lateral-nav" class="lateral-nav"></nav>
+    </aside>
 
+    <!-- 💻 CONTEÚDO PRINCIPAL -->
+    <main id="conteudo" tabindex="-1" class="flex-1 min-w-0 p-4 md:p-8 space-y-6 max-w-7xl w-full mx-auto">
 
         <section id="tab-unidades" class="tab-content space-y-6">
             <h1 class="text-xl md:text-2xl font-bold text-emerald-400">Conversor de Unidades</h1>
@@ -211,6 +219,7 @@
         </section>
 
     </main>
+    </div>
     <!-- 📄 RODAPÉ COM DIREITOS RESERVADOS E CONTADOR -->
     <footer class="w-full bg-gray-800 border-t border-gray-700 py-6 mt-8">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400">
@@ -237,13 +246,18 @@
                     <li><a href="conversor-de-unidades.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Converta comprimento, massa, temperatura e mais</a></li>
                 </ul>
             </nav>
+            <nav aria-label="Institucional" class="mb-4">
+                <ul class="rodape-institucional flex flex-wrap justify-center gap-x-1 gap-y-1 text-gray-300">
+                    <li><a href="sobre.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Sobre</a></li>
+                    <li><span aria-hidden="true" class="mx-1 text-gray-500">|</span><a href="contato.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Contato</a></li>
+                    <li><span aria-hidden="true" class="mx-1 text-gray-500">|</span><a href="politica-de-privacidade.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Política de Privacidade</a></li>
+                    <li><span aria-hidden="true" class="mx-1 text-gray-500">|</span><a href="termos-de-uso.html" class="hover:text-emerald-400 underline-offset-2 hover:underline">Termos de Uso</a></li>
+                </ul>
+            </nav>
             <button type="button" id="marca-secreta" class="marca-secreta" aria-label="ExCalc">
                 <img src="favicon.png?v=3" alt="" width="18" height="18">
                 <span>ExCalc</span>
             </button>
-            <p class="mb-2">
-                <button type="button" onclick="abrirSugestao()" class="link-sugestao">💬 Enviar uma sugestão</button>
-            </p>
             <p>
                 © <span id="footer-year">2026</span> ExCalc Finanças e Ferramentas. Todos os direitos reservados.
             </p>
@@ -369,8 +383,8 @@
         <input type="file" id="mapa-arquivo" accept=".json,application/json" hidden>
     </div>
     <!-- Scripts: só o que esta página usa. O núcleo (core.js) vem primeiro. -->
-    <script src="js/core.js?v=f3cf208f"></script>
-    <script src="js/utilitarios.js?v=f3cf208f"></script>
+    <script src="js/core.js?v=89e2f76a"></script>
+    <script src="js/utilitarios.js?v=89e2f76a"></script>
 </body>
 
 </html>

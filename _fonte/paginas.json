@@ -2,6 +2,41 @@
   "dominio": "https://www.excalc.com.br",
   "nomeDoSite": "ExCalc",
   "sugestoes": { "accessKey": "" },
+  "contato": { "email": "contato@excalc.com.br", "responsavel": "Alan Dias, desenvolvedor independente" },
+  "institucionais": [
+    {
+      "id": "sobre",
+      "arquivo": "sobre.html",
+      "titulo": "Sobre o ExCalc | ExCalc",
+      "descricao": "Conheça o ExCalc: calculadoras financeiras, ferramentas de PDF, imagem e utilitários gratuitos, sem cadastro, que funcionam direto no navegador.",
+      "rotulo": "Sobre",
+      "prioridade": "0.4"
+    },
+    {
+      "id": "contato",
+      "arquivo": "contato.html",
+      "titulo": "Contato | ExCalc",
+      "descricao": "Fale com o ExCalc: envie dúvidas, sugestões, correções ou pedidos de novas ferramentas.",
+      "rotulo": "Contato",
+      "prioridade": "0.4"
+    },
+    {
+      "id": "privacidade",
+      "arquivo": "politica-de-privacidade.html",
+      "titulo": "Política de Privacidade | ExCalc",
+      "descricao": "Como o ExCalc trata dados pessoais conforme a LGPD, o uso de cookies e de anúncios do Google AdSense e como desativar a publicidade personalizada.",
+      "rotulo": "Política de Privacidade",
+      "prioridade": "0.3"
+    },
+    {
+      "id": "termos",
+      "arquivo": "termos-de-uso.html",
+      "titulo": "Termos de Uso | ExCalc",
+      "descricao": "Termos de uso do ExCalc: as ferramentas são informativas, não substituem um contador ou consultor e não garantem resultados.",
+      "rotulo": "Termos de Uso",
+      "prioridade": "0.3"
+    }
+  ],
   "paginas": [
     {
       "id": "home",

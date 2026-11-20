@@ -2779,3 +2779,194 @@ html.sem-blur #fundo-rede {
         background: #fff !important;
     }
 }
+
+
+/* ==========================================================================================================
+   CABEÇALHO FIXO + MENU LATERAL (2026-11-20). Substitui o antigo menu de abas no topo (#menu-nav).
+   - header#topo: fixo no alto (sticky), marca ExCalc + seletor de tema; o ☰ (.menu-hamb) só aparece abaixo de lg.
+     Usa #id + !important para vencer as regras antigas "Menu do topo SEM caixa" (html header {...!important}).
+   - aside#menu-lateral: só a partir de 1024px; fixo ao rolar, ferramentas agrupadas (GRUPOS_MENU no core.js).
+   - Abaixo de 1024px as ferramentas continuam no drawer (#mobile-drawer), também agrupado.
+   ========================================================================================================== */
+
+:root {
+    --topo-h: 64px;
+    --lateral-l: 252px;
+}
+
+html {
+    scroll-padding-top: calc(var(--topo-h) + 8px);
+}
+
+html header#topo {
+    position: sticky !important;
+    top: 0;
+    z-index: 50;
+    background: rgb(var(--gray-950) / 0.74) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
+    backdrop-filter: blur(14px) saturate(160%) !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--menu-borda) !important;
+    box-shadow: 0 10px 28px -18px var(--sombra-card) !important;
+}
+
+html.sem-blur header#topo {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgb(var(--gray-950) / 0.97) !important;
+}
+
+.topo-faixa {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: var(--topo-h);
+    padding: 0 16px;
+}
+
+.topo-marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: rgb(var(--gray-100));
+    text-decoration: none;
+    border-radius: 10px;
+}
+
+.topo-marca img {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.topo-marca:hover .topo-titulo,
+.topo-marca:focus-visible .topo-titulo {
+    color: rgb(var(--emerald-400));
+}
+
+.topo-nome {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.topo-titulo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    line-height: 1.1;
+    transition: color 0.2s ease;
+}
+
+.topo-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--gray-400));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topo-acoes {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Corpo: menu lateral + conteúdo lado a lado (align-items:flex-start é o que deixa o sticky do menu funcionar) */
+
+.layout-app {
+    display: flex;
+    align-items: flex-start;
+    flex: 1 0 auto;
+    width: 100%;
+}
+
+.menu-lateral {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .topo-faixa {
+        padding: 0 24px;
+    }
+
+    .menu-lateral {
+        display: block;
+        position: sticky;
+        top: var(--topo-h);
+        flex: 0 0 var(--lateral-l);
+        width: var(--lateral-l);
+        height: calc(100vh - var(--topo-h));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 20px 12px 28px 16px;
+        border-right: 1px solid var(--menu-borda);
+        background: rgb(var(--gray-950) / 0.28);
+        scrollbar-width: thin;
+    }
+}
+
+/* Grupos do menu (lateral e drawer) */
+
+.menu-grupo + .menu-grupo {
+    margin-top: 14px;
+}
+
+.menu-grupo-titulo {
+    margin: 0 0 6px;
+    padding: 0 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--gray-500));
+}
+
+#drawer-nav .menu-grupo .tab-btn + .tab-btn {
+    margin-top: 8px;
+}
+
+/* Itens do menu lateral: linhas sem contorno (lista limpa); hover tinge, a página atual fica preenchida */
+
+#lateral-nav .tab-btn + .tab-btn {
+    margin-top: 2px;
+}
+
+html #lateral-nav .tab-btn:not(.text-gray-950) {
+    border-color: transparent !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    color: rgb(var(--gray-300));
+}
+
+html #lateral-nav .tab-btn:not(.text-gray-950):hover,
+html #lateral-nav .tab-btn:not(.text-gray-950):focus-visible {
+    color: rgb(var(--gray-50));
+    border-color: transparent !important;
+    background-color: rgb(var(--emerald-500) / 0.14) !important;
+}
+
+/* O botão flutuante "não clique" (canto inferior esquerdo) não pode cobrir o fim do menu lateral */
+
+@media (min-width: 1024px) {
+    .troll-btn {
+        left: calc(var(--lateral-l) + 14px);
+    }
+}
+
+html #lateral-nav .glow-unica {
+    box-shadow: 0 0 16px var(--accent-soft) !important;
+}
+
+@media print {
+    html header#topo,
+    .menu-lateral {
+        display: none !important;
+    }
+}
