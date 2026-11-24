@@ -268,7 +268,7 @@ const PDF_GAP_COLUNA = 12;
 
 async function extractPdfTableRows(file) {
     const buffer = await readFileAsArrayBuffer(file);
-    const pdf = await pdfjsLib.getDocument(new Uint8Array(buffer)).promise;
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer), isEvalSupported: false }).promise;
 
     const linhas = [];
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -497,7 +497,7 @@ function sheetToSafeHtmlTable(worksheet) {
 
 async function extractPdfPagesText(file) {
     const buffer = await readFileAsArrayBuffer(file);
-    const pdf = await pdfjsLib.getDocument(new Uint8Array(buffer)).promise;
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer), isEvalSupported: false }).promise;
 
     const pages = [];
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -707,7 +707,7 @@ async function compressPDF() {
     try {
         await carregarLibs('pdfjs', 'pdflib');
         const arrayBuffer = await file.arrayBuffer();
-        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer, isEvalSupported: false }).promise;
         const newPdfDoc = await PDFLib.PDFDocument.create();
 
         for (let i = 1; i <= pdfDoc.numPages; i++) {
@@ -812,7 +812,7 @@ async function loadPdfForEditing(file) {
         await carregarLibs('pdfjs', 'pdflib');
         pdfEditOriginalBytes = await file.arrayBuffer();
         // pdfjsLib consome o buffer; usamos uma cópia para não afetar os bytes originais salvos
-        pdfEditDoc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfEditOriginalBytes.slice(0)) }).promise;
+        pdfEditDoc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfEditOriginalBytes.slice(0)), isEvalSupported: false }).promise;
         pdfEditTotalPages = pdfEditDoc.numPages;
         pdfEditCurrentPage = 1;
 

@@ -14,10 +14,6 @@ const VERSAO_JS = (() => {
 })();
 
 const LIBS_SOB_DEMANDA = {
-    // Modo Viagem: arquivo local carregado só quando a pessoa chega ao 6º clique no botão flutuante
-    viagem: { src: `js/viagem.js?v=${VERSAO_JS}`, pronta: () => window.__viagemCarregada },
-    // Mapa de sistemas (easter egg): arquivo local carregado só quando a pessoa clica na marca do rodapé
-    mapa: { src: `js/mapa.js?v=${VERSAO_JS}`, pronta: () => window.__mapaCarregada },
     pdflib: { src: 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js', pronta: () => window.PDFLib },
     pdfjs: {
         src: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
@@ -195,69 +191,6 @@ function closeMobileMenu() {
     const drawer = document.getElementById('mobile-drawer');
     drawer.classList.add('hidden');
 }
-
-// Botão flutuante "não clique": a legenda só muda ao CLICAR (5 frases); o 6º clique abre o Modo Viagem
-document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('troll-btn');
-    const label = document.getElementById('troll-label');
-    if (!btn || !label) return;
-
-    const inicial = label.innerText;
-    const frases = ['não clique', 'sério, não clique', 'você foi avisado', 'último aviso...', 'ok, você pediu 🌀'];
-    let i = 0;
-    let timerLegenda = null;
-    const voltar = () => { label.classList.remove('mostrar'); label.innerText = inicial; i = 0; };
-    // Já baixa o js/viagem.js quando o mouse chega no botão e 3s após abrir a página (arquivo pequeno): o 6º clique abre na hora
-    const preparar = () => { carregarLib('viagem').catch(() => {}); };
-    setTimeout(preparar, 3000);
-    btn.addEventListener('pointerenter', preparar, { once: true });
-    btn.addEventListener('pointerdown', preparar, { once: true });
-    // Cada clique mostra a próxima frase (5 no total); o clique seguinte à última leva ao Modo Viagem (6º clique)
-    btn.addEventListener('click', () => {
-        clearTimeout(timerLegenda);
-        if (i < frases.length) {
-            label.innerText = frases[i];
-            label.classList.add('mostrar');
-            i++;
-            timerLegenda = setTimeout(voltar, 8000); // 8s para dar o próximo clique antes de recomeçar
-        } else {
-            voltar();
-            abrirViagem();
-        }
-    });
-    // Botão iridescente: o brilho, o filme colorido e o ícone acompanham o ponteiro (ou a inclinação do celular).
-    // --px e --py vão de -1 a 1 e o CSS (.troll-btn) faz o resto. Sem "reduzir movimento", o botão fica parado.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    let alvoX = 0, alvoY = 0, atualX = 0, atualY = 0, agendado = false;
-    const limitar = v => Math.max(-1, Math.min(1, v));
-
-    const animar = () => {
-        agendado = false;
-        atualX += (alvoX - atualX) * 0.18; // suaviza: o movimento "escorrega" até o alvo
-        atualY += (alvoY - atualY) * 0.18;
-        btn.style.setProperty('--px', atualX.toFixed(3));
-        btn.style.setProperty('--py', atualY.toFixed(3));
-        if (Math.abs(alvoX - atualX) > 0.002 || Math.abs(alvoY - atualY) > 0.002) pedirQuadro();
-    };
-    const pedirQuadro = () => { if (!agendado) { agendado = true; requestAnimationFrame(animar); } };
-
-    window.addEventListener('pointermove', e => {
-        const r = btn.getBoundingClientRect();
-        alvoX = limitar((e.clientX - (r.left + r.width / 2)) / 260);
-        alvoY = limitar((e.clientY - (r.top + r.height / 2)) / 260);
-        pedirQuadro();
-    }, { passive: true });
-
-    // Celulares Android/desktop com sensor: a inclinação do aparelho move o brilho (iOS exige permissão, então fica de fora)
-    if ('DeviceOrientationEvent' in window && typeof DeviceOrientationEvent.requestPermission !== 'function') {
-        window.addEventListener('deviceorientation', e => {
-            if (e.gamma == null || e.beta == null) return;
-            alvoX = limitar(e.gamma / 30);
-            alvoY = limitar((e.beta - 45) / 30);
-            pedirQuadro();
-        }, { passive: true });
-    }
-});
 
 // ==========================================
 
@@ -464,95 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
         linha.appendChild(botao);
     });
 });
-// ==========================================
-// EASTER EGG: 7 cliques seguidos na marca do rodapé abrem o MAPA DE SISTEMAS (js/mapa.js, carregado sob demanda)
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const marca = document.getElementById('marca-secreta');
-    if (!marca) return;
-    let cliques = 0;
-    let timer = null;
-    // Já baixa o js/mapa.js quando o mouse chega na marca / no 1º toque: no 7º clique o mapa abre na hora
-    const preparar = () => { carregarLib('mapa').catch(() => {}); };
-    marca.addEventListener('pointerenter', preparar, { once: true });
-    marca.addEventListener('pointerdown', preparar, { once: true });
-    marca.addEventListener('click', () => {
-        cliques++;
-        marca.classList.remove('balanca');
-        void marca.offsetWidth; // reinicia a animação
-        marca.classList.add('balanca');
-        clearTimeout(timer);
-        timer = setTimeout(() => { cliques = 0; }, 2500); // precisa ser em sequência (<2,5s entre cliques)
-        if (cliques >= 7) {
-            cliques = 0;
-            abrirMapa();
-        }
-    });
-});
-// TOASTY!! (Mortal Kombat): digitar um código famoso, fora de campos de texto, faz o personagem surgir no canto
-const CODIGOS_TOASTY = ['abacabb', 'toasty']; // "ABACABB" = código do sangue no Mega Drive
-let teclasDigitadas = '';
-let toastyOcupado = false;
-
-// Som: se existir toasty.mp3 na raiz do site ele toca; senão o navegador "fala" TOASTY com voz grave (sem arquivo)
-function falarToasty() {
-    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined') return;
-    const fala = new SpeechSynthesisUtterance('Toasty!');
-    fala.lang = 'en-US';
-    fala.pitch = 0.1;
-    fala.rate = 0.9;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(fala);
-}
-
-function tocarToasty() {
-    try {
-        const som = new Audio('toasty.mp3');
-        som.addEventListener('error', falarToasty, { once: true });
-        const p = som.play();
-        if (p && p.catch) p.catch(() => {});
-    } catch (e) { falarToasty(); }
-}
-
-function mostrarToasty() {
-    if (toastyOcupado) return;
-    toastyOcupado = true;
-    const img = document.createElement('img');
-    img.src = 'toasty.png';
-    img.alt = 'Toasty!';
-    img.className = 'toasty';
-    img.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(img);
-    tocarToasty();
-    requestAnimationFrame(() => requestAnimationFrame(() => img.classList.add('toasty-in')));
-    setTimeout(() => img.classList.remove('toasty-in'), 1600);
-    setTimeout(() => { img.remove(); toastyOcupado = false; }, 2300);
-}
-
-document.addEventListener('keydown', e => {
-    if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
-    const alvo = e.target;
-    if (alvo && (alvo.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(alvo.tagName))) return;
-    teclasDigitadas = (teclasDigitadas + e.key.toLowerCase()).slice(-12);
-    if (CODIGOS_TOASTY.some(c => teclasDigitadas.endsWith(c))) {
-        teclasDigitadas = '';
-        mostrarToasty();
-    }
-});
-
-// No celular não há teclado: 5 toques seguidos no título da página (<h1>) também chamam o Toasty
-document.addEventListener('DOMContentLoaded', () => {
-    const titulo = document.querySelector('h1');
-    if (!titulo) return;
-    let toques = 0, timerToques = null;
-    titulo.addEventListener('click', () => {
-        toques++;
-        clearTimeout(timerToques);
-        timerToques = setTimeout(() => { toques = 0; }, 2000);
-        if (toques >= 5) { toques = 0; mostrarToasty(); }
-    });
-});
-
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         fecharSugestao();
@@ -894,26 +738,8 @@ async function enviarSugestao(evento) {
     }
 }
 // ==========================================
-// MODO VIAGEM E MAPA DE SISTEMAS (carregamento sob demanda) e INICIALIZAÇÃO DA PÁGINA
+// INICIALIZAÇÃO DA PÁGINA
 // ==========================================
-// O botão flutuante chama abrirViagem(); na primeira vez baixa js/viagem.js, que assume o nome
-// window.abrirViagem / window.fecharViagem e abre os efeitos. Assim as demais páginas ficam mais leves.
-const abrirViagemInicial = function () {
-    carregarLib('viagem')
-        .then(() => { if (window.abrirViagem !== abrirViagemInicial) window.abrirViagem(); })
-        .catch(() => mostrarToast('Não foi possível carregar o Modo Viagem. Verifique a conexão.', { tipo: 'humor' }));
-};
-window.abrirViagem = abrirViagemInicial;
-window.fecharViagem = function () { /* nada aberto ainda */ };
-// Os 7 cliques na marca do rodapé chamam abrirMapa(); na primeira vez baixa js/mapa.js, que assume o nome
-// window.abrirMapa / window.fecharMapa e abre o mapa. Assim as demais páginas ficam mais leves.
-const abrirMapaInicial = function () {
-    carregarLib('mapa')
-        .then(() => { if (window.abrirMapa !== abrirMapaInicial) window.abrirMapa(); })
-        .catch(() => mostrarToast('Não foi possível carregar o mapa. Verifique a conexão.', { tipo: 'humor' }));
-};
-window.abrirMapa = abrirMapaInicial;
-window.fecharMapa = function () { /* nada aberto ainda */ };
 
 document.addEventListener('DOMContentLoaded', function () {
     renderMenuTabs();
@@ -977,10 +803,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!canvas) return; // página sem o fundo (não deveria acontecer, mas protege)
 
     function pausado() {
-        const mapa = document.getElementById('mapa');
-        const viagem = document.getElementById('viagem');
-        if (mapa && !mapa.classList.contains('hidden')) return true;
-        if (viagem && !viagem.classList.contains('hidden')) return true;
         if (document.hidden) return true;
         return false;
     }

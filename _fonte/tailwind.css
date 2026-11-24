@@ -1,0 +1,4 @@
+/* Entrada do Tailwind compilado (ver _fonte/tailwind.config.js). O build gera o tailwind.min.css na raiz do site. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

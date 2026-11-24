@@ -53,7 +53,25 @@ fs.writeFileSync(path.join(raiz, 'style.min.css'), minificarCSS(cssOriginal), 'u
 if (!base.includes('<link rel="stylesheet" href="style.css">')) {
     problemas.push('base.html: não achei a tag <link> do style.css para trocar por style.min.css');
 }
-const baseComCss = base.replace('<link rel="stylesheet" href="style.css">', `<link rel="stylesheet" href="style.min.css?v=${versaoCss}">`);
+// ---------- tailwind.min.css: Tailwind COMPILADO (substitui o cdn.tailwindcss.com) ----------
+// Precisa do Tailwind instalado em _fonte/node_modules (uma vez: "npm install" dentro de _fonte; node_modules não vai pro git).
+// Procura as classes em _fonte/base.html, _fonte/conteudo/*.html, _fonte/build.js e js/*.js (ver _fonte/tailwind.config.js).
+const twCli = path.join(__dirname, 'node_modules', 'tailwindcss', 'lib', 'cli.js');
+const twSaida = path.join(raiz, 'tailwind.min.css');
+if (!fs.existsSync(twCli)) {
+    problemas.push('Tailwind não instalado: rode "npm install" dentro da pasta _fonte (o tailwind.min.css NÃO foi atualizado)');
+} else {
+    const tw = require('child_process').spawnSync(process.execPath, [twCli, '-c', path.join(__dirname, 'tailwind.config.js'),
+        '-i', path.join(__dirname, 'tailwind.css'), '-o', twSaida, '--minify'], { encoding: 'utf8' });
+    if (tw.status !== 0) problemas.push('Tailwind falhou:\n' + (tw.stderr || tw.stdout).trim());
+}
+const versaoTw = fs.existsSync(twSaida) ? crypto.createHash('md5').update(fs.readFileSync(twSaida)).digest('hex').slice(0, 8) : '0';
+if (!base.includes('<link rel="stylesheet" href="tailwind.css">')) {
+    problemas.push('base.html: não achei a tag <link> do tailwind.css para trocar por tailwind.min.css');
+}
+const baseComCss = base
+    .replace('<link rel="stylesheet" href="tailwind.css">', `<link rel="stylesheet" href="tailwind.min.css?v=${versaoTw}">`)
+    .replace('<link rel="stylesheet" href="style.css">', `<link rel="stylesheet" href="style.min.css?v=${versaoCss}">`);
 
 // ---------- confere o menu do core.js com o paginas.json ----------
 const core = lerArq(path.join(jsDir, 'core.js'));

@@ -1,0 +1,11 @@
+{
+  "name": "excalc-build",
+  "private": true,
+  "description": "Ferramentas do build do ExCalc (só para gerar o site; nada daqui é publicado).",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}

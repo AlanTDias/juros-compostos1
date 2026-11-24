@@ -551,12 +551,15 @@ function calculateFGTS() {
     let meses = Math.max(0, parseInt(document.getElementById('fgts-meses').value) || 0);
 
     let multaFgts = saldoFgts * 0.40;
-    let avisoPrevio = (salario / 30) * diasAvisoPrevio(meses);
+    const diasAviso = diasAvisoPrevio(meses);
+    let avisoPrevio = (salario / 30) * diasAviso;
     let totalRescisao = saldoFgts + multaFgts + avisoPrevio;
 
     document.getElementById('fgts-res-saldo').innerText = saldoFgts.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('fgts-res-multa').innerText = multaFgts.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('fgts-res-aviso').innerText = avisoPrevio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fgtsDiasEl = document.getElementById('fgts-res-aviso-dias');
+    if (fgtsDiasEl) fgtsDiasEl.innerText = ` (${diasAviso} dias)`;
     document.getElementById('fgts-res-total').innerText = totalRescisao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -582,15 +585,19 @@ function calculateRescisaoCLT() {
     feriasProporcionais += (feriasProporcionais / 3);
 
     let valorAviso = 0;
+    let textoDiasAviso = ''; // mostrado ao lado de "Aviso Prévio" no resultado
 
     if (motivo === 'pedido') {
         if (tipoAviso === 'descontado') {
-            valorAviso = -salario;
+            valorAviso = -salario; // pedido de demissão: desconto de 30 dias, sem proporcionalidade
+            textoDiasAviso = ' (30 dias descontados)';
         }
     } else if (motivo === 'sem-justa-causa') {
         if (tipoAviso === 'indenizado') {
             const mesesCasa = Math.max(0, parseInt(document.getElementById('clt-meses-casa').value) || 0);
-            valorAviso = (salario / 30) * diasAvisoPrevio(mesesCasa);
+            const diasAviso = diasAvisoPrevio(mesesCasa);
+            valorAviso = (salario / 30) * diasAviso;
+            textoDiasAviso = ` (${diasAviso} dias)`;
         }
     }
 
@@ -606,6 +613,8 @@ function calculateRescisaoCLT() {
 
     let avisoEl = document.getElementById('clt-res-aviso');
     avisoEl.innerText = formatBRL(valorAviso);
+    const cltDiasEl = document.getElementById('clt-res-aviso-dias');
+    if (cltDiasEl) cltDiasEl.innerText = textoDiasAviso;
 
     avisoEl.classList.remove('text-red-400', 'text-white');
     if (valorAviso < 0) {
