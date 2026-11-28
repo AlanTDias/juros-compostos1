@@ -995,7 +995,18 @@ document.addEventListener('DOMContentLoaded', function () {
     let convite = null;
     let querMostrar = false;
     let banner = null;
+    let modoAtual = '';
     let timerPosicao = null;
+    let esperaConvite = null;
+
+    const ICONE_COMPARTILHAR = '<svg class="pwa-glifo" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+    const ICONE_ADICIONAR = '<svg class="pwa-glifo" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>';
+    const ICONE_MENU = '<svg class="pwa-glifo" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
+    const TEXTOS = {
+        instalar: { titulo: 'Instale o ExCalc', texto: 'Abre mais rápido e funciona sem internet.' },
+        ios: { titulo: 'Tenha o ExCalc na tela de início', texto: `Toque em ${ICONE_COMPARTILHAR} Compartilhar e depois em ${ICONE_ADICIONAR} Adicionar à Tela de Início.` },
+        menu: { titulo: 'Tenha o ExCalc na tela de início', texto: `Abra o menu ${ICONE_MENU} do navegador e toque em Instalar app ou Adicionar à tela inicial.` }
+    };
 
     function podeMostrar() {
         if (instalado() || ler(CHAVE_INSTALADO) === '1' || !celular()) return false;
@@ -1020,6 +1031,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!banner) return;
         banner.remove();
         banner = null;
+        modoAtual = '';
         clearInterval(timerPosicao);
         window.removeEventListener('resize', posicionar);
         document.body.style.paddingBottom = '';
@@ -1039,10 +1051,23 @@ document.addEventListener('DOMContentLoaded', function () {
         return b;
     }
 
-    function mostrar() {
-        if (banner || !podeMostrar()) return;
-        const modoIos = !convite && ios();
-        if (!convite && !modoIos) return;
+    function instalarAgora() {
+        const pedido = convite;
+        convite = null;
+        fechar();
+        if (!pedido) return;
+        pedido.prompt();
+        pedido.userChoice.then(escolha => {
+            if (escolha.outcome === 'accepted') gravar(CHAVE_INSTALADO, '1');
+            else gravar(CHAVE_ADIADO, String(Date.now()));
+        }).catch(() => { });
+    }
+
+    function montar(modo) {
+        if (!podeMostrar()) return;
+        if (banner && modoAtual === modo) return;
+        fechar();
+        modoAtual = modo;
 
         banner = document.createElement('div');
         banner.className = 'pwa-convite';
@@ -1050,42 +1075,57 @@ document.addEventListener('DOMContentLoaded', function () {
         banner.setAttribute('aria-label', 'Instalar o ExCalc');
 
         const icone = document.createElement('img');
+        icone.className = 'pwa-icone';
         icone.src = 'icones/icone-192.png';
         icone.alt = '';
-        icone.width = 40;
-        icone.height = 40;
+        icone.width = 44;
+        icone.height = 44;
 
+        const textos = document.createElement('div');
+        textos.className = 'pwa-textos';
+        const titulo = document.createElement('p');
+        titulo.className = 'pwa-titulo';
+        titulo.textContent = TEXTOS[modo].titulo;
         const texto = document.createElement('p');
         texto.className = 'pwa-texto';
-        texto.textContent = modoIos
-            ? 'Instale o ExCalc: toque em Compartilhar e depois em Adicionar à Tela de Início.'
-            : 'Instale o ExCalc: abre mais rápido e funciona sem internet.';
+        texto.innerHTML = TEXTOS[modo].texto;
+        textos.append(titulo, texto);
 
         const fecharBtn = botao('×', 'pwa-fechar', adiar);
         fecharBtn.setAttribute('aria-label', 'Fechar o convite de instalação');
 
         const acoes = document.createElement('div');
         acoes.className = 'pwa-acoes';
-        acoes.appendChild(botao('Agora não', 'pwa-adiar', adiar));
-        if (!modoIos) {
-            acoes.appendChild(botao('Instalar', 'pwa-instalar', () => {
-                const pedido = convite;
-                convite = null;
-                fechar();
-                if (!pedido) return;
-                pedido.prompt();
-                pedido.userChoice.then(escolha => {
-                    if (escolha.outcome === 'accepted') gravar(CHAVE_INSTALADO, '1');
-                    else gravar(CHAVE_ADIADO, String(Date.now()));
-                }).catch(() => { });
-            }));
+        if (modo === 'instalar') {
+            acoes.append(botao('Agora não', 'pwa-botao', adiar), botao('Instalar', 'pwa-botao pwa-principal', instalarAgora));
+        } else {
+            acoes.append(botao('Entendi', 'pwa-botao', adiar));
         }
 
-        banner.append(icone, texto, fecharBtn, acoes);
+        banner.append(icone, textos, fecharBtn, acoes);
         document.body.appendChild(banner);
         posicionar();
         window.addEventListener('resize', posicionar);
         timerPosicao = setInterval(posicionar, 1500);
+    }
+
+    async function jaInstaladoNoAndroid() {
+        if (typeof navigator.getInstalledRelatedApps !== 'function') return false;
+        try {
+            const apps = await navigator.getInstalledRelatedApps();
+            return apps.length > 0;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function mostrar() {
+        if (!podeMostrar()) return;
+        if (convite) { montar('instalar'); return; }
+        if (ios()) { montar('ios'); return; }
+        if (await jaInstaladoNoAndroid()) { gravar(CHAVE_INSTALADO, '1'); return; }
+        clearTimeout(esperaConvite);
+        esperaConvite = setTimeout(() => { if (!convite) montar('menu'); }, 4000);
     }
 
     function gatilho() {
@@ -1104,12 +1144,16 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         convite = e;
-        if (querMostrar) mostrar();
+        if (querMostrar) {
+            clearTimeout(esperaConvite);
+            montar('instalar');
+        }
     });
 
     window.addEventListener('appinstalled', () => {
         gravar(CHAVE_INSTALADO, '1');
         convite = null;
+        clearTimeout(esperaConvite);
         fechar();
         precacheCalculadoras();
     });
