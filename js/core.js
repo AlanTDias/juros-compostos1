@@ -93,7 +93,7 @@ const abas = [
 // se mudar um endereço lá, mude aqui também (o build.js confere se as duas listas batem).
 function paginaDaAba(id) {
     const aba = abas.find(a => a.id === id);
-    return aba ? aba.pagina : 'index.html';
+    return !aba || aba.pagina === 'index.html' ? './' : aba.pagina;
 }
 
 // Ícones das abas: SVG inline (traço herdando a cor do texto via currentColor), sem depender de CDN.
@@ -169,7 +169,7 @@ function renderMenuTabs() {
         <div class="menu-grupo">
             ${g.titulo ? `<p class="menu-grupo-titulo">${g.titulo}</p>` : ''}
             ${g.abas.map(aba => `
-            <a href="${aba.pagina}" id="${prefixo}${aba.id}"
+            <a href="${paginaDaAba(aba.id)}" id="${prefixo}${aba.id}"
                 class="${classeBaseAba(COR_UNICA_ABAS, modo)}"
                 title="${aba.nome}">
                 ${iconeAba(aba.id, px)}

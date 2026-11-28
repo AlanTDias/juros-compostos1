@@ -106,7 +106,8 @@ ${paginas.filter(p => p.id !== 'home').map(p => `                    <li><a href
             </nav>
             <nav aria-label="Institucional" class="mb-4">
                 <ul class="rodape-institucional flex flex-wrap justify-center gap-x-1 gap-y-1 text-gray-300">
-${institucionais.map((p, i) => `                    <li>${i ? '<span aria-hidden="true" class="mx-1 text-gray-500">|</span>' : ''}<a href="${p.arquivo}" class="hover:text-emerald-400 underline-offset-2 hover:underline">${esc(p.rotulo)}</a></li>`).join('\n')}
+                    <li><a href="./" class="hover:text-emerald-400 underline-offset-2 hover:underline">Início</a></li>
+${institucionais.map((p, i) => `                    <li><span aria-hidden="true" class="mx-1 text-gray-500">|</span><a href="${p.arquivo}" class="hover:text-emerald-400 underline-offset-2 hover:underline">${esc(p.rotulo)}</a></li>`).join('\n')}
                 </ul>
             </nav>`;
 
@@ -145,7 +146,12 @@ function jsonLd(p) {
         grafo.push({ '@type': 'WebPage', name: p.titulo.replace(/ \| ExCalc$/, ''), url, description: p.descricao, inLanguage: 'pt-BR',
             isPartOf: { '@type': 'WebSite', name: config.nomeDoSite, url: config.dominio + '/' } });
     } else if (p.id === 'home') {
-        grafo.push({ '@type': 'WebSite', name: config.nomeDoSite, url: config.dominio + '/', inLanguage: 'pt-BR', description: p.descricao });
+        const organizacao = { '@type': 'Organization', '@id': config.dominio + '/#organizacao', name: config.nomeDoSite, url: config.dominio + '/',
+            logo: { '@type': 'ImageObject', url: config.dominio + '/icones/icone-512.png', width: 512, height: 512 },
+            email: (config.contato && config.contato.email) || undefined };
+        grafo.push({ '@type': 'WebSite', '@id': config.dominio + '/#site', name: config.nomeDoSite, alternateName: ['ExCalc Finanças e Ferramentas', 'excalc.com.br'],
+            url: config.dominio + '/', inLanguage: 'pt-BR', description: p.descricao, publisher: { '@id': config.dominio + '/#organizacao' } });
+        grafo.push(organizacao);
     } else {
         grafo.push({
             '@type': 'WebApplication', name: p.titulo.replace(/ \| ExCalc$/, ''), url, description: p.descricao,

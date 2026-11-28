@@ -1,18 +1,18 @@
-const VERSAO = 'ad580a549a';
+const VERSAO = 'd439b5fb71';
 const CACHE_ESTATICO = 'excalc-estatico-' + VERSAO;
 const CACHE_PAGINAS = 'excalc-paginas-' + VERSAO;
 const PRECACHE = [
     "/offline.html",
     "/tailwind.min.css?v=3276c4e2",
     "/style.min.css?v=73ec2d14",
-    "/js/arquivos.js?v=6492a6ef",
-    "/js/core.js?v=6492a6ef",
-    "/js/documentos.js?v=6492a6ef",
-    "/js/financeiro.js?v=6492a6ef",
-    "/js/indicadores.js?v=6492a6ef",
-    "/js/mercado.js?v=6492a6ef",
-    "/js/midia.js?v=6492a6ef",
-    "/js/utilitarios.js?v=6492a6ef",
+    "/js/arquivos.js?v=ef8b83c4",
+    "/js/core.js?v=ef8b83c4",
+    "/js/documentos.js?v=ef8b83c4",
+    "/js/financeiro.js?v=ef8b83c4",
+    "/js/indicadores.js?v=ef8b83c4",
+    "/js/mercado.js?v=ef8b83c4",
+    "/js/midia.js?v=ef8b83c4",
+    "/js/utilitarios.js?v=ef8b83c4",
     "/js/lib/chart-4.6.2.umd.min.js",
     "/fontes/inter-latin.woff2",
     "/fontes/jetbrains-mono-latin.woff2",

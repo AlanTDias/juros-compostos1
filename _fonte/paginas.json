@@ -13,7 +13,7 @@
     {
       "id": "sobre",
       "arquivo": "sobre.html",
-      "titulo": "Sobre o ExCalc | ExCalc",
+      "titulo": "Sobre | ExCalc",
       "descricao": "Conheça o ExCalc: calculadoras financeiras, ferramentas de PDF, imagem e utilitários gratuitos, sem cadastro, que funcionam direto no navegador.",
       "rotulo": "Sobre",
       "prioridade": "0.4"
