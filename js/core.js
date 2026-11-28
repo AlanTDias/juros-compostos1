@@ -1161,6 +1161,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!instalado() && ler(CHAVE_INSTALADO) !== '1') {
         document.addEventListener('input', aoUsar, true);
         document.addEventListener('click', aoUsar, true);
-        setTimeout(gatilho, 30000);
+        setTimeout(gatilho, 15000);
     }
 })();
