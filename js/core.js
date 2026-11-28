@@ -303,6 +303,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (meta) meta.setAttribute('content', corDoNavegadorPorTema(temaAtual()));
 });
 
+// Sem o Chart.js (arquivo não carregou), esconde o canvas e avisa no lugar, em vez de quebrar o cálculo
+function semGrafico(canvas) {
+    if (typeof Chart !== 'undefined') return false;
+    if (canvas && !canvas.dataset.semGrafico) {
+        canvas.dataset.semGrafico = '1';
+        canvas.style.display = 'none';
+        const aviso = document.createElement('p');
+        aviso.className = 'text-sm text-gray-400 text-center py-8';
+        aviso.textContent = 'Gráfico indisponível no momento.';
+        canvas.parentNode.appendChild(aviso);
+    }
+    return true;
+}
+
 // Cores do Chart.js seguem o tema (lidas das variáveis CSS)
 function coresDoGrafico() {
     const estilo = getComputedStyle(document.documentElement);
@@ -943,3 +957,166 @@ document.addEventListener('DOMContentLoaded', function () {
     // Segurança: se algo impedir a animação de rodar (reduced-motion mudou depois, etc.), libera transform/filter.
     setTimeout(() => candidatos.forEach(limpa), 4500);
 });
+
+// ==========================================
+// PWA: service worker (só em produção) e convite de instalação no celular
+// ==========================================
+(function () {
+    const PRODUCAO = location.hostname === 'www.excalc.com.br';
+    const CHAVE_ADIADO = 'excalc_pwa_adiado';
+    const CHAVE_INSTALADO = 'excalc_pwa_instalado';
+    const TRINTA_DIAS = 30 * 24 * 60 * 60 * 1000;
+    const ler = chave => { try { return localStorage.getItem(chave); } catch (e) { return null; } };
+    const gravar = (chave, valor) => { try { localStorage.setItem(chave, valor); } catch (e) { } };
+
+    const instalado = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const celular = () => matchMedia('(pointer: coarse)').matches && Math.min(window.innerWidth, screen.width) <= 820;
+    const ios = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    function precacheCalculadoras() {
+        if (!('serviceWorker' in navigator) || (navigator.connection && navigator.connection.saveData)) return;
+        navigator.serviceWorker.ready.then(reg => { if (reg.active) reg.active.postMessage('precache-calculadoras'); });
+    }
+
+    if (instalado()) gravar(CHAVE_INSTALADO, '1');
+
+    if (PRODUCAO && 'serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            const visitaAnterior = !!navigator.serviceWorker.controller;
+            navigator.serviceWorker.register('/sw.js').catch(() => { });
+            if (instalado()) precacheCalculadoras();
+            else if (visitaAnterior) {
+                const ocioso = 'requestIdleCallback' in window ? cb => requestIdleCallback(cb, { timeout: 10000 }) : cb => setTimeout(cb, 1000);
+                setTimeout(() => ocioso(precacheCalculadoras), 5000);
+            }
+        });
+    }
+
+    let convite = null;
+    let querMostrar = false;
+    let banner = null;
+    let timerPosicao = null;
+
+    function podeMostrar() {
+        if (instalado() || ler(CHAVE_INSTALADO) === '1' || !celular()) return false;
+        return Date.now() - (Number(ler(CHAVE_ADIADO)) || 0) > TRINTA_DIAS;
+    }
+
+    function anuncioFixoEmbaixo() {
+        const anuncio = document.querySelector('ins.adsbygoogle[data-anchor-status="displayed"], ins.adsbygoogle[data-anchor-shown="true"]');
+        if (!anuncio) return 0;
+        const r = anuncio.getBoundingClientRect();
+        return r.height > 0 && r.top > window.innerHeight / 2 ? Math.ceil(window.innerHeight - r.top) : 0;
+    }
+
+    function posicionar() {
+        if (!banner) return;
+        const folga = anuncioFixoEmbaixo();
+        banner.style.bottom = folga ? `calc(${folga + 12}px + env(safe-area-inset-bottom))` : '';
+        document.body.style.paddingBottom = (banner.offsetHeight + folga + 24) + 'px';
+    }
+
+    function fechar() {
+        if (!banner) return;
+        banner.remove();
+        banner = null;
+        clearInterval(timerPosicao);
+        window.removeEventListener('resize', posicionar);
+        document.body.style.paddingBottom = '';
+    }
+
+    function adiar() {
+        gravar(CHAVE_ADIADO, String(Date.now()));
+        fechar();
+    }
+
+    function botao(texto, classe, acao) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = classe;
+        b.textContent = texto;
+        b.addEventListener('click', acao);
+        return b;
+    }
+
+    function mostrar() {
+        if (banner || !podeMostrar()) return;
+        const modoIos = !convite && ios();
+        if (!convite && !modoIos) return;
+
+        banner = document.createElement('div');
+        banner.className = 'pwa-convite';
+        banner.setAttribute('role', 'region');
+        banner.setAttribute('aria-label', 'Instalar o ExCalc');
+
+        const icone = document.createElement('img');
+        icone.src = 'icones/icone-192.png';
+        icone.alt = '';
+        icone.width = 40;
+        icone.height = 40;
+
+        const texto = document.createElement('p');
+        texto.className = 'pwa-texto';
+        texto.textContent = modoIos
+            ? 'Instale o ExCalc: toque em Compartilhar e depois em Adicionar à Tela de Início.'
+            : 'Instale o ExCalc: abre mais rápido e funciona sem internet.';
+
+        const fecharBtn = botao('×', 'pwa-fechar', adiar);
+        fecharBtn.setAttribute('aria-label', 'Fechar o convite de instalação');
+
+        const acoes = document.createElement('div');
+        acoes.className = 'pwa-acoes';
+        acoes.appendChild(botao('Agora não', 'pwa-adiar', adiar));
+        if (!modoIos) {
+            acoes.appendChild(botao('Instalar', 'pwa-instalar', () => {
+                const pedido = convite;
+                convite = null;
+                fechar();
+                if (!pedido) return;
+                pedido.prompt();
+                pedido.userChoice.then(escolha => {
+                    if (escolha.outcome === 'accepted') gravar(CHAVE_INSTALADO, '1');
+                    else gravar(CHAVE_ADIADO, String(Date.now()));
+                }).catch(() => { });
+            }));
+        }
+
+        banner.append(icone, texto, fecharBtn, acoes);
+        document.body.appendChild(banner);
+        posicionar();
+        window.addEventListener('resize', posicionar);
+        timerPosicao = setInterval(posicionar, 1500);
+    }
+
+    function gatilho() {
+        if (querMostrar) return;
+        querMostrar = true;
+        document.removeEventListener('input', aoUsar, true);
+        document.removeEventListener('click', aoUsar, true);
+        mostrar();
+    }
+
+    function aoUsar(e) {
+        if (!e.isTrusted || !e.target.closest) return;
+        if (e.type === 'input' ? e.target.closest('#conteudo') : e.target.closest('#conteudo button')) gatilho();
+    }
+
+    window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        convite = e;
+        if (querMostrar) mostrar();
+    });
+
+    window.addEventListener('appinstalled', () => {
+        gravar(CHAVE_INSTALADO, '1');
+        convite = null;
+        fechar();
+        precacheCalculadoras();
+    });
+
+    if (!instalado() && ler(CHAVE_INSTALADO) !== '1') {
+        document.addEventListener('input', aoUsar, true);
+        document.addEventListener('click', aoUsar, true);
+        setTimeout(gatilho, 30000);
+    }
+})();

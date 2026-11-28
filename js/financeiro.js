@@ -254,7 +254,9 @@ function calculateJC() {
     document.getElementById('jc-res-juros').innerText = totalJuros.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('jc-res-total').innerText = currentTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    const ctx = document.getElementById('growthChart').getContext('2d');
+    const canvasJC = document.getElementById('growthChart');
+    if (semGrafico(canvasJC)) return;
+    const ctx = canvasJC.getContext('2d');
     if (myChart) myChart.destroy();
 
     const coresGraf = coresDoGrafico();

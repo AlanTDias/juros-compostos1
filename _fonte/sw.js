@@ -1,0 +1,87 @@
+const VERSAO = '__VERSAO__';
+const CACHE_ESTATICO = 'excalc-estatico-' + VERSAO;
+const CACHE_PAGINAS = 'excalc-paginas-' + VERSAO;
+const PRECACHE = __PRECACHE__;
+const CALCULADORAS = __CALCULADORAS__;
+const PAGINA_OFFLINE = '/offline.html';
+const HOSTS_IGNORADOS = /(^|\.)(google\.com|googlesyndication\.com|doubleclick\.net|gstatic\.com|googletagservices\.com|adtrafficquality\.google|bcb\.gov\.br|awesomeapi\.com\.br|cdnjs\.cloudflare\.com|jsdelivr\.net)$/;
+
+self.addEventListener('install', evento => {
+    evento.waitUntil(
+        caches.open(CACHE_ESTATICO)
+            .then(cache => cache.addAll(PRECACHE))
+            .then(() => self.skipWaiting())
+    );
+});
+
+self.addEventListener('activate', evento => {
+    evento.waitUntil(
+        caches.keys()
+            .then(nomes => Promise.all(nomes
+                .filter(nome => nome.startsWith('excalc-') && nome !== CACHE_ESTATICO && nome !== CACHE_PAGINAS)
+                .map(nome => caches.delete(nome))))
+            .then(() => self.clients.claim())
+    );
+});
+
+self.addEventListener('message', evento => {
+    if (evento.data === 'precache-calculadoras') {
+        evento.waitUntil(precacheCalculadoras());
+    }
+});
+
+async function precacheCalculadoras() {
+    const cache = await caches.open(CACHE_PAGINAS);
+    for (const url of CALCULADORAS) {
+        if (await cache.match(url)) continue;
+        try {
+            const resposta = await fetch(url, { credentials: 'same-origin' });
+            if (resposta.ok) await cache.put(url, resposta);
+        } catch (e) {
+            return;
+        }
+    }
+}
+
+self.addEventListener('fetch', evento => {
+    const req = evento.request;
+    if (req.method !== 'GET') return;
+    const url = new URL(req.url);
+    if (url.origin !== self.location.origin || HOSTS_IGNORADOS.test(url.hostname)) return;
+
+    if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
+        evento.respondWith(redePrimeiro(req));
+        return;
+    }
+    evento.respondWith(cacheEAtualiza(evento, req));
+});
+
+async function redePrimeiro(req) {
+    const cache = await caches.open(CACHE_PAGINAS);
+    try {
+        const resposta = await fetch(req);
+        if (resposta.ok && resposta.type === 'basic') cache.put(req, resposta.clone());
+        return resposta;
+    } catch (e) {
+        return (await cache.match(req, { ignoreSearch: true }))
+            || (await caches.match(req, { ignoreSearch: true }))
+            || (await caches.match(PAGINA_OFFLINE))
+            || Response.error();
+    }
+}
+
+async function cacheEAtualiza(evento, req) {
+    const cache = await caches.open(CACHE_ESTATICO);
+    const guardada = await cache.match(req);
+    const daRede = fetch(req)
+        .then(resposta => {
+            if (resposta.ok && resposta.type === 'basic') cache.put(req, resposta.clone());
+            return resposta;
+        })
+        .catch(() => null);
+    if (guardada) {
+        evento.waitUntil(daRede);
+        return guardada;
+    }
+    return (await daRede) || Response.error();
+}

@@ -84,7 +84,7 @@ const BRILHO_PIZZA = {
 function montarPizza(id, itens) {
     const canvas = document.getElementById(id);
     const legenda = document.getElementById(id + '-legenda');
-    if (!canvas || !legenda) return null;
+    if (!canvas || !legenda || semGrafico(canvas)) return null;
 
     const soma = itens.reduce((s, it) => s + it.valor, 0);
     const cores = coresDoGrafico();
@@ -206,6 +206,7 @@ async function carregarOscilador(cfg) {
         const estiloRaiz = getComputedStyle(document.documentElement);
         const corLinha = (subiu ? estiloRaiz.getPropertyValue('--sobe').trim() : estiloRaiz.getPropertyValue('--desce').trim()) || (subiu ? '#34d399' : '#f472b6');
         const corArea = subiu ? 'rgba(52,211,153,0.12)' : 'rgba(244,114,182,0.12)';
+        if (semGrafico(canvas)) return;
         const grafico = new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {

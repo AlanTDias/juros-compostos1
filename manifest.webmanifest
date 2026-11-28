@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "ExCalc — Calculadoras Financeiras",
+  "short_name": "ExCalc",
+  "description": "Calculadoras financeiras, ferramentas de PDF e utilitários grátis, sem cadastro.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/?origem=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#05070D",
+  "theme_color": "#05070D",
+  "categories": ["finance", "utilities", "productivity"],
+  "icons": [
+    { "src": "/icones/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icones/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icones/icone-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icones/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

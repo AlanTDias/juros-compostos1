@@ -169,7 +169,7 @@ function metaDa(p) {
     return [
         `<meta name="description" content="${esc(p.descricao)}">`,
         `<link rel="canonical" href="${url}">`,
-        `<meta name="robots" content="index, follow, max-image-preview:large">`,
+        `<meta name="robots" content="${p.noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'}">`,
         `<meta property="og:type" content="website">`,
         `<meta property="og:locale" content="pt_BR">`,
         `<meta property="og:site_name" content="${config.nomeDoSite}">`,
@@ -187,7 +187,13 @@ function metaDa(p) {
 
 function scriptsDa(p) {
     const linhas = ['<!-- Scripts: só o que esta página usa. O núcleo (core.js) vem primeiro. -->'];
-    (p.externos || []).forEach(u => linhas.push(`    <script src="${u}" crossorigin="anonymous" referrerpolicy="no-referrer"></script>`));
+    (p.externos || []).forEach(u => {
+        if (/^https?:/.test(u)) linhas.push(`    <script src="${u}" crossorigin="anonymous" referrerpolicy="no-referrer"></script>`);
+        else {
+            if (!fs.existsSync(path.join(raiz, u))) problemas.push(`${p.id}: ${u} não existe`);
+            linhas.push(`    <script src="${u}"></script>`);
+        }
+    });
     ['core.js', ...(p.scripts || [])].forEach(f => {
         if (!fs.existsSync(path.join(jsDir, f))) problemas.push(`${p.id}: js/${f} não existe`);
         linhas.push(`    <script src="js/${f}?v=${versao}"></script>`);
@@ -198,7 +204,10 @@ function scriptsDa(p) {
 // ---------- gera cada página ----------
 const hoje = new Date().toISOString().slice(0, 10);
 const nomes = new Set();
-const todasAsPaginas = [...paginas, ...institucionais.map(p => ({ ...p, institucional: true }))];
+const paginaOffline = config.offline ? { ...config.offline, institucional: true, noindex: true } : null;
+const paginasDoSitemap = [...paginas, ...institucionais.map(p => ({ ...p, institucional: true }))];
+const todasAsPaginas = paginaOffline ? [...paginasDoSitemap, paginaOffline] : paginasDoSitemap;
+const htmlGerado = crypto.createHash('md5');
 for (const p of todasAsPaginas) {
     const arqConteudo = path.join(__dirname, 'conteudo', p.id + '.html');
     if (!fs.existsSync(arqConteudo)) { problemas.push(`Falta _fonte/conteudo/${p.id}.html`); continue; }
@@ -239,12 +248,13 @@ for (const p of todasAsPaginas) {
     if ((conteudo.match(/<h1\b/g) || []).length !== 1) problemas.push(`${p.id}: deveria ter exatamente um <h1>`);
 
     fs.writeFileSync(path.join(raiz, p.arquivo), pagina.replace(/\n/g, '\r\n'), 'utf8');
+    htmlGerado.update(pagina);
 }
 
 // ---------- sitemap.xml e robots.txt ----------
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${todasAsPaginas.map(p => `  <url>
+${paginasDoSitemap.map(p => `  <url>
     <loc>${urlDa(p)}</loc>
     <lastmod>${hoje}</lastmod>
     <priority>${p.prioridade || '0.5'}</priority>
@@ -254,6 +264,37 @@ ${todasAsPaginas.map(p => `  <url>
 fs.writeFileSync(path.join(raiz, 'sitemap.xml'), sitemap, 'utf8');
 fs.writeFileSync(path.join(raiz, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${config.dominio}/sitemap.xml\n`, 'utf8');
 
+// ---------- sw.js (service worker): pré-cache dos arquivos do site + versão que muda a cada build ----------
+if (!fs.existsSync(path.join(raiz, 'manifest.webmanifest'))) problemas.push('Falta manifest.webmanifest na raiz');
+const listar = (pasta, filtro) => fs.existsSync(path.join(raiz, pasta))
+    ? fs.readdirSync(path.join(raiz, pasta)).filter(filtro).sort().map(a => `/${pasta}/${a}`) : [];
+const precache = [
+    '/offline.html',
+    `/tailwind.min.css?v=${versaoTw}`,
+    `/style.min.css?v=${versaoCss}`,
+    ...fs.readdirSync(jsDir).filter(a => a.endsWith('.js')).sort().map(a => `/js/${a}?v=${versao}`),
+    ...listar('js/lib', a => a.endsWith('.js')),
+    ...listar('fontes', a => a.endsWith('.woff2')),
+    ...listar('icones', a => a.endsWith('.png')),
+    '/favicon.png?v=3',
+    '/apple-touch-icon.png?v=4',
+    '/manifest.webmanifest'
+];
+for (const u of precache) if (!fs.existsSync(path.join(raiz, u.split('?')[0]))) problemas.push(`sw.js: arquivo do pré-cache não existe: ${u}`);
+const calculadoras = paginas.filter(p => p.calculadora).map(p => '/' + p.arquivo);
+if (calculadoras.length !== 13) problemas.push(`sw.js: esperava 13 calculadoras marcadas no paginas.json, achei ${calculadoras.length}`);
+calculadoras.unshift('/');
+const hashArquivos = precache.map(u => path.join(raiz, u.split('?')[0])).filter(a => fs.existsSync(a))
+    .map(a => crypto.createHash('md5').update(fs.readFileSync(a)).digest('hex')).join('');
+const versaoSw = crypto.createHash('md5').update(htmlGerado.digest('hex') + hashArquivos + JSON.stringify(precache) + JSON.stringify(calculadoras))
+    .digest('hex').slice(0, 10);
+const swFonte = lerArq(path.join(__dirname, 'sw.js'));
+for (const m of ['__VERSAO__', '__PRECACHE__', '__CALCULADORAS__']) if (!swFonte.includes(m)) problemas.push('_fonte/sw.js perdeu o marcador ' + m);
+fs.writeFileSync(path.join(raiz, 'sw.js'), swFonte
+    .replace('__VERSAO__', versaoSw)
+    .replace('__PRECACHE__', () => JSON.stringify(precache, null, 4))
+    .replace('__CALCULADORAS__', () => JSON.stringify(calculadoras, null, 4)), 'utf8');
+
 // confere se cada página carrega os scripts das funções que usa (roda como script separado, imprime só se achar problema)
 const dep = require('child_process').spawnSync(process.execPath, [path.join(__dirname, 'verificar-dependencias.js'), raiz], { encoding: 'utf8' });
 if (dep.status !== 0) problemas.push('Dependências de script:\n' + dep.stdout.trim());
@@ -261,7 +302,7 @@ if (dep.status !== 0) problemas.push('Dependências de script:\n' + dep.stdout.t
 const tamanhoCss = fs.statSync(path.join(raiz, 'style.css')).size;
 const tamanhoCssMin = fs.statSync(path.join(raiz, 'style.min.css')).size;
 const economiaCss = Math.round((1 - tamanhoCssMin / tamanhoCss) * 100);
-console.log(`Páginas geradas: ${todasAsPaginas.length} (${institucionais.length} institucionais) | versão dos scripts: ${versao} | style.min.css: ${(tamanhoCssMin / 1024).toFixed(1)} KB (${economiaCss}% menor que o style.css) | sitemap.xml e robots.txt atualizados`);
+console.log(`Páginas geradas: ${todasAsPaginas.length} (${institucionais.length} institucionais + offline) | sw.js ${versaoSw} (${precache.length} no pré-cache) | versão dos scripts: ${versao} | style.min.css: ${(tamanhoCssMin / 1024).toFixed(1)} KB (${economiaCss}% menor que o style.css) | sitemap.xml e robots.txt atualizados`);
 if (problemas.length) {
     console.log('\nATENÇÃO:\n - ' + problemas.join('\n - '));
     process.exitCode = 1;
